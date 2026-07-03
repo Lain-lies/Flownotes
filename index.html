@@ -1,504 +1,528 @@
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<script src="index.js" defer></script>
-		<title>Flownotes</title>
-		<style>
-			* {
-				box-sizing: border-box;
-				font-family: sans-serif;
-			}
-
-			input,
-			textarea {
-				display: block;
-				font-size: 1rem;
-				margin-bottom: 1rem;
-			}
-
-			input[name="resolutionNotes"] {
-				width: 100%;
-			}
-
-			textarea {
-				width: 100%;
-			}
-
-			header {
-				display: flex;
-				justify-content: center;
-				align-items: center;
-				gap: 1rem;
-			}
-
-			h1 {
-				display: inline-block;
-			}
-
-			.logo {
-				display: inline-block;
-				width: 60px;
-			}
-
-			img {
-				overflow: hidden;
-				width: 100%;
-				border-radius: 50%;
-			}
-
-			button {
-				display: block;
-				margin-bottom: 1rem;
-			}
-
-			button:hover {
-				cursor: pointer;
-				filter: brightness(1.2);
-			}
-
-			#saveTicketButton {
-				padding: 1rem;
-			}
-
-			.control-panel {
-				border: 1px solid #000;
-				padding: 1rem;
-				margin-bottom: 1rem;
-			}
-
-			.switch-btn {
-				margin-top: 0.5rem;
-				font-size: 1rem;
-				padding: 0.5rem 1rem;
-			}
-
-			#session-individual-record > button {
-				font-size: 1rem;
-				padding: 0.75rem 0.5rem;
-			}
-
-			#mode-and-type {
-				display: flex;
-				gap: 0.5rem;
-				align-items: center;
-			}
-			#mode-and-type > button {
-				margin-bottom: 0;
-				font-size: 1rem;
-			}
-
-			.availability-container {
-				display: flex;
-				align-items: center;
-				gap: 0.5rem;
-			}
-
-			.availability-container > button {
-				font-size: 0.8rem;
-			}
-
-			.adpwrWrapper {
-				display: none;
-			}
-
-			.visible {
-				display: block;
-			}
-
-			.hidden {
-				display: none;
-			}
-
-			[name="nextActions"] {
-				display: block;
-				margin-bottom: 1rem;
-			}
-		</style>
-	</head>
-	<body>
-		<header>
-			<h1>Flownotes</h1>
-			<div class="logo">
-				<img
-					src="https://static.vecteezy.com/system/resources/thumbnails/053/366/663/small_2x/wave-rgb-color-icon-symbolizing-ocean-tides-currents-coastal-and-marine-environments-tsunami-natural-disaster-isolated-illustration-simple-filled-line-drawing-editable-stroke-vector.jpg"
-					alt="Flownotes Logo" />
-			</div>
-		</header>
-		<p>ver 1.1.0</p>
-
-		<div class="control-panel">
-			<form id="createSessionForm">
-				<label for="sessionName">
-					Create New Session :
-					<input
-						type="text"
-						id="sessionName"
-						name="sessionName"
-						placeholder="Enter session name"
-						required />
-				</label>
-
-				<button type="submit">Create Session</button>
-			</form>
-			<h4>Current Session:</h4>
-			<p id="currentSessionName"></p>
-
-			<h4>Session List:</h4>
-			<ul id="session-list"></ul>
-
-			<h4>Session History</h4>
-			<ul id="exportable-list"></ul>
-
-			<hr />
-			<hr />
-
-			<h3>History</h3>
-			<div id="session-history"></div>
-		</div>
-
-		<button id="hide-control-panel">Hide Control Panel</button>
-
-		<hr />
-
-		<form id="ticketForm">
-			<div id="mode-and-type">
-				<h3>Call Type:</h3>
-				<button type="button" id="calltype">Caller</button>
-
-				<h3>Template Type:</h3>
-				<button type="button" id="doctype">Standard</button>
-			</div>
-
-			<h3>Caller</h3>
-			<label>
-				Employee ID:
-				<input
-					type="text"
-					name="employeeId"
-					placeholder="Enter Employee ID"
-					required />
-			</label>
-
-			<label>
-				First and Last Name:
-				<input
-					type="text"
-					name="fullName"
-					placeholder="Enter Full Name"
-					required />
-			</label>
-
-			<label>
-				Email Address:
-				<input
-					type="email"
-					name="email"
-					placeholder="Enter Email Address"
-					required />
-			</label>
-
-			<label>
-				Contact Number:
-				<input
-					type="text"
-					name="contactNumber"
-					placeholder="Enter Contact Number"
-					required />
-			</label>
-
-			<div class="availability-container">
-				<label>
-					Availability Hours:
-					<input
-						type="text"
-						name="availability"
-						placeholder="Enter Best Time to Reach"
-						value="9am-4pm"
-						required />
-				</label>
-
-				<select name="timezone">
-					<option value="EST" default>EST</option>
-					<option value="DST" default>DST</option>
-					<option value="IST" default>IST</option>
-				</select>
-			</div>
-
-			<label>
-				Location:
-				<input
-					type="text"
-					name="location"
-					placeholder="Enter Location"
-					required />
-			</label>
-
-			<hr />
-			<div id="onbehalf">
-				<h3>User</h3>
-
-				<label>
-					Employee ID:
-					<input
-						type="text"
-						name="OBemployeeId"
-						placeholder="Enter Employee ID"
-						value="N/A"
-						required />
-				</label>
-
-				<label>
-					First and Last Name:
-					<input
-						type="text"
-						name="OBfullName"
-						placeholder="Enter Full Name"
-						value="N/A"
-						required />
-				</label>
-
-				<label>
-					Email Address:
-					<input
-						type="text"
-						name="OBemail"
-						placeholder="Enter Email Address"
-						value="N/A" />
-				</label>
-
-				<label>
-					Contact Number:
-					<input
-						type="text"
-						name="OBcontactNumber"
-						placeholder="Enter Contact Number"
-						value="N/A"
-						required />
-				</label>
-				<div class="availability-container">
-					<label>
-						Availability Hours:
-						<input
-							type="text"
-							name="OBavailability"
-							placeholder="Enter Best Time to Reach"
-							value="9am-4pm"
-							required />
-					</label>
-					<select name="OBtimezone">
-						<option value="EST" default>EST</option>
-						<option value="DST">DST</option>
-						<option value="IST">IST</option>
-					</select>
-				</div>
-
-				<label>
-					Location:
-					<input
-						type="text"
-						name="OBlocation"
-						placeholder="Enter Location"
-						value="N/A"
-						required />
-				</label>
-			</div>
-			<hr />
-
-			<label>
-				Existing Ticket?:
-				<input type="input" name="existingTicket" value="No" />
-			</label>
-
-			<div class="inc">
-				<label>
-					Possible Major Incident?
-					<input type="input" name="possibleMajorIncident" />
-				</label>
-			</div>
-
-			<div class="inc">
-				<label>
-					Contact type:
-					<input type="input" name="contactType" />
-				</label>
-			</div>
-
-			<div class="inc">
-				<label>
-					Machine name:
-					<input type="input" name="machineName" value="N/A" />
-				</label>
-				<label>
-					Nexthink Checklist:
-					<input type="input" name="nexthinkChecklist" value="N/A" />
-				</label>
-			</div>
-
-			<div class="pwr">
-				<p>Active Directory Password Reset?:</p>
-				<button type="button" id="adpwrSwitch">No</button>
-			</div>
-
-			<div class="adpwrWrapper">
-				<label>
-					New Hire:
-					<input type="input" name="newHire" />
-				</label>
-
-				<label>
-					MFA Registered:
-					<input type="input" name="mfaRegistered" />
-				</label>
-
-				<label>
-					SSPR Offered:
-					<input type="input" name="ssprOffered" />
-				</label>
-
-				<label for="ssprOutcome">SSPR Outcome</label>
-
-				<select name="ssprOutcome" id="ssprOutcome">
-					<optgroup label="SSPR Offered: No" id="noOptGroup">
-						<option value="N/A: User is not yet registered to MFA.">
-							N/A: User is not yet registered to MFA.
-						</option>
-						<option
-							value="N/A: User just had a password reset within 24 hours.">
-							N/A: User just had a password reset within 24 hours.
-						</option>
-						<option value="N/A: User is calling for an admin account.">
-							N/A: User is calling for an admin account.
-						</option>
-						<option value="N/A: User's AD account is locked out.">
-							N/A: User's AD account is locked out.
-						</option>
-						<option value="N/A: User's AD account is deactivated/disabled.">
-							N/A: User's AD account is deactivated/disabled.
-						</option>
-					</optgroup>
-
-					<optgroup label="SSPR Offered: Yes" id="yesOptGroup" hidden>
-						<option
-							value="User refused: User prefers the agent to do the password change.">
-							User refused: User prefers the agent to do the password change.
-						</option>
-						<option
-							value="User refused: User don't want to use their mobile phone.">
-							User refused: User don't want to use their mobile phone.
-						</option>
-						<option
-							value="User refused: User prefers to keep their current password.">
-							User refused: User prefers to keep their current password.
-						</option>
-
-						<option value="Failed: User cannot correctly input the CAPTCHA.">
-							Failed: User cannot correctly input the CAPTCHA.
-						</option>
-						<option
-							value="Failed: User unable to change their password due to complexity requirements.">
-							Failed: User unable to change their password due to complexity
-							requirements.
-						</option>
-						<option
-							value="Failed: The user forgot the answers to the security questions.">
-							Failed: The user forgot the answers to the security questions.
-						</option>
-						<option value="Failed: User was disconnected.">
-							Failed: User was disconnected.
-						</option>
-
-						<option value="Error: User is unable to access aka.ms/sspr.">
-							Error: User is unable to access aka.ms/sspr.
-						</option>
-						<option
-							value="Error: Account doesn't exist. Contact administrator.">
-							Error: Account doesn't exist. Contact administrator.
-						</option>
-						<option value="Error: You haven't registered for a password reset.">
-							Error: You haven't registered for a password reset.
-						</option>
-					</optgroup>
-				</select>
-			</div>
-
-			<hr />
-			<hr />
-
-			<label>
-				Issue Description:
-				<textarea
-					name="issueDescription"
-					rows="5"
-					placeholder="Describe the issue"></textarea>
-			</label>
-
-			<label>
-				Troubleshooting Steps:
-				<textarea name="ts" rows="10"></textarea>
-			</label>
-
-			<hr />
-
-			<label>
-				KB Article Used:
-				<input
-					type="text"
-					name="kbArticle"
-					placeholder="Enter KB Article"
-					required />
-			</label>
-
-			<label for="issueResolved">
-				<span>Issue Resolved?</span>
-				<input type="input" name="issueResolved" id="issueResolved" />
-			</label>
-
-			<label>
-				Resolution Notes:
-				<input
-					type="input"
-					name="resolutionNotes"
-					placeholder="Detailed step that resolved the issue" />
-			</label>
-
-			<label for="nextActions"> Next Action(s): </label>
-			<select name="nextActions" id="nextActions">
-				<option value="N/A" default>N/A</option>
-				<option value="Wait for Line-Manager Approval">
-					Wait for Line-Manager Approval
-				</option>
-				<option value="Route the ticket to the next resolver team">
-					Route the ticket to the next resolver team
-				</option>
-				<option value="Set ticket to pending">Set ticket to pending</option>
-				<option value="Set ticket to resolved">Set ticket to resolved</option>
-				<option value="Set ticket to fulfilled">Set ticket to fulfilled</option>
-				<option value="Cancel ticket">Cancel ticket</option>
-			</select>
-
-			<label for="userAgreedResolved">
-				<span>User agreed to set ticket to Resolved?</span>
-				<input type="iput" name="userAgreedResolved" id="userAgreedResolved" />
-			</label>
-
-			<hr />
-			<button type="submit" id="saveTicketButton">Save Ticket</button>
-			<button type="button" id="cancelButton">Cancel</button>
-			<button type="button" id="newNoteButton">New Note</button>
-		</form>
-
-		<button type="button" id="fillTestData">Fill Test Data</button>
-		<hr />
-
-		<footer>
-			<p>
-				Flownotes &copy; 2026 | GitHub:
-				<a href="https://github.com/Lain-lies/worknotes" target="_blank"
-					>Flownotes</a
-				>
-			</p>
-		</footer>
-	</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="index.js" defer></script>
+    <title>Flownotes</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        font-family: sans-serif;
+      }
+
+      input,
+      textarea {
+        display: block;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      input[name="resolutionNotes"] {
+        width: 100%;
+      }
+
+      textarea {
+        width: 100%;
+      }
+
+      header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      h1 {
+        display: inline-block;
+      }
+
+      .logo {
+        display: inline-block;
+        width: 60px;
+      }
+
+      img {
+        overflow: hidden;
+        width: 100%;
+        border-radius: 50%;
+      }
+
+      button {
+        display: block;
+        margin-bottom: 1rem;
+      }
+
+      button:hover {
+        cursor: pointer;
+        filter: brightness(1.2);
+      }
+
+      #saveTicketButton {
+        padding: 1rem;
+      }
+
+      .control-panel {
+        border: 1px solid #000;
+        padding: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .switch-btn {
+        margin-top: 0.5rem;
+        font-size: 1rem;
+        padding: 0.5rem 1rem;
+      }
+
+      #session-individual-record > button {
+        font-size: 1rem;
+        padding: 0.75rem 0.5rem;
+      }
+
+      #mode-and-type {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
+      #mode-and-type > button {
+        margin-bottom: 0;
+        font-size: 1rem;
+      }
+
+      .availability-container {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .availability-container > button {
+        font-size: 0.8rem;
+      }
+
+      .adpwrWrapper {
+        display: none;
+      }
+
+      .visible {
+        display: block;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      [name="nextActions"] {
+        display: block;
+        margin-bottom: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Flownotes</h1>
+      <div class="logo">
+        <img
+          src="https://static.vecteezy.com/system/resources/thumbnails/053/366/663/small_2x/wave-rgb-color-icon-symbolizing-ocean-tides-currents-coastal-and-marine-environments-tsunami-natural-disaster-isolated-illustration-simple-filled-line-drawing-editable-stroke-vector.jpg"
+          alt="Flownotes Logo"
+        />
+      </div>
+    </header>
+    <p>ver 1.1.0</p>
+
+    <div class="control-panel">
+      <form id="createSessionForm">
+        <label for="sessionName">
+          Create New Session :
+          <input
+            type="text"
+            id="sessionName"
+            name="sessionName"
+            placeholder="Enter session name"
+            required
+          />
+        </label>
+
+        <button type="submit">Create Session</button>
+      </form>
+      <h4>Current Session:</h4>
+      <p id="currentSessionName"></p>
+
+      <h4>Session List:</h4>
+      <ul id="session-list"></ul>
+
+      <h4>Session History</h4>
+      <ul id="exportable-list"></ul>
+
+      <hr />
+      <hr />
+
+      <h3>History</h3>
+      <div id="session-history"></div>
+    </div>
+
+    <button id="hide-control-panel">Hide Control Panel</button>
+
+    <hr />
+
+    <form id="ticketForm">
+      <div id="mode-and-type">
+        <h3>Call Type:</h3>
+        <button type="button" id="calltype">Caller</button>
+
+        <h3>Template Type:</h3>
+        <button type="button" id="doctype">Standard</button>
+      </div>
+
+      <h3>Caller</h3>
+      <label>
+        Employee ID:
+        <input
+          type="text"
+          name="employeeId"
+          placeholder="Enter Employee ID"
+          required
+        />
+      </label>
+
+      <label>
+        First and Last Name:
+        <input
+          type="text"
+          name="fullName"
+          placeholder="Enter Full Name"
+          required
+        />
+      </label>
+
+      <label>
+        Email Address:
+        <input
+          type="email"
+          name="email"
+          placeholder="Enter Email Address"
+          required
+        />
+      </label>
+
+      <label>
+        Contact Number:
+        <input
+          type="text"
+          name="contactNumber"
+          placeholder="Enter Contact Number"
+          required
+        />
+      </label>
+
+      <div class="availability-container">
+        <label>
+          Availability Hours:
+          <input
+            type="text"
+            name="availability"
+            placeholder="Enter Best Time to Reach"
+            value="9am-4pm"
+            required
+          />
+        </label>
+
+        <select name="timezone">
+          <option value="EST" default>EST</option>
+          <option value="DST" default>DST</option>
+          <option value="IST" default>IST</option>
+        </select>
+      </div>
+
+      <label>
+        Location:
+        <input
+          type="text"
+          name="location"
+          placeholder="Enter Location"
+          required
+        />
+      </label>
+
+      <hr />
+      <div id="onbehalf">
+        <h3>User</h3>
+
+        <label>
+          Employee ID:
+          <input
+            type="text"
+            name="OBemployeeId"
+            placeholder="Enter Employee ID"
+            value="N/A"
+            required
+          />
+        </label>
+
+        <label>
+          First and Last Name:
+          <input
+            type="text"
+            name="OBfullName"
+            placeholder="Enter Full Name"
+            value="N/A"
+            required
+          />
+        </label>
+
+        <label>
+          Email Address:
+          <input
+            type="text"
+            name="OBemail"
+            placeholder="Enter Email Address"
+            value="N/A"
+          />
+        </label>
+
+        <label>
+          Contact Number:
+          <input
+            type="text"
+            name="OBcontactNumber"
+            placeholder="Enter Contact Number"
+            value="N/A"
+            required
+          />
+        </label>
+        <div class="availability-container">
+          <label>
+            Availability Hours:
+            <input
+              type="text"
+              name="OBavailability"
+              placeholder="Enter Best Time to Reach"
+              value="9am-4pm"
+              required
+            />
+          </label>
+          <select name="OBtimezone">
+            <option value="EST" default>EST</option>
+            <option value="DST">DST</option>
+            <option value="IST">IST</option>
+          </select>
+        </div>
+
+        <label>
+          Location:
+          <input
+            type="text"
+            name="OBlocation"
+            placeholder="Enter Location"
+            value="N/A"
+            required
+          />
+        </label>
+      </div>
+      <hr />
+
+      <label>
+        Existing Ticket?:
+        <input type="input" name="existingTicket" value="No" />
+      </label>
+
+      <div class="inc">
+        <label>
+          Possible Major Incident?
+          <input type="input" name="possibleMajorIncident" />
+        </label>
+      </div>
+
+      <div class="inc">
+        <label>
+          Contact type:
+          <input type="input" name="contactType" />
+        </label>
+      </div>
+
+      <div class="inc">
+        <label>
+          Machine name:
+          <input type="input" name="machineName" value="N/A" />
+        </label>
+        <label>
+          Nexthink Checklist:
+          <input type="input" name="nexthinkChecklist" value="N/A" />
+        </label>
+      </div>
+
+      <div class="pwr">
+        <p>Active Directory Password Reset?:</p>
+        <button type="button" id="adpwrSwitch">No</button>
+      </div>
+
+      <div class="adpwrWrapper">
+        <label>
+          New Hire:
+          <input type="input" name="newHire" />
+        </label>
+
+        <label>
+          MFA Registered:
+          <input type="input" name="mfaRegistered" />
+        </label>
+
+        <label>
+          SSPR Offered:
+          <input type="input" name="ssprOffered" />
+        </label>
+
+        <label for="ssprOutcome">SSPR Outcome</label>
+
+        <select name="ssprOutcome" id="ssprOutcome">
+          <optgroup label="SSPR Offered: No" id="noOptGroup">
+            <option value="N/A: User is not yet registered to MFA.">
+              N/A: User is not yet registered to MFA.
+            </option>
+            <option
+              value="N/A: User just had a password reset within 24 hours."
+            >
+              N/A: User just had a password reset within 24 hours.
+            </option>
+            <option value="N/A: User is calling for an admin account.">
+              N/A: User is calling for an admin account.
+            </option>
+            <option value="N/A: User's AD account is locked out.">
+              N/A: User's AD account is locked out.
+            </option>
+            <option value="N/A: User's AD account is deactivated/disabled.">
+              N/A: User's AD account is deactivated/disabled.
+            </option>
+          </optgroup>
+
+          <optgroup label="SSPR Offered: Yes" id="yesOptGroup" hidden>
+            <option
+              value="User refused: User prefers the agent to do the password change."
+            >
+              User refused: User prefers the agent to do the password change.
+            </option>
+            <option
+              value="User refused: User don't want to use their mobile phone."
+            >
+              User refused: User don't want to use their mobile phone.
+            </option>
+            <option
+              value="User refused: User prefers to keep their current password."
+            >
+              User refused: User prefers to keep their current password.
+            </option>
+
+            <option value="Failed: User cannot correctly input the CAPTCHA.">
+              Failed: User cannot correctly input the CAPTCHA.
+            </option>
+            <option
+              value="Failed: User unable to change their password due to complexity requirements."
+            >
+              Failed: User unable to change their password due to complexity
+              requirements.
+            </option>
+            <option
+              value="Failed: The user forgot the answers to the security questions."
+            >
+              Failed: The user forgot the answers to the security questions.
+            </option>
+            <option value="Failed: Unable to reach back.">
+              Failed: Unable to reach back.
+            </option>
+
+            <option value="Error: User is unable to access aka.ms/sspr.">
+              Error: User is unable to access aka.ms/sspr.
+            </option>
+            <option
+              value="Error: Account doesn't exist. Contact administrator."
+            >
+              Error: Account doesn't exist. Contact administrator.
+            </option>
+            <option value="Error: You haven't registered for a password reset.">
+              Error: You haven't registered for a password reset.
+            </option>
+          </optgroup>
+        </select>
+      </div>
+
+      <hr />
+      <hr />
+
+      <label>
+        Issue Description:
+        <textarea
+          name="issueDescription"
+          rows="5"
+          placeholder="Describe the issue"
+        ></textarea>
+      </label>
+
+      <label>
+        Troubleshooting Steps:
+        <textarea name="ts" rows="10"></textarea>
+      </label>
+
+      <hr />
+
+      <label>
+        KB Article Used:
+        <input
+          type="text"
+          name="kbArticle"
+          placeholder="Enter KB Article"
+          required
+        />
+      </label>
+
+      <label for="issueResolved">
+        <span>Issue Resolved?</span>
+        <input type="input" name="issueResolved" id="issueResolved" />
+      </label>
+
+      <label>
+        Resolution Notes:
+        <input
+          type="input"
+          name="resolutionNotes"
+          placeholder="Detailed step that resolved the issue"
+        />
+      </label>
+
+      <label for="nextActions"> Next Action(s): </label>
+      <select name="nextActions" id="nextActions">
+        <option value="N/A" default>N/A</option>
+        <option value="Wait for Line-Manager Approval">
+          Wait for Line-Manager Approval
+        </option>
+        <option value="Route the ticket to the next resolver team">
+          Route the ticket to the next resolver team
+        </option>
+        <option value="Set ticket to pending">Set ticket to pending</option>
+        <option value="Set ticket to resolved">Set ticket to resolved</option>
+        <option value="Set ticket to fulfilled">Set ticket to fulfilled</option>
+        <option value="Cancel ticket">Cancel ticket</option>
+      </select>
+
+      <label for="userAgreedResolved">
+        <span>User agreed to set ticket to Resolved?</span>
+        <input type="iput" name="userAgreedResolved" id="userAgreedResolved" />
+      </label>
+
+      <hr />
+      <button type="submit" id="saveTicketButton">Save Ticket</button>
+      <button type="button" id="cancelButton">Cancel</button>
+      <button type="button" id="newNoteButton">New Note</button>
+    </form>
+
+    <button type="button" id="fillTestData">Fill Test Data</button>
+    <hr />
+
+    <footer>
+      <p>
+        Flownotes &copy; 2026 | GitHub:
+        <a href="https://github.com/Lain-lies/worknotes" target="_blank"
+          >Flownotes</a
+        >
+      </p>
+    </footer>
+  </body>
 </html>
