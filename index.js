@@ -142,6 +142,10 @@ const fieldState = {
     this.IsAD = value;
   },
 
+  setIsResolved: function (value) {
+    this.IsResolved = value;
+  },
+
   // GETTERS //
 
   getFieldModified: function () {
@@ -167,10 +171,13 @@ const fieldState = {
   getIsAD: function () {
     return this.IsAD;
   },
+
+  getIsResolved: function () {
+    return this.IsResolved;
+  },
   // HELPERS //
 
   onSaveHelper: function (data) {
-    console.log(this);
     if (this.getFieldModified() === false) {
       alert("No changes detected! Please modify the form before saving.");
       return;
@@ -183,7 +190,18 @@ const fieldState = {
     // console.log(data);
     this.setFieldData(data);
     copyToClipboard(data);
+    console.log(`
+<< FIELD STATE >> 
 
+data : ${this.fieldData}
+modified: ${this.fieldModified}
+saved : ${this.fieldSaved}
+isCaller : ${this.IsCaller}
+isIncident : ${this.IsIncident}
+isResolved : ${this.IsResolved}
+isAD : ${this.IsAD}
+
+`);
     alert("Record Saved and Copied to Clipboard");
   },
 
@@ -220,11 +238,8 @@ const fieldState = {
       : false;
   },
 
-  fieldCleaner: function (data) {
-    let filteredDataOne = { ...data };
-    filteredDataOne.isCaller = false;
-
-    if (this.getIsCaller() === true) {
+  OBFieldRemover(data) {
+    if (this.getIsCaller === true) {
       const {
         OBemployeeId,
         OBemployeeLocation,
@@ -235,62 +250,58 @@ const fieldState = {
         OBtimezone,
         ...OBremoved
       } = data;
-
-      filteredDataOne = OBremoved;
-      filteredDataOne.isCaller = true;
+      OBremoved.isCaller = true;
+      return OBremoved;
     }
 
-    let filteredDataTwo = null;
+    return data;
+  },
 
-    if (this.getIsIncident() === true) {
-      const {
-        newHire,
-        mfaRegistered,
-        ssprOffered,
-        ssprOutcome,
-        ticketFulfilled,
-        userAgreedFulfill,
-        ...purified
-      } = filteredDataOne;
-
-      filteredDataTwo = purified;
-      filteredDataTwo.isIncident = true;
-    } else {
-      if (this.getIsAD() === true) {
-        const {
-          possibleMajorIncident,
-          contactType,
-          machineName,
-          nexthinkChecklist,
-          issueResolved,
-          userAgreedResolved,
-          ...purified
-        } = filteredDataOne;
-        filteredDataTwo = purified;
-        filteredDataTwo.isAD = true;
-      } else {
-        const {
-          newHire,
-          mfaRegistered,
-          ssprOffered,
-          ssprOutcome,
-          possibleMajorIncident,
-          contactType,
-          machineName,
-          nexthinkChecklist,
-          issueResolved,
-          userAgreedResolved,
-          ...purified
-        } = filteredDataOne;
-        filteredDataTwo = purified;
-        filteredDataTwo.isAD = false;
-      }
-
-      filteredDataTwo.isIncident = false;
+  ResoNoteRemover(data) {
+    if (!this.getIsResolved()) {
+      const { resolutionNotes, ...purified } = data;
+      purified.isResolved = false;
+      return purified;
     }
 
-    console.log(filteredDataTwo);
-    return filteredDataTwo;
+    return data;
+  },
+
+  PWRFieldRemover(data) {
+    const { newHire, mfaRegistered, ssprOffered, ssprOutcome, ...purified } =
+      data;
+
+    purified.isIncident = true;
+    return purified;
+  },
+
+  INCFieldRemover(data) {
+    const {
+      possibleMajorIncident,
+      contactType,
+      machineName,
+      nexthinkChecklist,
+      ...purified
+    } = data;
+
+    purified.isIncident = false;
+    purified.isAD = true;
+
+    if (this.getIsAD() === false) {
+      const { newHire, mfaRegistered, ssprOffered, ssprOutcome, ...purified2 } =
+        purified;
+
+      purified2.isAD = false;
+      return purified2;
+    }
+
+    return purified;
+  },
+
+  fieldDataFilter: function (data) {
+    return this.getIsIncident()
+      ? this.PWRFieldRemover(this.ResoNoteRemover(this.OBFieldRemover(data)))
+      : this.INCFieldRemover(this.ResoNoteRemover(this.OBFieldRemover(data)));
   },
 };
 
@@ -411,7 +422,13 @@ const fieldUI = {
     this.setupSwitch(
       document.querySelector("[name=issueResolved]"),
       ["No", "Yes"],
-      () => fieldState.setIsResolved(!fieldState.getIsResolved()),
+      () => {
+        const resolutionNotes = document.querySelector(
+          "[name=resolutionNotes]",
+        );
+        fieldState.setIsResolved(!fieldState.getIsResolved());
+        resolutionNotes.classList.toggle("hidden");
+      },
     );
 
     this.setupSwitch(document.querySelector("[name=userAgreedResolved]"));
@@ -460,12 +477,15 @@ const fieldUI = {
 
   initSSPRTemplateSwitch: function () {
     const ssprSwitchButton = document.querySelector("#ssprSwitchButton");
+    let options = ["No", "Yes"];
+    let current = 0;
 
     ssprSwitchButton.addEventListener("click", (e) => {
       e.preventDefault();
       fieldState.setIsAD(!fieldState.getIsAD());
-      console.log(`isAD: ${fieldState.getIsAD()}`);
       this.util.ssprTemplateWrapperSwitchVisibility();
+      current = 1 - current;
+      ssprSwitchButton.textContent = options[current];
     });
   },
 
@@ -610,7 +630,7 @@ const fieldUI = {
       event.preventDefault();
       const formData = new FormData(event.target);
       const data = Object.fromEntries(formData.entries());
-      const cleanedData = fieldState.fieldCleaner(data);
+      const cleanedData = fieldState.fieldDataFilter(data);
       fieldState.onSaveHelper(cleanedData);
     });
 
@@ -851,7 +871,7 @@ Location: ${data.OBlocation}
   }
 
   let resolutionNotes = "";
-  if (data.isResolved === "Yes") {
+  if (data.isResolved) {
     resolutionNotes = `
 RESOLUTION NOTES:
 ${data.resolutionNotes}`;
@@ -897,6 +917,13 @@ SSPR Offered? ${data.ssprOffered}
 SSPR Outcome: ${data.ssprOutcome}`;
   }
 
+  let resolutionNotes = "";
+  if (data.isResolved) {
+    resolutionNotes = `
+RESOLUTION NOTES:
+${data.resolutionNotes}`;
+  }
+
   const documentation = `
 Employee ID: ${data.employeeId}
 Name: ${data.fullName}
@@ -906,17 +933,15 @@ Availability Hours: ${data.bestTimeToReach} ${data.timezone}
 Location: ${data.location}
 Existing Ticket? ${data.existingTicket}
 ${adDetails}
+
 ISSUE DESCRIPTION:
 ${data.issueDescription}
 
 TROUBLESHOOTING STEPS:
 ${data.troubleshootingSteps}
-
-RESOLUTION NOTES:
-${data.resolutionNotes}
-
+${resolutionNotes}
 KB Article: ${data.kbArticle}
-Ticket Fulfilled: ${data.ticketFulfilled}
+Ticket Fulfilled: ${data.issueResolved}
 Next Action(s): ${data.nextActions}
 User agreed to fulfill ticket? ${data.userAgreedResolved}`;
 

@@ -449,8 +449,10 @@
                     Failed: The user forgot the answers to the security
                     questions.
                   </option>
-                  <option value="Failed: Unable to reach back.">
-                    Failed: Unable to reach back.
+                  <option
+                    value="Failed: User was disconnected; Unable to reach back."
+                  >
+                    Failed: User was disconnected; Unable to reach back.
                   </option>
 
                   <option value="Error: User is unable to access aka.ms/sspr.">
@@ -518,6 +520,7 @@
           Resolution Notes:
           <input
             type="input"
+            class="hidden"
             name="resolutionNotes"
             placeholder="Detailed step that resolved the issue"
           />
