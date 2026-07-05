@@ -118,6 +118,21 @@ const fieldState = {
 
   // SETTERS //
 
+  debug() {
+    console.log(`
+<< FIELD STATE >> 
+
+data : ${this.fieldData}
+modified: ${this.fieldModified}
+saved : ${this.fieldSaved}
+isCaller : ${this.IsCaller}
+isIncident : ${this.IsIncident}
+isResolved : ${this.IsResolved}
+isAD : ${this.IsAD}
+
+`);
+  },
+
   setFieldModified: function (value) {
     this.fieldModified = value;
   },
@@ -190,18 +205,7 @@ const fieldState = {
     // console.log(data);
     this.setFieldData(data);
     copyToClipboard(data);
-    console.log(`
-<< FIELD STATE >> 
-
-data : ${this.fieldData}
-modified: ${this.fieldModified}
-saved : ${this.fieldSaved}
-isCaller : ${this.IsCaller}
-isIncident : ${this.IsIncident}
-isResolved : ${this.IsResolved}
-isAD : ${this.IsAD}
-
-`);
+    this.debug();
     alert("Record Saved and Copied to Clipboard");
   },
 
@@ -228,8 +232,6 @@ isAD : ${this.IsAD}
     this.setIsCaller(true);
     this.setIsIncident(true);
     this.setIsAD(false);
-
-    window.location.href = "#ticketForm";
   },
 
   isAllowedtoSwitchSession: function () {
@@ -239,7 +241,8 @@ isAD : ${this.IsAD}
   },
 
   OBFieldRemover(data) {
-    if (this.getIsCaller === true) {
+    if (this.getIsCaller()) {
+      console.log(1);
       const {
         OBemployeeId,
         OBemployeeLocation,
@@ -254,7 +257,7 @@ isAD : ${this.IsAD}
       return OBremoved;
     }
 
-    return data;
+    return { isCaller: false, ...data };
   },
 
   ResoNoteRemover(data) {
@@ -264,7 +267,7 @@ isAD : ${this.IsAD}
       return purified;
     }
 
-    return data;
+    return { isResolved: true, ...data };
   },
 
   PWRFieldRemover(data) {
@@ -314,6 +317,8 @@ const fieldUI = {
     callTypeButton: document.querySelector("#callTypeButton"),
     templateTypeButton: document.querySelector("#templateTypeButton"),
     templateDependentTexts: document.querySelectorAll(".templateDependentText"),
+    resolutionNotesWrapper: document.querySelector("[name=resolutionNotes]")
+      .parentElement,
 
     onBehalfOfWrapperSwitchVisibility: function () {
       this.onBehalfOfWrapper.classList.toggle("hidden");
@@ -329,6 +334,12 @@ const fieldUI = {
 
     ssprTemplateWrapperSwitchVisibility: function () {
       this.ssprTemplateWrapper.classList.toggle("hidden");
+    },
+
+    resolutionNotesWrapperSwitchVisibility: function () {
+      if (!this.resolutionNotesWrapper.classList.contains("hidden")) {
+        this.resolutionNotesWrapper.classList.toggle("hidden");
+      }
     },
 
     backToTop: function () {
@@ -354,7 +365,7 @@ const fieldUI = {
   },
 
   resetSwitch: function () {
-    const switchClickButtons = document.querySelectorAll(".switch-click");
+    const switchClickButtons = document.querySelectorAll(".switchClickButton");
 
     switchClickButtons.forEach((button) => {
       button.remove();
@@ -370,8 +381,10 @@ const fieldUI = {
   },
 
   resetTemplateType: function () {
+    fieldState.debug();
     if (fieldState.getIsIncident() === false) {
       this.util.templateTypeButton.click();
+      console.log(1);
     }
   },
 
@@ -379,6 +392,7 @@ const fieldUI = {
     this.resetSwitch();
     this.resetCallType();
     this.resetTemplateType();
+    this.util.resolutionNotesWrapperSwitchVisibility();
     this.util.backToTop();
   },
 
@@ -393,7 +407,7 @@ const fieldUI = {
 
     button.textContent = options[current];
     button.type = "button";
-    button.classList.add("switch-btn");
+    button.classList.add("switchClickButton");
 
     button.addEventListener("click", () => {
       current = 1 - current;
@@ -423,11 +437,14 @@ const fieldUI = {
       document.querySelector("[name=issueResolved]"),
       ["No", "Yes"],
       () => {
-        const resolutionNotes = document.querySelector(
+        const resolutionNotesWrapper = document.querySelector(
           "[name=resolutionNotes]",
-        );
+        ).parentElement;
+
+        console.log(resolutionNotesWrapper);
+
         fieldState.setIsResolved(!fieldState.getIsResolved());
-        resolutionNotes.classList.toggle("hidden");
+        resolutionNotesWrapper.classList.toggle("hidden");
       },
     );
 
@@ -472,6 +489,7 @@ const fieldUI = {
       current = 1 - current;
       templateTypeButton.textContent = options[current];
       this.util.switchTemplateDependentTexts(current);
+      fieldState.debug();
     });
   },
 
@@ -641,17 +659,17 @@ const fieldUI = {
           "Are you sure you want to cancel? All unsaved changes will be lost.",
         )
       ) {
-        fieldState.resetState();
         documentationField.reset();
         this.reset();
+        fieldState.resetState();
       }
     });
 
     const newNoteButton = document.querySelector("#newNoteButton");
     newNoteButton.addEventListener("click", () => {
-      fieldState.onNewNoteHelper();
-      documenttionField.reset();
+      documentationField.reset();
       this.reset();
+      fieldState.onNewNoteHelper();
     });
   },
 
@@ -857,8 +875,9 @@ function initCreateNewSessionForm() {
 }
 
 function incidentTypeFormatter(data) {
+  console.log(data);
   let onBehalfDetails = "";
-  if (!data.isCaller) {
+  if (data.isCaller === false) {
     onBehalfDetails = `
 USER
 Employee ID: ${data.OBemployeeId}
@@ -899,6 +918,7 @@ ${data.issueDescription}
 TROUBLESHOOTING STEPS:
 ${data.troubleshootingSteps}
 ${resolutionNotes}
+
 KB Article: ${data.kbArticle}
 Issue Resolved? ${data.issueResolved}
 Next Action(s): ${data.nextActions}
@@ -940,6 +960,7 @@ ${data.issueDescription}
 TROUBLESHOOTING STEPS:
 ${data.troubleshootingSteps}
 ${resolutionNotes}
+
 KB Article: ${data.kbArticle}
 Ticket Fulfilled: ${data.issueResolved}
 Next Action(s): ${data.nextActions}
@@ -949,9 +970,9 @@ User agreed to fulfill ticket? ${data.userAgreedResolved}`;
 }
 
 function init() {
-  // window.addEventListener("beforeunload", (e) => {
-  // 	e.preventDefault();
-  // });
+  window.addEventListener("beforeunload", (e) => {
+    e.preventDefault();
+  });
 
   const isFreshStart = !storageState.resumeLastSession();
   console.log(`isFreshStart: ${isFreshStart}`);

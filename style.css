@@ -1,0 +1,121 @@
+* {
+  box-sizing: border-box;
+  font-family: sans-serif;
+}
+
+input,
+textarea {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+input[name="resolutionNotes"] {
+  width: 100%;
+}
+
+textarea {
+  width: 100%;
+}
+
+header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+h1 {
+  display: inline-block;
+}
+
+.logo {
+  display: inline-block;
+  width: 60px;
+}
+
+img {
+  overflow: hidden;
+  width: 100%;
+  border-radius: 50%;
+}
+
+button {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+button:hover {
+  cursor: pointer;
+  filter: brightness(1.2);
+}
+
+#saveTicketButton {
+  padding: 1rem;
+}
+
+.control-panel {
+  border: 1px solid #000;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.switchClickButton {
+  margin-top: 0.5rem;
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+}
+
+#session-individual-record > button {
+  font-size: 1rem;
+  padding: 0.75rem 0.5rem;
+}
+
+#mode-and-type {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+#mode-and-type > button {
+  margin-bottom: 0;
+  font-size: 1rem;
+}
+
+.availability-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.availability-container > button {
+  font-size: 0.8rem;
+}
+
+.adpwrWrapper {
+  display: none;
+}
+
+.visible {
+  display: block;
+}
+
+.hidden {
+  display: none;
+}
+
+[name="nextActions"] {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+legend {
+  display: block;
+  width: auto;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+fieldset {
+  padding: 1.5rem 1rem;
+}
