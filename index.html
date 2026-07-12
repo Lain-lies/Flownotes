@@ -1,455 +1,429 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="index.js" defer></script>
-    <title>Flownotes</title>
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <header>
-      <h1>Flownotes</h1>
-      <div class="logo">
-        <img
-          src="https://static.vecteezy.com/system/resources/thumbnails/053/366/663/small_2x/wave-rgb-color-icon-symbolizing-ocean-tides-currents-coastal-and-marine-environments-tsunami-natural-disaster-isolated-illustration-simple-filled-line-drawing-editable-stroke-vector.jpg"
-          alt="Flownotes Logo"
-        />
-      </div>
-    </header>
-    <p>ver 1.3.0</p>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<script src="index.js" defer></script>
+		<title>Flownotes</title>
+		<link rel="stylesheet" href="style.css" />
+	</head>
+	<body>
+		<header>
+			<h1>Flownotes</h1>
+			<div class="logo">
+				<img
+					src="https://static.vecteezy.com/system/resources/thumbnails/053/366/663/small_2x/wave-rgb-color-icon-symbolizing-ocean-tides-currents-coastal-and-marine-environments-tsunami-natural-disaster-isolated-illustration-simple-filled-line-drawing-editable-stroke-vector.jpg"
+					alt="Flownotes Logo" />
+			</div>
+		</header>
+		<p>ver 1.3.0</p>
 
-    <div class="control-panel">
-      <form id="createSessionForm">
-        <label for="sessionName">
-          Create New Session :
-          <input
-            type="text"
-            id="sessionName"
-            name="sessionName"
-            placeholder="Enter session name"
-            required
-          />
-        </label>
+		<div class="control-panel">
+			<form id="createSessionForm">
+				<label for="sessionName">
+					Create New Session :
+					<input
+						type="text"
+						id="sessionName"
+						name="sessionName"
+						placeholder="Enter session name"
+						required />
+				</label>
 
-        <button type="submit">Create Session</button>
-      </form>
-      <h4>Current Session:</h4>
-      <p id="currentSessionName"></p>
+				<button type="submit">Create Session</button>
+			</form>
+			<h4>Current Session:</h4>
+			<p id="currentSessionName"></p>
 
-      <h4>Session List:</h4>
-      <ul id="session-list"></ul>
+			<h4>Session List:</h4>
+			<ul id="session-list"></ul>
 
-      <h4>Session History</h4>
-      <ul id="exportable-list"></ul>
+			<h4>Session History</h4>
+			<ul id="exportable-list"></ul>
 
-      <hr />
-      <hr />
+			<hr />
+			<hr />
 
-      <h3>History</h3>
-      <div id="session-history"></div>
-    </div>
+			<h3>History</h3>
+			<div id="session-history"></div>
+		</div>
 
-    <button id="hide-control-panel">Hide Control Panel</button>
+		<button id="hide-control-panel">Hide Control Panel</button>
 
-    <hr />
+		<hr />
 
-    <form id="documentationField">
-      <fieldset>
-        <legend>Call & Template Type</legend>
-        <div id="mode-and-type">
-          <h4>Call Type:</h4>
-          <button type="button" id="callTypeButton">Caller</button>
-        </div>
-        <div id="mode-and-type">
-          <h4>Template Type:</h4>
-          <button type="button" id="templateTypeButton">Standard</button>
-        </div>
-      </fieldset>
+		<form id="documentationField">
+			<fieldset>
+				<legend>Call & Template Type</legend>
+				<div id="mode-and-type">
+					<h4>Call Type:</h4>
+					<button type="button" id="callTypeButton">Caller</button>
+				</div>
+				<div id="mode-and-type">
+					<h4>Template Type:</h4>
+					<button type="button" id="templateTypeButton">Standard</button>
+				</div>
+			</fieldset>
 
-      <!-- User Entitlement -->
-      <fieldset>
-        <legend>User Entitlement</legend>
-        <label>
-          Employee ID:
-          <input
-            type="text"
-            name="employeeId"
-            placeholder="Enter Employee ID"
-            required
-          />
-        </label>
+			<!-- User Entitlement -->
+			<fieldset>
+				<legend>User Entitlement</legend>
+				<label>
+					Employee ID:
+					<input
+						type="text"
+						name="employeeId"
+						placeholder="Enter Employee ID"
+						required />
+				</label>
 
-        <label>
-          First and Last Name:
-          <input
-            type="text"
-            name="fullName"
-            placeholder="Enter Full Name"
-            required
-          />
-        </label>
+				<label>
+					First and Last Name:
+					<input
+						type="text"
+						name="fullName"
+						placeholder="Enter Full Name"
+						required />
+				</label>
 
-        <label>
-          Email Address:
-          <input
-            type="email"
-            name="email"
-            placeholder="Enter Email Address"
-            required
-          />
-        </label>
+				<label>
+					Email Address:
+					<input
+						type="email"
+						name="email"
+						placeholder="Enter Email Address"
+						required />
+				</label>
 
-        <label>
-          Contact Number:
-          <input
-            type="text"
-            name="contactNumber"
-            placeholder="Enter Contact Number"
-            required
-          />
-        </label>
+				<label>
+					Contact Number:
+					<input
+						type="text"
+						name="contactNumber"
+						placeholder="Enter Contact Number"
+						required />
+				</label>
 
-        <div class="availability-container">
-          <label>
-            Availability Hours:
-            <input
-              type="text"
-              name="availability"
-              placeholder="Enter Best Time to Reach"
-              value="9am-4pm"
-              required
-            />
-          </label>
+				<div class="availability-container">
+					<label>
+						Availability Hours:
+						<input
+							type="text"
+							name="availability"
+							placeholder="Enter Best Time to Reach"
+							value="9am-4pm"
+							required />
+					</label>
 
-          <select name="timezone">
-            <option value="EST" default>EST</option>
-            <option value="DST" default>DST</option>
-            <option value="IST" default>IST</option>
-          </select>
-        </div>
+					<select name="timezone">
+						<option value="EST" default>EST</option>
+						<option value="DST" default>DST</option>
+						<option value="IST" default>IST</option>
+					</select>
+				</div>
 
-        <label>
-          Location:
-          <input
-            type="text"
-            name="location"
-            placeholder="Enter Location"
-            required
-          />
-        </label>
+				<label>
+					Location:
+					<input
+						type="text"
+						name="location"
+						placeholder="Enter Location"
+						required />
+				</label>
 
-        <div id="onBehalfOfWrapper" class="hidden">
-          <fieldset>
-            <legend>On Behalf Of</legend>
+				<div id="onBehalfOfWrapper" class="hidden">
+					<fieldset>
+						<legend>On Behalf Of</legend>
 
-            <label>
-              Employee ID:
-              <input
-                type="text"
-                name="OBemployeeId"
-                placeholder="Enter Employee ID"
-                value="N/A"
-                required
-              />
-            </label>
+						<label>
+							Employee ID:
+							<input
+								type="text"
+								name="OBemployeeId"
+								placeholder="Enter Employee ID"
+								value="N/A"
+								required />
+						</label>
 
-            <label>
-              First and Last Name:
-              <input
-                type="text"
-                name="OBfullName"
-                placeholder="Enter Full Name"
-                value="N/A"
-                required
-              />
-            </label>
+						<label>
+							First and Last Name:
+							<input
+								type="text"
+								name="OBfullName"
+								placeholder="Enter Full Name"
+								value="N/A"
+								required />
+						</label>
 
-            <label>
-              Email Address:
-              <input
-                type="text"
-                name="OBemail"
-                placeholder="Enter Email Address"
-                value="N/A"
-              />
-            </label>
+						<label>
+							Email Address:
+							<input
+								type="text"
+								name="OBemail"
+								placeholder="Enter Email Address"
+								value="N/A" />
+						</label>
 
-            <label>
-              Contact Number:
-              <input
-                type="text"
-                name="OBcontactNumber"
-                placeholder="Enter Contact Number"
-                value="N/A"
-                required
-              />
-            </label>
-            <div class="availability-container">
-              <label>
-                Availability Hours:
-                <input
-                  type="text"
-                  name="OBavailability"
-                  placeholder="Enter Best Time to Reach"
-                  value="9am-4pm"
-                  required
-                />
-              </label>
-              <select name="OBtimezone">
-                <option value="EST" default>EST</option>
-                <option value="DST">DST</option>
-                <option value="IST">IST</option>
-              </select>
-            </div>
+						<label>
+							Contact Number:
+							<input
+								type="text"
+								name="OBcontactNumber"
+								placeholder="Enter Contact Number"
+								value="N/A"
+								required />
+						</label>
+						<div class="availability-container">
+							<label>
+								Availability Hours:
+								<input
+									type="text"
+									name="OBavailability"
+									placeholder="Enter Best Time to Reach"
+									value="9am-4pm"
+									required />
+							</label>
+							<select name="OBtimezone">
+								<option value="EST" default>EST</option>
+								<option value="DST">DST</option>
+								<option value="IST">IST</option>
+							</select>
+						</div>
 
-            <label>
-              Location:
-              <input
-                type="text"
-                name="OBlocation"
-                placeholder="Enter Location"
-                value="N/A"
-                required
-              />
-            </label>
-          </fieldset>
-        </div>
+						<label>
+							Location:
+							<input
+								type="text"
+								name="OBlocation"
+								placeholder="Enter Location"
+								value="N/A"
+								required />
+						</label>
+					</fieldset>
+				</div>
 
-        <label>
-          Existing Ticket?:
-          <input type="input" name="existingTicket" value="No" />
-        </label>
-      </fieldset>
+				<label>
+					Existing Ticket?:
+					<input type="input" name="existingTicket" value="No" />
+				</label>
+			</fieldset>
 
-      <!-- User Extra Details -->
-      <fieldset>
-        <legend>User Extra Details</legend>
-        <div class="incTemplateWrapper">
-          <label>
-            Possible Major Incident?
-            <input type="input" name="possibleMajorIncident" />
-          </label>
-          <label>
-            Contact type:
-            <input type="input" name="contactType" />
-          </label>
-          <label>
-            Machine name:
-            <input type="input" name="machineName" value="N/A" />
-          </label>
-          <label>
-            Nexthink Checklist:
-            <input type="input" name="nexthinkChecklist" value="N/A" />
-          </label>
-        </div>
+			<!-- User Extra Details -->
+			<fieldset>
+				<legend>User Extra Details</legend>
+				<div class="incTemplateWrapper">
+					<label>
+						Possible Major Incident?
+						<input type="input" name="possibleMajorIncident" />
+					</label>
+					<label>
+						Contact type:
+						<input type="input" name="contactType" />
+					</label>
+					<label>
+						Machine name:
+						<input type="input" name="machineName" value="N/A" />
+					</label>
+					<label>
+						Nexthink Checklist:
+						<input type="input" name="nexthinkChecklist" value="N/A" />
+					</label>
+				</div>
 
-        <div class="pwrTemplateWrapper hidden">
-          <p>Active Directory Password Reset?:</p>
+				<div class="pwrTemplateWrapper hidden">
+					<p>Active Directory Password Reset?:</p>
 
-          <button type="button" id="ssprSwitchButton">No</button>
+					<button type="button" id="ssprSwitchButton">No</button>
 
-          <div class="ssprTemplateWrapper hidden">
-            <fieldset>
-              <legend>Active Directory SSPR Details</legend>
-              <label>
-                New Hire:
-                <input type="input" name="newHire" />
-              </label>
+					<div class="ssprTemplateWrapper hidden">
+						<fieldset>
+							<legend>Active Directory SSPR Details</legend>
+							<label>
+								New Hire:
+								<input type="input" name="newHire" />
+							</label>
 
-              <label>
-                MFA Registered:
-                <input type="input" name="mfaRegistered" />
-              </label>
+							<label>
+								MFA Registered:
+								<input type="input" name="mfaRegistered" />
+							</label>
 
-              <label>
-                SSPR Offered:
-                <input type="input" name="ssprOffered" />
-              </label>
+							<label>
+								SSPR Offered:
+								<input type="input" name="ssprOffered" />
+							</label>
 
-              <label for="ssprOutcome">SSPR Outcome</label>
+							<label for="ssprOutcome">SSPR Outcome</label>
 
-              <select name="ssprOutcome" id="ssprOutcome">
-                <optgroup label="SSPR Offered: No" id="noOptGroup">
-                  <option value="N/A: User is not yet registered to MFA.">
-                    N/A: User is not yet registered to MFA.
-                  </option>
-                  <option
-                    value="N/A: User just had a password reset within 24 hours."
-                  >
-                    N/A: User just had a password reset within 24 hours.
-                  </option>
-                  <option value="N/A: User is calling for an admin account.">
-                    N/A: User is calling for an admin account.
-                  </option>
-                  <option value="N/A: User's AD account is locked out.">
-                    N/A: User's AD account is locked out.
-                  </option>
-                  <option
-                    value="N/A: User's AD account is deactivated/disabled."
-                  >
-                    N/A: User's AD account is deactivated/disabled.
-                  </option>
-                </optgroup>
+							<select name="ssprOutcome" id="ssprOutcome">
+								<optgroup label="SSPR Offered: No" id="noOptGroup">
+									<option value="N/A: User is not yet registered to MFA.">
+										N/A: User is not yet registered to MFA.
+									</option>
+									<option
+										value="N/A: User just had a password reset within 24 hours.">
+										N/A: User just had a password reset within 24 hours.
+									</option>
+									<option value="N/A: User is calling for an admin account.">
+										N/A: User is calling for an admin account.
+									</option>
+									<option value="N/A: User's AD account is locked out.">
+										N/A: User's AD account is locked out.
+									</option>
+									<option
+										value="N/A: User's AD account is deactivated/disabled.">
+										N/A: User's AD account is deactivated/disabled.
+									</option>
+								</optgroup>
 
-                <optgroup label="SSPR Offered: Yes" id="yesOptGroup" hidden>
-                  <option
-                    value="User refused: User prefers the agent to do the password change."
-                  >
-                    User refused: User prefers the agent to do the password
-                    change.
-                  </option>
-                  <option
-                    value="User refused: User don't want to use their mobile phone."
-                  >
-                    User refused: User don't want to use their mobile phone.
-                  </option>
-                  <option
-                    value="User refused: User prefers to keep their current password."
-                  >
-                    User refused: User prefers to keep their current password.
-                  </option>
+								<optgroup label="SSPR Offered: Yes" id="yesOptGroup" hidden>
+									<option
+										value="User refused: User prefers the agent to do the password change.">
+										User refused: User prefers the agent to do the password
+										change.
+									</option>
+									<option
+										value="User refused: User don't want to use their mobile phone.">
+										User refused: User don't want to use their mobile phone.
+									</option>
+									<option
+										value="User refused: User prefers to keep their current password.">
+										User refused: User prefers to keep their current password.
+									</option>
 
-                  <option
-                    value="Failed: User cannot correctly input the CAPTCHA."
-                  >
-                    Failed: User cannot correctly input the CAPTCHA.
-                  </option>
-                  <option
-                    value="Failed: User unable to change their password due to complexity requirements."
-                  >
-                    Failed: User unable to change their password due to
-                    complexity requirements.
-                  </option>
-                  <option
-                    value="Failed: The user forgot the answers to the security questions."
-                  >
-                    Failed: The user forgot the answers to the security
-                    questions.
-                  </option>
-                  <option
-                    value="Failed: User was disconnected; Unable to reach back."
-                  >
-                    Failed: User was disconnected; Unable to reach back.
-                  </option>
+									<option
+										value="Failed: User cannot correctly input the CAPTCHA.">
+										Failed: User cannot correctly input the CAPTCHA.
+									</option>
+									<option
+										value="Failed: User unable to change their password due to complexity requirements.">
+										Failed: User unable to change their password due to
+										complexity requirements.
+									</option>
+									<option
+										value="Failed: The user forgot the answers to the security questions.">
+										Failed: The user forgot the answers to the security
+										questions.
+									</option>
+									<option
+										value="Failed: User was disconnected; Unable to reach back.">
+										Failed: User was disconnected; Unable to reach back.
+									</option>
 
-                  <option value="Error: User is unable to access aka.ms/sspr.">
-                    Error: User is unable to access aka.ms/sspr.
-                  </option>
-                  <option
-                    value="Error: Account doesn't exist. Contact administrator."
-                  >
-                    Error: Account doesn't exist. Contact administrator.
-                  </option>
-                  <option
-                    value="Error: You haven't registered for a password reset."
-                  >
-                    Error: You haven't registered for a password reset.
-                  </option>
-                </optgroup>
-              </select>
-            </fieldset>
-          </div>
-        </div>
-      </fieldset>
+									<option value="Error: User is unable to access aka.ms/sspr.">
+										Error: User is unable to access aka.ms/sspr.
+									</option>
+									<option
+										value="Error: Account doesn't exist. Contact administrator.">
+										Error: Account doesn't exist. Contact administrator.
+									</option>
+									<option
+										value="Error: You haven't registered for a password reset.">
+										Error: You haven't registered for a password reset.
+									</option>
+								</optgroup>
+							</select>
+						</fieldset>
+					</div>
+				</div>
+			</fieldset>
 
-      <!-- Issue Identification and Troubleshooting -->
-      <fieldset>
-        <legend>Issue Identification and Troubleshooting</legend>
-        <label>
-          Issue Description:
-          <textarea
-            name="issueDescription"
-            rows="5"
-            placeholder="Describe the issue"
-          ></textarea>
-        </label>
+			<!-- Issue Identification and Troubleshooting -->
+			<fieldset>
+				<legend>Issue Identification and Troubleshooting</legend>
+				<label>
+					Issue Description:
+					<textarea
+						name="issueDescription"
+						rows="5"
+						placeholder="Describe the issue"></textarea>
+				</label>
 
-        <label>
-          Troubleshooting Steps:
-          <textarea
-            name="troubleshootingSteps"
-            rows="10"
-            placeholder="List the steps taken to troubleshoot the issue"
-          ></textarea>
-        </label>
-      </fieldset>
+				<label>
+					Troubleshooting Steps:
+					<textarea
+						name="troubleshootingSteps"
+						rows="10"
+						placeholder="List the steps taken to troubleshoot the issue"></textarea>
+				</label>
+			</fieldset>
 
-      <!-- Closing Details -->
+			<!-- Closing Details -->
 
-      <fieldset>
-        <legend>Closing Details</legend>
-        <label>
-          KB Article Used:
-          <input
-            type="text"
-            name="kbArticle"
-            placeholder="Enter KB Article"
-            required
-          />
-        </label>
+			<fieldset>
+				<legend>Closing Details</legend>
+				<label>
+					KB Article Used:
+					<input
+						type="text"
+						name="kbArticle"
+						placeholder="Enter KB Article"
+						required />
+				</label>
 
-        <label for="issueResolved">
-          <span class="templateDependentText">Issue Resolved?:</span>
-          <input type="input" name="issueResolved" id="issueResolved" />
-        </label>
+				<label for="issueResolved">
+					<span class="templateDependentText">Issue Resolved?:</span>
+					<input type="input" name="issueResolved" id="issueResolved" />
+				</label>
 
-        <label class="hidden">
-          Resolution Notes:
-          <input
-            type="input"
-            name="resolutionNotes"
-            placeholder="Detailed step that resolved the issue"
-          />
-        </label>
+				<label class="hidden">
+					Resolution Notes:
+					<input
+						type="input"
+						name="resolutionNotes"
+						placeholder="Detailed step that resolved the issue" />
+				</label>
 
-        <label for="nextActions"> Next Action(s): </label>
-        <select name="nextActions" id="nextActions">
-          <option value="N/A" default>N/A</option>
-          <option value="Wait for Line-Manager Approval">
-            Wait for Line-Manager Approval
-          </option>
-          <option value="Route the ticket to the next resolver team">
-            Route the ticket to the next resolver team
-          </option>
-          <option value="Set ticket to pending">Set ticket to pending</option>
-          <option value="Set ticket to resolved">Set ticket to resolved</option>
-          <option value="Set ticket to fulfilled">
-            Set ticket to fulfilled
-          </option>
-          <option value="Cancel ticket">Cancel ticket</option>
-        </select>
+				<label for="nextActions"> Next Action(s): </label>
+				<select name="nextActions" id="nextActions">
+					<option value="N/A" default>N/A</option>
+					<option value="Wait for Line-Manager Approval">
+						Wait for Line-Manager Approval
+					</option>
+					<option value="Route the ticket to the next resolver team">
+						Route the ticket to the next resolver team
+					</option>
+					<option value="Set ticket to pending">Set ticket to pending</option>
+					<option value="Set ticket to resolved">Set ticket to resolved</option>
+					<option value="Set ticket to fulfilled">
+						Set ticket to fulfilled
+					</option>
+					<option value="Cancel ticket">Cancel ticket</option>
+				</select>
 
-        <label for="userAgreedResolved">
-          <span class="templateDependentText"
-            >User agreed to set ticket to 'Resolved'?</span
-          >
-          <input
-            type="iput"
-            name="userAgreedResolved"
-            id="userAgreedResolved"
-          />
-        </label>
-      </fieldset>
+				<label for="userAgreedResolved">
+					<span class="templateDependentText"
+						>User agreed to set ticket to 'Resolved'?</span
+					>
+					<input
+						type="iput"
+						name="userAgreedResolved"
+						id="userAgreedResolved" />
+				</label>
+			</fieldset>
 
-      <fieldset>
-        <legend>Field Controls</legend>
-        <button type="submit" id="saveTicketButton">Save Ticket</button>
-        <button type="button" id="cancelButton">Cancel</button>
-        <button type="button" id="newNoteButton">New Note</button>
-      </fieldset>
-    </form>
+			<!-- Field Controls -->
+			<fieldset>
+				<legend>Field Controls</legend>
+				<button type="submit" id="saveNoteButton">Save Note & Copy</button>
+				<button type="button" id="cancelButton">Cancel</button>
+				<button type="button" id="newNoteButton">New Note</button>
+				<button type="button" id="newNoteUserInfoRetainedButton">
+					New Note(Multiple Issue)
+				</button>
+			</fieldset>
+		</form>
 
-    <button type="button" id="fillTestData">Fill Test Data</button>
-    <hr />
+		<button type="button" id="fillTestData">Fill Test Data</button>
+		<hr />
 
-    <footer>
-      <p>
-        Flownotes &copy; 2026 | GitHub:
-        <a href="https://github.com/Lain-lies/worknotes" target="_blank"
-          >Flownotes</a
-        >
-      </p>
-    </footer>
-  </body>
+		<footer>
+			<p>
+				Flownotes &copy; 2026 | GitHub:
+				<a href="https://github.com/Lain-lies/worknotes" target="_blank"
+					>Flownotes</a
+				>
+			</p>
+		</footer>
+	</body>
 </html>

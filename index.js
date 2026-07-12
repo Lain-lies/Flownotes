@@ -1,125 +1,126 @@
 const storageState = {
-  record: null,
-  currentSessionName: "",
-  sessionList: [],
+	record: null,
+	currentSessionName: "",
+	sessionList: [],
 
-  setRecord: function (record) {
-    this.record = record;
-  },
+	setRecord: function (record) {
+		this.record = record;
+	},
 
-  setCurrentSessionName: function (sessionName) {
-    this.currentSessionName = sessionName;
-  },
+	setCurrentSessionName: function (sessionName) {
+		this.currentSessionName = sessionName;
+	},
 
-  setSessionList: function (sessionList) {
-    this.sessionList = [...sessionList];
-  },
+	setSessionList: function (sessionList) {
+		this.sessionList = [...sessionList];
+	},
 
-  getRecord: function () {
-    return this.record;
-  },
+	getRecord: function () {
+		return this.record;
+	},
 
-  getCurrentSessionName: function () {
-    return this.currentSessionName;
-  },
+	getCurrentSessionName: function () {
+		return this.currentSessionName;
+	},
 
-  getSessionList: function () {
-    return [...this.sessionList];
-  },
+	getSessionList: function () {
+		return [...this.sessionList];
+	},
 
-  getSessionListFromLocalStorage: function () {
-    const sessionList = Object.entries(localStorage)
-      .map(([key]) => key)
-      .filter((key) => key !== "lastSessionName");
-    console.log(sessionList);
+	getSessionListFromLocalStorage: function () {
+		const sessionList = Object.entries(localStorage)
+			.map(([key]) => key)
+			.filter((key) => key !== "lastSessionName");
+		console.log(sessionList);
 
-    return sessionList;
-  },
+		return sessionList;
+	},
 
-  // HELPERS //
-  resumeLastSession: function () {
-    const lastSessionName = localStorage.getItem("lastSessionName");
+	// HELPERS //
+	resumeLastSession: function () {
+		const lastSessionName = localStorage.getItem("lastSessionName");
 
-    if (lastSessionName === null || lastSessionName === undefined) {
-      console.log("No last session");
-      return false;
-    }
+		if (lastSessionName === null || lastSessionName === undefined) {
+			console.log("No last session");
+			return false;
+		}
 
-    const sessionList = this.getSessionListFromLocalStorage(lastSessionName);
-    this.setSessionList(sessionList);
-    this.loadSession(lastSessionName);
-    return true;
-  },
+		const sessionList = this.getSessionListFromLocalStorage(lastSessionName);
+		this.setSessionList(sessionList);
+		this.loadSession(lastSessionName);
+		return true;
+	},
 
-  loadSession: function (sessionName) {
-    const sessionData = JSON.parse(localStorage.getItem(sessionName));
+	loadSession: function (sessionName) {
+		const sessionData = JSON.parse(localStorage.getItem(sessionName));
 
-    if (!Array.isArray(sessionData)) {
-      alert(
-        "Error encountered: The session loaded is not Array and will cause saving errors",
-      );
-      return;
-    }
+		if (!Array.isArray(sessionData)) {
+			alert(
+				"Error encountered: The session loaded is not Array and will cause saving errors",
+			);
+			return;
+		}
 
-    this.setRecord(sessionData);
-    this.setCurrentSessionName(sessionName);
+		this.setRecord(sessionData);
+		this.setCurrentSessionName(sessionName);
 
-    // alert(`Session Loaded: ${this.getCurrentSessionName()}`);
-    console.log(`
+		// alert(`Session Loaded: ${this.getCurrentSessionName()}`);
+		console.log(`
 Current Session: ${this.getCurrentSessionName()}
 Current Record: ${this.getRecord()}
 Session List: ${this.getSessionList()}`);
-  },
+	},
 
-  syncWithLocalStorage: function (newRecord) {
-    this.setRecord([...this.getRecord(), newRecord]);
+	syncWithLocalStorage: function (newRecord) {
+		this.setRecord([...this.getRecord(), newRecord]);
 
-    localStorage.setItem(
-      this.getCurrentSessionName(),
-      JSON.stringify(this.getRecord()),
-    );
+		localStorage.setItem(
+			this.getCurrentSessionName(),
+			JSON.stringify(this.getRecord()),
+		);
 
-    alert("Local Storage Synced!");
+		alert("Local Storage Synced!");
 
-    return true;
-  },
+		return true;
+	},
 
-  updateSessionList: function () {
-    const newSessionList = this.getSessionListFromLocalStorage();
-    this.setSessionList(newSessionList);
-  },
+	updateSessionList: function () {
+		const newSessionList = this.getSessionListFromLocalStorage();
+		this.setSessionList(newSessionList);
+	},
 
-  saveLastSession: function () {
-    console.log(`savelastsession: ${this.getCurrentSessionName()} `);
-    localStorage.setItem("lastSessionName", this.getCurrentSessionName());
-  },
+	saveLastSession: function () {
+		console.log(`savelastsession: ${this.getCurrentSessionName()} `);
+		localStorage.setItem("lastSessionName", this.getCurrentSessionName());
+	},
 
-  // INIT //
+	// INIT //
 
-  init: function () {
-    const now = Date.now();
-    const dateObject = new Date(now);
-    const currentDate = dateObject.toLocaleDateString();
-    localStorage.setItem(currentDate, JSON.stringify([]));
-    this.setSessionList([currentDate]);
-    this.loadSession(currentDate);
-    this.saveLastSession();
-  },
+	init: function () {
+		const now = Date.now();
+		const dateObject = new Date(now);
+		const currentDate = dateObject.toLocaleDateString();
+		localStorage.setItem(currentDate, JSON.stringify([]));
+		this.setSessionList([currentDate]);
+		this.loadSession(currentDate);
+		this.saveLastSession();
+	},
 };
 
 const fieldState = {
-  fieldModified: false,
-  fieldSaved: false,
-  fieldData: {},
-  IsCaller: true,
-  IsIncident: true,
-  IsAD: false,
-  IsResolved: false,
+	fieldModified: false,
+	fieldSaved: false,
+	fieldData: {},
+	IsCaller: true,
+	IsIncident: true,
+	IsAD: false,
+	IsResolved: false,
+	userInformation: {},
 
-  // SETTERS //
+	// SETTERS //
 
-  debug() {
-    console.log(`
+	debug() {
+		console.log(`
 << FIELD STATE >> 
 
 data : ${this.fieldData}
@@ -131,404 +132,413 @@ isResolved : ${this.IsResolved}
 isAD : ${this.IsAD}
 
 `);
-  },
+	},
 
-  setFieldModified: function (value) {
-    this.fieldModified = value;
-  },
+	setFieldModified: function (value) {
+		this.fieldModified = value;
+	},
 
-  setFieldSaved: function (value) {
-    this.fieldSaved = value;
-  },
+	setFieldSaved: function (value) {
+		this.fieldSaved = value;
+	},
 
-  setFieldData: function (value) {
-    this.fieldData = value;
-  },
+	setFieldData: function (value) {
+		this.fieldData = value;
+	},
 
-  setIsCaller: function (value) {
-    this.IsCaller = value;
-  },
+	setIsCaller: function (value) {
+		this.IsCaller = value;
+	},
 
-  setIsIncident: function (value) {
-    this.IsIncident = value;
-  },
+	setIsIncident: function (value) {
+		this.IsIncident = value;
+	},
 
-  setIsAD: function (value) {
-    this.IsAD = value;
-  },
+	setIsAD: function (value) {
+		this.IsAD = value;
+	},
 
-  setIsResolved: function (value) {
-    this.IsResolved = value;
-  },
+	setIsResolved: function (value) {
+		this.IsResolved = value;
+	},
 
-  // GETTERS //
+	// GETTERS //
 
-  getFieldModified: function () {
-    return this.fieldModified;
-  },
+	getFieldModified: function () {
+		return this.fieldModified;
+	},
 
-  getFieldSaved: function () {
-    return this.fieldSaved;
-  },
+	getFieldSaved: function () {
+		return this.fieldSaved;
+	},
 
-  getFieldData: function () {
-    return this.fieldData;
-  },
+	getFieldData: function () {
+		return this.fieldData;
+	},
 
-  getIsCaller: function () {
-    return this.IsCaller;
-  },
+	getIsCaller: function () {
+		return this.IsCaller;
+	},
 
-  getIsIncident: function () {
-    return this.IsIncident;
-  },
+	getIsIncident: function () {
+		return this.IsIncident;
+	},
 
-  getIsAD: function () {
-    return this.IsAD;
-  },
+	getIsAD: function () {
+		return this.IsAD;
+	},
 
-  getIsResolved: function () {
-    return this.IsResolved;
-  },
-  // HELPERS //
+	getIsResolved: function () {
+		return this.IsResolved;
+	},
+	// HELPERS //
 
-  onSaveHelper: function (data) {
-    if (this.getFieldModified() === false) {
-      alert("No changes detected! Please modify the form before saving.");
-      return;
-    }
+	onSaveHelper: function (data) {
+		if (this.getFieldModified() === false) {
+			alert("No changes detected! Please modify the form before saving.");
+			return;
+		}
 
-    if (this.getFieldSaved() === false) {
-      this.setFieldSaved(true);
-    }
+		if (this.getFieldSaved() === false) {
+			this.setFieldSaved(true);
+		}
 
-    // console.log(data);
-    this.setFieldData(data);
-    copyToClipboard(data);
-    this.debug();
-    alert("Record Saved and Copied to Clipboard");
-  },
+		// console.log(data);
+		this.setFieldData(data);
+		copyToClipboard(data);
+		this.debug();
+		alert("Record Saved and Copied to Clipboard");
+	},
 
-  onNewNoteHelper: function () {
-    if (this.getFieldSaved() === false && this.getFieldModified() === false) {
-      alert("No changes detected! Please modify the form before saving.");
-      return;
-    }
+	onNewNoteHelper: function () {
+		storageState.syncWithLocalStorage(this.getFieldData());
+		this.resetState();
+		controlPanelDisplayState.renderAllControlPanelList();
+	},
 
-    if (this.getFieldSaved() === false && this.getFieldModified() === true) {
-      alert("Please save current record Or cancel it first.");
-      return;
-    }
+	resetState: function () {
+		this.setFieldModified(false);
+		this.setFieldSaved(false);
+		this.setFieldData({});
+		this.setIsCaller(true);
+		this.setIsIncident(true);
+		this.setIsAD(false);
+	},
 
-    storageState.syncWithLocalStorage(this.getFieldData());
-    this.resetState();
-    controlPanelDisplayState.renderAllControlPanelList();
-  },
+	isAllowedtoSwitchSession: function () {
+		return this.getFieldSaved() === false && this.getFieldModified() === false
+			? true
+			: false;
+	},
 
-  resetState: function () {
-    this.setFieldModified(false);
-    this.setFieldSaved(false);
-    this.setFieldData({});
-    this.setIsCaller(true);
-    this.setIsIncident(true);
-    this.setIsAD(false);
-  },
+	OBFieldRemover(data) {
+		if (this.getIsCaller()) {
+			console.log(1);
+			const {
+				OBemployeeId,
+				OBemployeeLocation,
+				OBfullName,
+				OBemail,
+				OBcontactNumber,
+				OBavailability,
+				OBtimezone,
+				...OBremoved
+			} = data;
+			OBremoved.isCaller = true;
+			return OBremoved;
+		}
 
-  isAllowedtoSwitchSession: function () {
-    return this.getFieldSaved() === false && this.getFieldModified() === false
-      ? true
-      : false;
-  },
+		return { isCaller: false, ...data };
+	},
 
-  OBFieldRemover(data) {
-    if (this.getIsCaller()) {
-      console.log(1);
-      const {
-        OBemployeeId,
-        OBemployeeLocation,
-        OBfullName,
-        OBemail,
-        OBcontactNumber,
-        OBavailability,
-        OBtimezone,
-        ...OBremoved
-      } = data;
-      OBremoved.isCaller = true;
-      return OBremoved;
-    }
+	ResoNoteRemover(data) {
+		if (!this.getIsResolved()) {
+			const { resolutionNotes, ...purified } = data;
+			purified.isResolved = false;
+			return purified;
+		}
 
-    return { isCaller: false, ...data };
-  },
+		return { isResolved: true, ...data };
+	},
 
-  ResoNoteRemover(data) {
-    if (!this.getIsResolved()) {
-      const { resolutionNotes, ...purified } = data;
-      purified.isResolved = false;
-      return purified;
-    }
+	PWRFieldRemover(data) {
+		const { newHire, mfaRegistered, ssprOffered, ssprOutcome, ...purified } =
+			data;
 
-    return { isResolved: true, ...data };
-  },
+		purified.isIncident = true;
+		return purified;
+	},
 
-  PWRFieldRemover(data) {
-    const { newHire, mfaRegistered, ssprOffered, ssprOutcome, ...purified } =
-      data;
+	INCFieldRemover(data) {
+		const {
+			possibleMajorIncident,
+			contactType,
+			machineName,
+			nexthinkChecklist,
+			...purified
+		} = data;
 
-    purified.isIncident = true;
-    return purified;
-  },
+		purified.isIncident = false;
+		purified.isAD = true;
 
-  INCFieldRemover(data) {
-    const {
-      possibleMajorIncident,
-      contactType,
-      machineName,
-      nexthinkChecklist,
-      ...purified
-    } = data;
+		if (this.getIsAD() === false) {
+			const { newHire, mfaRegistered, ssprOffered, ssprOutcome, ...purified2 } =
+				purified;
 
-    purified.isIncident = false;
-    purified.isAD = true;
+			purified2.isAD = false;
+			return purified2;
+		}
 
-    if (this.getIsAD() === false) {
-      const { newHire, mfaRegistered, ssprOffered, ssprOutcome, ...purified2 } =
-        purified;
+		return purified;
+	},
 
-      purified2.isAD = false;
-      return purified2;
-    }
-
-    return purified;
-  },
-
-  fieldDataFilter: function (data) {
-    return this.getIsIncident()
-      ? this.PWRFieldRemover(this.ResoNoteRemover(this.OBFieldRemover(data)))
-      : this.INCFieldRemover(this.ResoNoteRemover(this.OBFieldRemover(data)));
-  },
+	fieldDataFilter: function (data) {
+		return this.getIsIncident()
+			? this.PWRFieldRemover(this.ResoNoteRemover(this.OBFieldRemover(data)))
+			: this.INCFieldRemover(this.ResoNoteRemover(this.OBFieldRemover(data)));
+	},
 };
 
 const fieldUI = {
-  util: {
-    onBehalfOfWrapper: document.querySelector("#onBehalfOfWrapper"),
-    incTemplateWrapper: document.querySelector(".incTemplateWrapper"),
-    pwrTemplateWrapper: document.querySelector(".pwrTemplateWrapper"),
-    ssprTemplateWrapper: document.querySelector(".ssprTemplateWrapper"),
-    callTypeButton: document.querySelector("#callTypeButton"),
-    templateTypeButton: document.querySelector("#templateTypeButton"),
-    templateDependentTexts: document.querySelectorAll(".templateDependentText"),
-    resolutionNotesWrapper: document.querySelector("[name=resolutionNotes]")
-      .parentElement,
+	util: {
+		onBehalfOfWrapper: document.querySelector("#onBehalfOfWrapper"),
+		incTemplateWrapper: document.querySelector(".incTemplateWrapper"),
+		pwrTemplateWrapper: document.querySelector(".pwrTemplateWrapper"),
+		ssprTemplateWrapper: document.querySelector(".ssprTemplateWrapper"),
+		callTypeButton: document.querySelector("#callTypeButton"),
+		templateTypeButton: document.querySelector("#templateTypeButton"),
+		templateDependentTexts: document.querySelectorAll(".templateDependentText"),
+		resolutionNotesWrapper: document.querySelector("[name=resolutionNotes]")
+			.parentElement,
 
-    onBehalfOfWrapperSwitchVisibility: function () {
-      this.onBehalfOfWrapper.classList.toggle("hidden");
-    },
+		onBehalfOfWrapperSwitchVisibility: function () {
+			this.onBehalfOfWrapper.classList.toggle("hidden");
+		},
 
-    incTemplateWrapperSwitchVisibility: function () {
-      this.incTemplateWrapper.classList.toggle("hidden");
-    },
+		incTemplateWrapperSwitchVisibility: function () {
+			this.incTemplateWrapper.classList.toggle("hidden");
+		},
 
-    pwrTemplateWrapperSwitchVisibility: function () {
-      this.pwrTemplateWrapper.classList.toggle("hidden");
-    },
+		pwrTemplateWrapperSwitchVisibility: function () {
+			this.pwrTemplateWrapper.classList.toggle("hidden");
+		},
 
-    ssprTemplateWrapperSwitchVisibility: function () {
-      this.ssprTemplateWrapper.classList.toggle("hidden");
-    },
+		ssprTemplateWrapperSwitchVisibility: function () {
+			this.ssprTemplateWrapper.classList.toggle("hidden");
+		},
 
-    resolutionNotesWrapperSwitchVisibility: function () {
-      if (!this.resolutionNotesWrapper.classList.contains("hidden")) {
-        this.resolutionNotesWrapper.classList.toggle("hidden");
-      }
-    },
+		resolutionNotesWrapperSwitchVisibility: function () {
+			if (!this.resolutionNotesWrapper.classList.contains("hidden")) {
+				this.resolutionNotesWrapper.classList.toggle("hidden");
+			}
+		},
 
-    backToTop: function () {
-      window.location.href = "#documentationField";
-    },
+		backToTop: function () {
+			window.location.href = "#documentationField";
+		},
 
-    switchTemplateDependentTexts: function (option) {
-      const issueResolvedTextOptions = [
-        "Issue Resolved?:",
-        "Ticket Fulfilled?:",
-      ];
+		switchTemplateDependentTexts: function (option) {
+			const issueResolvedTextOptions = [
+				"Issue Resolved?:",
+				"Ticket Fulfilled?:",
+			];
 
-      const userAgreedResolvedTextOptions = [
-        "User agreed to set ticket to 'Resolved'?:",
-        "User agreed to set ticket to 'Fulfilled'?:",
-      ];
+			const userAgreedResolvedTextOptions = [
+				"User agreed to set ticket to 'Resolved'?:",
+				"User agreed to set ticket to 'Fulfilled'?:",
+			];
 
-      this.templateDependentTexts[0].textContent =
-        issueResolvedTextOptions[option];
-      this.templateDependentTexts[1].textContent =
-        userAgreedResolvedTextOptions[option];
-    },
-  },
+			this.templateDependentTexts[0].textContent =
+				issueResolvedTextOptions[option];
+			this.templateDependentTexts[1].textContent =
+				userAgreedResolvedTextOptions[option];
+		},
 
-  resetSwitch: function () {
-    const switchClickButtons = document.querySelectorAll(".switchClickButton");
+		isAllowedToNewNote() {
+			if (
+				fieldState.getFieldSaved() === false &&
+				fieldState.getFieldModified() === false
+			) {
+				alert("No changes detected");
+				return false;
+			}
+			if (
+				fieldState.getFieldSaved() === false &&
+				fieldState.getFieldModified() === true
+			) {
+				alert("Please save current note");
+				return false;
+			}
 
-    switchClickButtons.forEach((button) => {
-      button.remove();
-    });
+			return true;
+		},
+	},
 
-    this.initSwitch();
-  },
+	resetSwitch: function () {
+		const switchClickButtons = document.querySelectorAll(".switchClickButton");
 
-  resetCallType: function () {
-    if (fieldState.getIsCaller() === false) {
-      this.util.callTypeButton.click();
-    }
-  },
+		switchClickButtons.forEach((button) => {
+			button.remove();
+		});
 
-  resetTemplateType: function () {
-    fieldState.debug();
-    if (fieldState.getIsIncident() === false) {
-      this.util.templateTypeButton.click();
-      console.log(1);
-    }
-  },
+		this.initSwitch();
+	},
 
-  reset: function () {
-    this.resetSwitch();
-    this.resetCallType();
-    this.resetTemplateType();
-    this.util.resolutionNotesWrapperSwitchVisibility();
-    this.util.backToTop();
-  },
+	resetCallType: function () {
+		if (fieldState.getIsCaller() === false) {
+			this.util.callTypeButton.click();
+		}
+	},
 
-  setupSwitch(element, options = ["No", "Yes"], handler = null) {
-    let current = 0;
+	resetTemplateType: function () {
+		fieldState.debug();
+		if (fieldState.getIsIncident() === false) {
+			this.util.templateTypeButton.click();
+			console.log(1);
+		}
+	},
 
-    element.value = options[current];
-    element.style.display = "none";
+	reset: function () {
+		this.resetSwitch();
+		this.resetCallType();
+		this.resetTemplateType();
+		this.util.resolutionNotesWrapperSwitchVisibility();
+		this.util.backToTop();
+	},
 
-    const parent = element.parentElement;
-    const button = document.createElement("button");
+	setupSwitch(element, options = ["No", "Yes"], handler = null) {
+		let current = 0;
 
-    button.textContent = options[current];
-    button.type = "button";
-    button.classList.add("switchClickButton");
+		element.value = options[current];
+		element.style.display = "none";
 
-    button.addEventListener("click", () => {
-      current = 1 - current;
-      button.textContent = options[current];
-      element.value = options[current];
-      if (handler !== null) {
-        handler();
-      }
-    });
+		const parent = element.parentElement;
+		const button = document.createElement("button");
 
-    parent.appendChild(button);
-  },
+		button.textContent = options[current];
+		button.type = "button";
+		button.classList.add("switchClickButton");
 
-  initSwitch: function () {
-    // INC
-    this.setupSwitch(document.querySelector("[name=possibleMajorIncident]"));
-    this.setupSwitch(document.querySelector("[name=contactType]"), [
-      "Phone",
-      "Chat",
-    ]);
+		button.addEventListener("click", () => {
+			current = 1 - current;
+			button.textContent = options[current];
+			element.value = options[current];
+			if (handler !== null) {
+				handler();
+			}
+		});
 
-    // PWR
-    this.setupSwitch(document.querySelector("[name=newHire]"));
-    this.setupSwitch(document.querySelector("[name=mfaRegistered]"));
+		parent.appendChild(button);
+	},
 
-    this.setupSwitch(
-      document.querySelector("[name=issueResolved]"),
-      ["No", "Yes"],
-      () => {
-        const resolutionNotesWrapper = document.querySelector(
-          "[name=resolutionNotes]",
-        ).parentElement;
+	initSwitch: function () {
+		// INC
+		this.setupSwitch(document.querySelector("[name=possibleMajorIncident]"));
+		this.setupSwitch(document.querySelector("[name=contactType]"), [
+			"Phone",
+			"Chat",
+		]);
 
-        console.log(resolutionNotesWrapper);
+		// PWR
+		this.setupSwitch(document.querySelector("[name=newHire]"));
+		this.setupSwitch(document.querySelector("[name=mfaRegistered]"));
 
-        fieldState.setIsResolved(!fieldState.getIsResolved());
-        resolutionNotesWrapper.classList.toggle("hidden");
-      },
-    );
+		this.setupSwitch(
+			document.querySelector("[name=issueResolved]"),
+			["No", "Yes"],
+			() => {
+				const resolutionNotesWrapper = document.querySelector(
+					"[name=resolutionNotes]",
+				).parentElement;
 
-    this.setupSwitch(document.querySelector("[name=userAgreedResolved]"));
+				console.log(resolutionNotesWrapper);
 
-    this.setupSwitch(
-      document.querySelector("[name=ssprOffered]"),
-      ["No", "Yes"],
-      () => {
-        const noOptGroup = document.querySelector("#noOptGroup");
-        const yesOptGroup = document.querySelector("#yesOptGroup");
+				fieldState.setIsResolved(!fieldState.getIsResolved());
+				resolutionNotesWrapper.classList.toggle("hidden");
+			},
+		);
 
-        noOptGroup.hidden = !noOptGroup.hidden;
-        yesOptGroup.hidden = !yesOptGroup.hidden;
-      },
-    );
-  },
+		this.setupSwitch(document.querySelector("[name=userAgreedResolved]"));
 
-  initCallTypeSwitch: function () {
-    const callTypeButton = document.querySelector("#callTypeButton");
-    const options = ["Caller", "On Behalf Of"];
-    let current = 0;
+		this.setupSwitch(
+			document.querySelector("[name=ssprOffered]"),
+			["No", "Yes"],
+			() => {
+				const noOptGroup = document.querySelector("#noOptGroup");
+				const yesOptGroup = document.querySelector("#yesOptGroup");
 
-    callTypeButton.addEventListener("click", (e) => {
-      fieldState.setIsCaller(!fieldState.getIsCaller());
-      this.util.onBehalfOfWrapperSwitchVisibility();
-      current = 1 - current;
-      callTypeButton.textContent = options[current];
-    });
-  },
+				noOptGroup.hidden = !noOptGroup.hidden;
+				yesOptGroup.hidden = !yesOptGroup.hidden;
+			},
+		);
+	},
 
-  initTemplateTypeSwitch: function () {
-    const templateTypeButton = document.querySelector("#templateTypeButton");
-    const options = ["Standard", "Password Reset"];
-    let current = 0;
+	initCallTypeSwitch: function () {
+		const callTypeButton = document.querySelector("#callTypeButton");
+		const options = ["Caller", "On Behalf Of"];
+		let current = 0;
 
-    templateTypeButton.addEventListener("click", (e) => {
-      e.preventDefault();
-      fieldState.setIsIncident(!fieldState.getIsIncident());
-      this.util.incTemplateWrapperSwitchVisibility();
-      this.util.pwrTemplateWrapperSwitchVisibility();
-      current = 1 - current;
-      templateTypeButton.textContent = options[current];
-      this.util.switchTemplateDependentTexts(current);
-      fieldState.debug();
-    });
-  },
+		callTypeButton.addEventListener("click", (e) => {
+			fieldState.setIsCaller(!fieldState.getIsCaller());
+			this.util.onBehalfOfWrapperSwitchVisibility();
+			current = 1 - current;
+			callTypeButton.textContent = options[current];
+		});
+	},
 
-  initSSPRTemplateSwitch: function () {
-    const ssprSwitchButton = document.querySelector("#ssprSwitchButton");
-    let options = ["No", "Yes"];
-    let current = 0;
+	initTemplateTypeSwitch: function () {
+		const templateTypeButton = document.querySelector("#templateTypeButton");
+		const options = ["Standard", "Password Reset"];
+		let current = 0;
 
-    ssprSwitchButton.addEventListener("click", (e) => {
-      e.preventDefault();
-      fieldState.setIsAD(!fieldState.getIsAD());
-      this.util.ssprTemplateWrapperSwitchVisibility();
-      current = 1 - current;
-      ssprSwitchButton.textContent = options[current];
-    });
-  },
+		templateTypeButton.addEventListener("click", (e) => {
+			e.preventDefault();
+			fieldState.setIsIncident(!fieldState.getIsIncident());
+			this.util.incTemplateWrapperSwitchVisibility();
+			this.util.pwrTemplateWrapperSwitchVisibility();
+			current = 1 - current;
+			templateTypeButton.textContent = options[current];
+			this.util.switchTemplateDependentTexts(current);
+			fieldState.debug();
+		});
+	},
 
-  initAutoFillMinimumDataSet: function () {
-    const element = document.querySelector("[name=troubleshootingSteps]");
-    const parent = element.parentElement;
+	initSSPRTemplateSwitch: function () {
+		const ssprSwitchButton = document.querySelector("#ssprSwitchButton");
+		let options = ["No", "Yes"];
+		let current = 0;
 
-    const buttonOne = document.createElement("button");
-    buttonOne.textContent = "PW Reset VERIFIED";
-    const buttonTwo = document.createElement("button");
-    buttonTwo.textContent = "PW Reset NOT VERIFIED";
+		ssprSwitchButton.addEventListener("click", (e) => {
+			e.preventDefault();
+			fieldState.setIsAD(!fieldState.getIsAD());
+			this.util.ssprTemplateWrapperSwitchVisibility();
+			current = 1 - current;
+			ssprSwitchButton.textContent = options[current];
+		});
+	},
 
-    const buttonThree = document.createElement("button");
-    buttonThree.textContent = "Incident Routed";
-    const buttonFour = document.createElement("button");
-    buttonFour.textContent = "Incident Resolved";
+	initAutoFillMinimumDataSet: function () {
+		const element = document.querySelector("[name=troubleshootingSteps]");
+		const parent = element.parentElement;
 
-    buttonOne.type = "button";
-    buttonTwo.type = "button";
-    buttonThree.type = "button";
-    buttonFour.type = "button";
+		const buttonOne = document.createElement("button");
+		buttonOne.textContent = "PW Reset VERIFIED";
+		const buttonTwo = document.createElement("button");
+		buttonTwo.textContent = "PW Reset NOT VERIFIED";
 
-    buttonOne.addEventListener("click", () => {
-      const resetType = element.value;
-      element.value = `
+		const buttonThree = document.createElement("button");
+		buttonThree.textContent = "Incident Routed";
+		const buttonFour = document.createElement("button");
+		buttonFour.textContent = "Incident Resolved";
+
+		buttonOne.type = "button";
+		buttonTwo.type = "button";
+		buttonThree.type = "button";
+		buttonFour.type = "button";
+
+		buttonOne.addEventListener("click", () => {
+			const resetType = element.value;
+			element.value = `
 - Checked Users account via ${resetType}
 - User account is active
 - Verified the user via verification tool
@@ -540,11 +550,11 @@ const fieldUI = {
 - Provided ticket number to user
 - User acknowledged
 - End call`;
-    });
+		});
 
-    buttonTwo.addEventListener("click", () => {
-      const resetType = element.value;
-      element.value += `
+		buttonTwo.addEventListener("click", () => {
+			const resetType = element.value;
+			element.value += `
 - Checked Users account via  ${resetType}
 - Verified the user via verification tool
 - User is not verified
@@ -553,332 +563,396 @@ const fieldUI = {
 - Provided Ticket Number
 - User Acknowledged
 - End call`;
-    });
+		});
 
-    buttonThree.addEventListener("click", () => {
-      element.value += `
+		buttonThree.addEventListener("click", () => {
+			element.value += `
 - Advised user ticket will be routed to [NAME] team
 - Provided ticket number to the user
 - User Acknowledged
 - End call`;
-    });
+		});
 
-    buttonFour.addEventListener("click", () => {
-      element.value += `
+		buttonFour.addEventListener("click", () => {
+			element.value += `
 - Issue Resolved
 - Provided ticket number to the user
 - Confirmed with user ticket can now be set to resolved
 - End call`;
-    });
-    parent.appendChild(buttonOne);
-    parent.appendChild(buttonTwo);
-    parent.appendChild(buttonThree);
-    parent.appendChild(buttonFour);
-  },
+		});
+		parent.appendChild(buttonOne);
+		parent.appendChild(buttonTwo);
+		parent.appendChild(buttonThree);
+		parent.appendChild(buttonFour);
+	},
 
-  initTextAreaAutoFormat: function () {
-    const resolutionNotesElement = document.querySelector(
-      "[name=troubleshootingSteps]",
-    );
+	initTextAreaAutoFormat: function () {
+		const resolutionNotesElement = document.querySelector(
+			"[name=troubleshootingSteps]",
+		);
 
-    resolutionNotesElement.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        e.target.value += `
+		resolutionNotesElement.addEventListener("keydown", (e) => {
+			if (e.key === "Enter") {
+				e.preventDefault();
+				e.target.value += `
 - `;
-      }
-    });
+			}
+		});
 
-    const issueDescriptionElement = document.querySelector(
-      "[name=issueDescription]",
-    );
+		const issueDescriptionElement = document.querySelector(
+			"[name=issueDescription]",
+		);
 
-    issueDescriptionElement.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        e.target.value += `
+		issueDescriptionElement.addEventListener("keydown", (e) => {
+			if (e.key === "Enter") {
+				e.preventDefault();
+				e.target.value += `
 - `;
-      }
-    });
-  },
+			}
+		});
+	},
 
-  initKBShortcut: function () {
-    const kbaElement = document.querySelector("[name=kbArticle]");
+	initKBShortcut: function () {
+		const kbaElement = document.querySelector("[name=kbArticle]");
 
-    const shortcuts = {
-      ad: "KB0034635",
-      css: "KB0036245",
-      ds: "KB0036249",
-      ldap: "KB0034367",
-      cwq: "KB0034367",
-      arcos: "KB0011194",
-      max: "KB0050099",
-      power: "KB0010724",
-      sap: "KB0028648",
-      win11: "KB0042494",
-      laptop: "KB0041117",
-      mobile: "KB0041555",
-      avd: "KB0042642",
-      o365: "KB0034763",
-      outlook: "KB0035272",
-      intune: "KB0035752",
-      mfa: "KB0040875",
-      myhub: "KB0040883",
-      teams: "KB0041367",
-      adsup: "KB0035746",
-    };
+		const shortcuts = {
+			ad: "KB0034635",
+			css: "KB0036245",
+			ds: "KB0036249",
+			ldap: "KB0034367",
+			cwq: "KB0034367",
+			arcos: "KB0011194",
+			max: "KB0050099",
+			power: "KB0010724",
+			sap: "KB0028648",
+			win11: "KB0042494",
+			laptop: "KB0041117",
+			mobile: "KB0041555",
+			avd: "KB0042642",
+			o365: "KB0034763",
+			outlook: "KB0035272",
+			intune: "KB0035752",
+			mfa: "KB0040875",
+			myhub: "KB0040883",
+			teams: "KB0041367",
+			adsup: "KB0035746",
+		};
 
-    kbaElement.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        const value = shortcuts[e.target.value];
-        if (value === null || value === undefined) return;
-        e.target.value = value;
-      }
-    });
-  },
+		kbaElement.addEventListener("keydown", (e) => {
+			if (e.key === "Enter") {
+				e.preventDefault();
+				const value = shortcuts[e.target.value];
+				if (value === null || value === undefined) return;
+				e.target.value = value;
+			}
+		});
+	},
 
-  initField: function () {
-    const documentationField = document.querySelector("#documentationField");
-    documentationField.addEventListener("input", () => {
-      fieldState.setFieldModified(true);
-    });
+	initField: function () {
+		const documentationField = document.querySelector("#documentationField");
+		documentationField.addEventListener("input", () => {
+			fieldState.setFieldModified(true);
+		});
 
-    documentationField.addEventListener("submit", (event) => {
-      event.preventDefault();
-      const formData = new FormData(event.target);
-      const data = Object.fromEntries(formData.entries());
-      const cleanedData = fieldState.fieldDataFilter(data);
-      fieldState.onSaveHelper(cleanedData);
-    });
+		documentationField.addEventListener("submit", (event) => {
+			event.preventDefault();
+			const formData = new FormData(event.target);
+			const data = Object.fromEntries(formData.entries());
+			const cleanedData = fieldState.fieldDataFilter(data);
+			fieldState.onSaveHelper(cleanedData);
+		});
 
-    const resetButton = document.querySelector("#cancelButton");
-    resetButton.addEventListener("click", () => {
-      if (
-        confirm(
-          "Are you sure you want to cancel? All unsaved changes will be lost.",
-        )
-      ) {
-        documentationField.reset();
-        this.reset();
-        fieldState.resetState();
-      }
-    });
+		const resetButton = document.querySelector("#cancelButton");
+		resetButton.addEventListener("click", () => {
+			if (
+				confirm(
+					"Are you sure you want to cancel? All unsaved changes will be lost.",
+				)
+			) {
+				documentationField.reset();
+				this.reset();
+				fieldState.resetState();
+			}
+		});
 
-    const newNoteButton = document.querySelector("#newNoteButton");
-    newNoteButton.addEventListener("click", () => {
-      documentationField.reset();
-      this.reset();
-      fieldState.onNewNoteHelper();
-    });
-  },
+		const newNoteButton = document.querySelector("#newNoteButton");
+		newNoteButton.addEventListener("click", () => {
+			if (this.util.isAllowedToNewNote()) {
+				documentationField.reset();
+				this.reset();
+				fieldState.onNewNoteHelper();
+			}
+			return;
+		});
 
-  init() {
-    this.initSwitch();
-    this.initCallTypeSwitch();
-    this.initTemplateTypeSwitch();
-    this.initSSPRTemplateSwitch();
-    this.initAutoFillMinimumDataSet();
-    this.initTextAreaAutoFormat();
-    this.initKBShortcut();
-    this.initField();
-  },
+		const newNoteUserInfoRetainedButton = document.querySelector(
+			"#newNoteUserInfoRetainedButton",
+		);
+
+		newNoteUserInfoRetainedButton.addEventListener("click", () => {
+			if (!this.util.isAllowedToNewNote()) return;
+			const {
+				employeeId,
+				fullName,
+				email,
+				contactNumber,
+				availability,
+				timezone,
+				location,
+				OBemployeeId,
+				OBfullName,
+				OBemail,
+				OBcontactNumber,
+				OBavailability,
+				OBtimezone,
+				OBlocation,
+			} = fieldState.getFieldData();
+
+			const userEntitlementData = {
+				employeeId,
+				fullName,
+				email,
+				contactNumber,
+				availability,
+				timezone,
+				location,
+				OBemployeeId,
+				OBfullName,
+				OBemail,
+				OBcontactNumber,
+				OBavailability,
+				OBtimezone,
+				OBlocation,
+			};
+
+			documentationField.reset();
+			this.reset();
+			fieldState.onNewNoteHelper();
+			console.log(userEntitlementData);
+
+			Object.entries(userEntitlementData).forEach(([name, value]) => {
+				const field = document.querySelector(`[name="${name}"]`);
+
+				if (field) {
+					field.value = value;
+
+					const switchButton =
+						field.parentElement?.querySelector(".switch-click");
+
+					if (switchButton) {
+						switchButton.textContent = value;
+					}
+				}
+			});
+		});
+	},
+
+	init() {
+		this.initSwitch();
+		this.initCallTypeSwitch();
+		this.initTemplateTypeSwitch();
+		this.initSSPRTemplateSwitch();
+		this.initAutoFillMinimumDataSet();
+		this.initTextAreaAutoFormat();
+		this.initKBShortcut();
+		this.initField();
+	},
 };
 
 const controlPanelDisplayState = {
-  controlPanelElement: document.querySelector(".control-panel"),
-  controlPanelCurrentSessionNameElement: document.querySelector(
-    "#currentSessionName",
-  ),
-  controlPanelSessionListElement: document.querySelector("#session-list"),
-  controlPanelExportSessionListElement:
-    document.querySelector("#exportable-list"),
-  controlPanelSessionHistoryElement: document.querySelector("#session-history"),
+	controlPanelElement: document.querySelector(".control-panel"),
+	controlPanelCurrentSessionNameElement: document.querySelector(
+		"#currentSessionName",
+	),
+	controlPanelSessionListElement: document.querySelector("#session-list"),
+	controlPanelExportSessionListElement:
+		document.querySelector("#exportable-list"),
+	controlPanelSessionHistoryElement: document.querySelector("#session-history"),
 
-  renderCurrentSessionName: function (value) {
-    this.controlPanelCurrentSessionNameElement.textContent = value;
-  },
+	renderCurrentSessionName: function (value) {
+		this.controlPanelCurrentSessionNameElement.textContent = value;
+	},
 
-  renderSessionList: function () {
-    this.controlPanelSessionListElement.replaceChildren();
+	renderSessionList: function () {
+		this.controlPanelSessionListElement.replaceChildren();
 
-    const sessionList = storageState.getSessionList();
-    sessionList.forEach((session) => {
-      const li = document.createElement("li");
-      const button = document.createElement("button");
-      button.textContent = session;
-      button.addEventListener("click", () => {
-        if (fieldState.isAllowedtoSwitchSession()) {
-          storageState.loadSession(session);
-          storageState.saveLastSession();
-          this.renderCurrentSessionName(storageState.getCurrentSessionName());
-          this.renderAllControlPanelList();
+		const sessionList = storageState.getSessionList();
+		sessionList.forEach((session) => {
+			const li = document.createElement("li");
+			const button = document.createElement("button");
+			button.textContent = session;
+			button.addEventListener("click", () => {
+				if (fieldState.isAllowedtoSwitchSession()) {
+					storageState.loadSession(session);
+					storageState.saveLastSession();
+					this.renderCurrentSessionName(storageState.getCurrentSessionName());
+					this.renderAllControlPanelList();
 
-          return;
-        }
-        alert(
-          "Please SAVE current work before switching or CANCEL if you want to abandon work",
-        );
-      });
-      li.appendChild(button);
-      this.controlPanelSessionListElement.appendChild(li);
-    });
-  },
+					return;
+				}
+				alert(
+					"Please SAVE current work before switching or CANCEL if you want to abandon work",
+				);
+			});
+			li.appendChild(button);
+			this.controlPanelSessionListElement.appendChild(li);
+		});
+	},
 
-  renderExportSessionList: function () {
-    this.controlPanelExportSessionListElement.replaceChildren();
-    const sessionList = storageState.getSessionList();
-    sessionList.forEach((session) => {
-      const li = document.createElement("li");
-      const button = document.createElement("button");
-      button.textContent = session;
-      button.addEventListener("click", () => {
-        this.renderSessionHistory(session);
-      });
-      li.appendChild(button);
-      this.controlPanelExportSessionListElement.appendChild(li);
-    });
-  },
+	renderExportSessionList: function () {
+		this.controlPanelExportSessionListElement.replaceChildren();
+		const sessionList = storageState.getSessionList();
+		sessionList.forEach((session) => {
+			const li = document.createElement("li");
+			const button = document.createElement("button");
+			button.textContent = session;
+			button.addEventListener("click", () => {
+				this.renderSessionHistory(session);
+			});
+			li.appendChild(button);
+			this.controlPanelExportSessionListElement.appendChild(li);
+		});
+	},
 
-  renderSessionHistory: function (sessionName) {
-    this.controlPanelSessionHistoryElement.replaceChildren();
+	renderSessionHistory: function (sessionName) {
+		this.controlPanelSessionHistoryElement.replaceChildren();
 
-    const exportAllButton = document.createElement("button");
-    exportAllButton.textContent = "Export ALL";
-    exportAllButton.addEventListener("click", () => exportSession(sessionName));
+		const exportAllButton = document.createElement("button");
+		exportAllButton.textContent = "Export ALL";
+		exportAllButton.addEventListener("click", () => exportSession(sessionName));
 
-    this.controlPanelSessionHistoryElement.appendChild(exportAllButton);
+		this.controlPanelSessionHistoryElement.appendChild(exportAllButton);
 
-    const sessionHistory = JSON.parse(localStorage.getItem(sessionName));
+		const sessionHistory = JSON.parse(localStorage.getItem(sessionName));
 
-    sessionHistory.forEach((record) => {
-      const button = document.createElement("button");
-      const doctype = record.isIncident ? "Incident" : "Password Reset";
-      button.textContent = `${record.fullName} | ${doctype}`;
-      button.addEventListener("click", () => {
-        exportIndividualRecord(record);
-      });
-      this.controlPanelSessionHistoryElement.appendChild(button);
-    });
-  },
+		sessionHistory.forEach((record) => {
+			const button = document.createElement("button");
+			const doctype = record.isIncident ? "Incident" : "Password Reset";
+			button.textContent = `${record.fullName} | ${doctype}`;
+			button.addEventListener("click", () => {
+				exportIndividualRecord(record);
+			});
+			this.controlPanelSessionHistoryElement.appendChild(button);
+		});
+	},
 
-  renderAllControlPanelList: function () {
-    console.log("render all called");
-    this.renderSessionList();
-    this.renderExportSessionList();
-  },
+	renderAllControlPanelList: function () {
+		console.log("render all called");
+		this.renderSessionList();
+		this.renderExportSessionList();
+	},
 
-  init: function () {
-    const hideControlPanelButton = document.querySelector(
-      "#hide-control-panel",
-    );
+	init: function () {
+		const hideControlPanelButton = document.querySelector(
+			"#hide-control-panel",
+		);
 
-    hideControlPanelButton.addEventListener("click", () => {
-      if (this.controlPanelElement.style.display === "none") {
-        this.controlPanelElement.style.display = "block";
-        hideControlPanelButton.textContent = "HIDE CONTROL PANEL";
-      } else {
-        this.controlPanelElement.style.display = "none";
-        hideControlPanelButton.textContent = "SHOW CONTROL PANEL";
-      }
-    });
+		hideControlPanelButton.addEventListener("click", () => {
+			if (this.controlPanelElement.style.display === "none") {
+				this.controlPanelElement.style.display = "block";
+				hideControlPanelButton.textContent = "HIDE CONTROL PANEL";
+			} else {
+				this.controlPanelElement.style.display = "none";
+				hideControlPanelButton.textContent = "SHOW CONTROL PANEL";
+			}
+		});
 
-    this.renderCurrentSessionName(storageState.getCurrentSessionName());
+		this.renderCurrentSessionName(storageState.getCurrentSessionName());
 
-    this.renderAllControlPanelList();
-  },
+		this.renderAllControlPanelList();
+	},
 };
 
 // UTILITIES //
 
 async function copyToClipboard(data) {
-  const text = data.isIncident
-    ? incidentTypeFormatter(data)
-    : pwrTypeFormatter(data);
-  try {
-    await navigator.clipboard.writeText(text);
-  } catch (err) {
-    console.error("Failed to copy: ", err);
-  }
+	const text = data.isIncident
+		? incidentTypeFormatter(data)
+		: pwrTypeFormatter(data);
+	try {
+		await navigator.clipboard.writeText(text);
+	} catch (err) {
+		console.error("Failed to copy: ", err);
+	}
 }
 
 function exportSession(sessionName) {
-  const records = JSON.parse(localStorage.getItem(sessionName)) || [];
+	const records = JSON.parse(localStorage.getItem(sessionName)) || [];
 
-  let textContent = "";
+	let textContent = "";
 
-  records.forEach((record, index) => {
-    textContent += record.isIncident
-      ? incidentTypeFormatter(record, record.isCaller)
-      : pwrTypeFormatter(record);
-    textContent += `
+	records.forEach((record, index) => {
+		textContent += record.isIncident
+			? incidentTypeFormatter(record, record.isCaller)
+			: pwrTypeFormatter(record);
+		textContent += `
 =============================================================
 `;
-  });
+	});
 
-  const blob = new Blob([textContent], {
-    type: "text/plain",
-  });
+	const blob = new Blob([textContent], {
+		type: "text/plain",
+	});
 
-  const url = URL.createObjectURL(blob);
+	const url = URL.createObjectURL(blob);
 
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${sessionName}.txt`;
+	const a = document.createElement("a");
+	a.href = url;
+	a.download = `${sessionName}.txt`;
 
-  a.click();
+	a.click();
 
-  URL.revokeObjectURL(url);
+	URL.revokeObjectURL(url);
 }
 
 function exportIndividualRecord(data) {
-  const textContent = data.isIncident
-    ? incidentTypeFormatter(data, data.isCaller)
-    : pwrTypeFormatter(data);
+	const textContent = data.isIncident
+		? incidentTypeFormatter(data, data.isCaller)
+		: pwrTypeFormatter(data);
 
-  const blob = new Blob([textContent], {
-    type: "text/plain",
-  });
+	const blob = new Blob([textContent], {
+		type: "text/plain",
+	});
 
-  const url = URL.createObjectURL(blob);
+	const url = URL.createObjectURL(blob);
 
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${data.fullName}.txt`;
+	const a = document.createElement("a");
+	a.href = url;
+	a.download = `${data.fullName}.txt`;
 
-  a.click();
+	a.click();
 
-  URL.revokeObjectURL(url);
+	URL.revokeObjectURL(url);
 }
 
 function initCreateNewSessionForm() {
-  const createSessionForm = document.querySelector("#createSessionForm");
-  createSessionForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const newSessionName = formData.get("sessionName").trim();
-    console.log(newSessionName);
-    if (newSessionName === "") {
-      alert("Session name cannot be empty!");
-      return;
-    }
+	const createSessionForm = document.querySelector("#createSessionForm");
+	createSessionForm.addEventListener("submit", (event) => {
+		event.preventDefault();
+		const formData = new FormData(event.target);
+		const newSessionName = formData.get("sessionName").trim();
+		console.log(newSessionName);
+		if (newSessionName === "") {
+			alert("Session name cannot be empty!");
+			return;
+		}
 
-    if (localStorage.getItem(newSessionName)) {
-      alert("Session name already exists! Please choose a different name.");
-      return;
-    }
+		if (localStorage.getItem(newSessionName)) {
+			alert("Session name already exists! Please choose a different name.");
+			return;
+		}
 
-    localStorage.setItem(newSessionName, JSON.stringify([]));
-    storageState.updateSessionList();
-    controlPanelDisplayState.renderAllControlPanelList();
-  });
+		localStorage.setItem(newSessionName, JSON.stringify([]));
+		storageState.updateSessionList();
+		controlPanelDisplayState.renderAllControlPanelList();
+	});
 }
 
 function incidentTypeFormatter(data) {
-  console.log(data);
-  let onBehalfDetails = "";
-  if (data.isCaller === false) {
-    onBehalfDetails = `
+	console.log(data);
+	let onBehalfDetails = "";
+	if (data.isCaller === false) {
+		onBehalfDetails = `
 USER
 Employee ID: ${data.OBemployeeId}
 Name: ${data.OBfullName}
@@ -887,16 +961,16 @@ Contact Number: ${data.OBcontactNumber}
 Availability Hours: ${data.OBbestTimeToReach} ${data.OBtimezone}
 Location: ${data.OBlocation}
 `;
-  }
+	}
 
-  let resolutionNotes = "";
-  if (data.isResolved) {
-    resolutionNotes = `
+	let resolutionNotes = "";
+	if (data.isResolved) {
+		resolutionNotes = `
 RESOLUTION NOTES:
 ${data.resolutionNotes}`;
-  }
+	}
 
-  const documentation = `
+	const documentation = `
 CALLER
 Employee ID: ${data.employeeId}
 Name: ${data.fullName}
@@ -924,27 +998,27 @@ Issue Resolved? ${data.issueResolved}
 Next Action(s): ${data.nextActions}
 User agreed to set data to Resolved? ${data.userAgreedResolved}`;
 
-  return documentation;
+	return documentation;
 }
 
 function pwrTypeFormatter(data) {
-  let adDetails = "";
-  if (data.isAD === true) {
-    adDetails = `
+	let adDetails = "";
+	if (data.isAD === true) {
+		adDetails = `
 New Hire: ${data.newHire}
 MFA Registered? ${data.mfaRegistered}
 SSPR Offered? ${data.ssprOffered}
 SSPR Outcome: ${data.ssprOutcome}`;
-  }
+	}
 
-  let resolutionNotes = "";
-  if (data.isResolved) {
-    resolutionNotes = `
+	let resolutionNotes = "";
+	if (data.isResolved) {
+		resolutionNotes = `
 RESOLUTION NOTES:
 ${data.resolutionNotes}`;
-  }
+	}
 
-  const documentation = `
+	const documentation = `
 Employee ID: ${data.employeeId}
 Name: ${data.fullName}
 Email Address: ${data.email}
@@ -966,49 +1040,49 @@ Ticket Fulfilled: ${data.issueResolved}
 Next Action(s): ${data.nextActions}
 User agreed to fulfill ticket? ${data.userAgreedResolved}`;
 
-  return documentation;
+	return documentation;
 }
 
 function init() {
-  window.addEventListener("beforeunload", (e) => {
-    e.preventDefault();
-  });
+	window.addEventListener("beforeunload", (e) => {
+		e.preventDefault();
+	});
 
-  const isFreshStart = !storageState.resumeLastSession();
-  console.log(`isFreshStart: ${isFreshStart}`);
-  if (isFreshStart) storageState.init();
+	const isFreshStart = !storageState.resumeLastSession();
+	console.log(`isFreshStart: ${isFreshStart}`);
+	if (isFreshStart) storageState.init();
 
-  fieldUI.init();
-  controlPanelDisplayState.init();
-  initCreateNewSessionForm();
+	fieldUI.init();
+	controlPanelDisplayState.init();
+	initCreateNewSessionForm();
 }
 
 function fillTestData() {
-  const testData = {
-    employeeId: "7012345",
-    fullName: "John Doe",
-    email: "john.doe@nationalgrid.com",
-    contactNumber: "555-123-4567",
-    availability: "9am-4pm",
-    location: "Waltham Data Drive",
+	const testData = {
+		employeeId: "7012345",
+		fullName: "John Doe",
+		email: "john.doe@nationalgrid.com",
+		contactNumber: "555-123-4567",
+		availability: "9am-4pm",
+		location: "Waltham Data Drive",
 
-    OBemployeeId: "7054321",
-    OBfullName: "Jane Smith",
-    OBemail: "jane.smith@nationalgrid.com",
-    OBcontactNumber: "555-987-6543",
-    OBavailability: "9am-4pm",
-    OBlocation: "Syracue Erie Blvd",
+		OBemployeeId: "7054321",
+		OBfullName: "Jane Smith",
+		OBemail: "jane.smith@nationalgrid.com",
+		OBcontactNumber: "555-987-6543",
+		OBavailability: "9am-4pm",
+		OBlocation: "Syracue Erie Blvd",
 
-    existingTicket: "No",
-    machineName: "US-L-A1234",
-    nexthinkChecklist: "N/A",
-    issueDescription: `
+		existingTicket: "No",
+		machineName: "US-L-A1234",
+		nexthinkChecklist: "N/A",
+		issueDescription: `
 - User is trying to access myhub
 - Error message "Invalid Login"
 - User was able to access myhub before
 `,
 
-    troubleshootingSteps: `
+		troubleshootingSteps: `
 - Remote user via LMI.
 - Cleared Cache and Cookies
 - Removed Favorites folder/bookmark
@@ -1020,26 +1094,26 @@ function fillTestData() {
 - Confirmed with user ticket can now be set to resolved
 - End call`,
 
-    kbArticle: "KB0000111",
-  };
+		kbArticle: "KB0000111",
+	};
 
-  Object.entries(testData).forEach(([name, value]) => {
-    const field = document.querySelector(`[name="${name}"]`);
+	Object.entries(testData).forEach(([name, value]) => {
+		const field = document.querySelector(`[name="${name}"]`);
 
-    if (field) {
-      field.value = value;
+		if (field) {
+			field.value = value;
 
-      const switchButton = field.parentElement?.querySelector(".switch-click");
+			const switchButton = field.parentElement?.querySelector(".switch-click");
 
-      if (switchButton) {
-        switchButton.textContent = value;
-      }
-    }
-  });
+			if (switchButton) {
+				switchButton.textContent = value;
+			}
+		}
+	});
 
-  if (typeof fieldState !== "undefined") {
-    fieldState.setFieldModified(true);
-  }
+	if (typeof fieldState !== "undefined") {
+		fieldState.setFieldModified(true);
+	}
 }
 
 document.querySelector("#fillTestData").addEventListener("click", fillTestData);
