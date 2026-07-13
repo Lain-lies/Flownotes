@@ -2,6 +2,7 @@ const storageState = {
 	record: null,
 	currentSessionName: "",
 	sessionList: [],
+	indexBeingEdited: 0,
 
 	setRecord: function (record) {
 		this.record = record;
@@ -64,7 +65,6 @@ const storageState = {
 		this.setRecord(sessionData);
 		this.setCurrentSessionName(sessionName);
 
-		// alert(`Session Loaded: ${this.getCurrentSessionName()}`);
 		console.log(`
 Current Session: ${this.getCurrentSessionName()}
 Current Record: ${this.getRecord()}
@@ -94,6 +94,15 @@ Session List: ${this.getSessionList()}`);
 		localStorage.setItem("lastSessionName", this.getCurrentSessionName());
 	},
 
+	getDataInRecord(index) {
+		const data = this.getRecord()[index];
+		return data;
+	},
+
+	updateDataInRecord(index, newData) {
+		this.getRecord()[index] = newData;
+	},
+
 	// INIT //
 
 	init: function () {
@@ -115,8 +124,7 @@ const fieldState = {
 	IsIncident: true,
 	IsAD: false,
 	IsResolved: false,
-	userInformation: {},
-
+	IsEditMode: false,
 	// SETTERS //
 
 	debug() {
@@ -213,7 +221,6 @@ isAD : ${this.IsAD}
 	onNewNoteHelper: function () {
 		storageState.syncWithLocalStorage(this.getFieldData());
 		this.resetState();
-		controlPanelDisplayState.renderAllControlPanelList();
 	},
 
 	resetState: function () {
@@ -372,6 +379,25 @@ const fieldUI = {
 
 			return true;
 		},
+
+		injectValuesToField(data) {
+			Object.entries(data).forEach(([name, value]) => {
+				const field = document.querySelector(`[name="${name}"]`);
+				if (field) {
+					field.value = value;
+
+					if (
+						field.nextElementSibling &&
+						field.nextElementSibling.classList.contains("switchClickButton") &&
+						field.nextElementSibling.textContent !== value
+					) {
+						field.nextElementSibling.click();
+					}
+				}
+			});
+		},
+
+		triggerEditMode() {},
 	},
 
 	resetSwitch: function () {
@@ -648,6 +674,11 @@ const fieldUI = {
 		});
 	},
 
+	initSaveChangesButton: function () {
+		const saveChangesButton = document.querySelector("#saveChangesButton");
+
+    saveChangesButton.addEventListener("click", )
+	},
 	initField: function () {
 		const documentationField = document.querySelector("#documentationField");
 		documentationField.addEventListener("input", () => {
@@ -688,7 +719,6 @@ const fieldUI = {
 		const newNoteUserInfoRetainedButton = document.querySelector(
 			"#newNoteUserInfoRetainedButton",
 		);
-
 		newNoteUserInfoRetainedButton.addEventListener("click", () => {
 			if (!this.util.isAllowedToNewNote()) return;
 			const {
@@ -760,14 +790,12 @@ const fieldUI = {
 };
 
 const controlPanelDisplayState = {
-	controlPanelElement: document.querySelector(".control-panel"),
+	controlPanelElement: document.querySelector(".controlPanel"),
 	controlPanelCurrentSessionNameElement: document.querySelector(
 		"#currentSessionName",
 	),
-	controlPanelSessionListElement: document.querySelector("#session-list"),
-	controlPanelExportSessionListElement:
-		document.querySelector("#exportable-list"),
-	controlPanelSessionHistoryElement: document.querySelector("#session-history"),
+	controlPanelSessionListElement: document.querySelector("#sessionList"),
+	controlPanelSessionHistoryElement: document.querySelector("#sessionHistory"),
 
 	renderCurrentSessionName: function (value) {
 		this.controlPanelCurrentSessionNameElement.textContent = value;
@@ -786,31 +814,14 @@ const controlPanelDisplayState = {
 					storageState.loadSession(session);
 					storageState.saveLastSession();
 					this.renderCurrentSessionName(storageState.getCurrentSessionName());
-					this.renderAllControlPanelList();
-
+					this.renderSessionHistory(storageState.getCurrentSessionName());
+					this.renderSessionList();
 					return;
 				}
-				alert(
-					"Please SAVE current work before switching or CANCEL if you want to abandon work",
-				);
+				alert("Please SAVE current notes before switching or CANCEL");
 			});
 			li.appendChild(button);
 			this.controlPanelSessionListElement.appendChild(li);
-		});
-	},
-
-	renderExportSessionList: function () {
-		this.controlPanelExportSessionListElement.replaceChildren();
-		const sessionList = storageState.getSessionList();
-		sessionList.forEach((session) => {
-			const li = document.createElement("li");
-			const button = document.createElement("button");
-			button.textContent = session;
-			button.addEventListener("click", () => {
-				this.renderSessionHistory(session);
-			});
-			li.appendChild(button);
-			this.controlPanelExportSessionListElement.appendChild(li);
 		});
 	},
 
@@ -825,21 +836,27 @@ const controlPanelDisplayState = {
 
 		const sessionHistory = JSON.parse(localStorage.getItem(sessionName));
 
-		sessionHistory.forEach((record) => {
-			const button = document.createElement("button");
-			const doctype = record.isIncident ? "Incident" : "Password Reset";
-			button.textContent = `${record.fullName} | ${doctype}`;
-			button.addEventListener("click", () => {
+		sessionHistory.forEach((record, index) => {
+			const wrapper = document.createElement("div");
+			const previewButton = document.createElement("button");
+			const editButton = document.createElement("button");
+			const doctype = record.isIncident ? "Standard" : "Password Reset";
+
+			previewButton.textContent = `${record.fullName} | ${doctype}`;
+			previewButton.addEventListener("click", () => {
 				exportIndividualRecord(record);
 			});
-			this.controlPanelSessionHistoryElement.appendChild(button);
-		});
-	},
 
-	renderAllControlPanelList: function () {
-		console.log("render all called");
-		this.renderSessionList();
-		this.renderExportSessionList();
+			editButton.textContent = "EDIT";
+			editButton.addEventListener("click", () => {
+				fieldUI.util.injectValuesToField(storageState.getDataInRecord(index));
+			});
+
+			wrapper.appendChild(previewButton);
+			wrapper.appendChild(editButton);
+
+			this.controlPanelSessionHistoryElement.appendChild(wrapper);
+		});
 	},
 
 	init: function () {
@@ -849,7 +866,7 @@ const controlPanelDisplayState = {
 
 		hideControlPanelButton.addEventListener("click", () => {
 			if (this.controlPanelElement.style.display === "none") {
-				this.controlPanelElement.style.display = "block";
+				this.controlPanelElement.style.display = "flex";
 				hideControlPanelButton.textContent = "HIDE CONTROL PANEL";
 			} else {
 				this.controlPanelElement.style.display = "none";
@@ -858,8 +875,7 @@ const controlPanelDisplayState = {
 		});
 
 		this.renderCurrentSessionName(storageState.getCurrentSessionName());
-
-		this.renderAllControlPanelList();
+		this.renderSessionList();
 	},
 };
 

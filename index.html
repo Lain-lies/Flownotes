@@ -16,38 +16,39 @@
 					alt="Flownotes Logo" />
 			</div>
 		</header>
-		<p>ver 1.3.0</p>
+		<p>ver 2.0.0</p>
 
-		<div class="control-panel">
-			<form id="createSessionForm">
-				<label for="sessionName">
-					Create New Session :
-					<input
-						type="text"
-						id="sessionName"
-						name="sessionName"
-						placeholder="Enter session name"
-						required />
-				</label>
+		<div class="controlPanel">
+			<div class="sessionDivider">
+				<form id="createSessionForm">
+					<label for="sessionName">
+						Create New Session :
+						<input
+							type="text"
+							id="sessionName"
+							name="sessionName"
+							placeholder="Enter session name"
+							required />
+					</label>
 
-				<button type="submit">Create Session</button>
-			</form>
-			<h4>Current Session:</h4>
-			<p id="currentSessionName"></p>
+					<button type="submit">Create Session</button>
+				</form>
 
-			<h4>Session List:</h4>
-			<ul id="session-list"></ul>
+				<div>
+					<span>Current Session:</span> <span id="currentSessionName"></span>
+				</div>
 
-			<h4>Session History</h4>
-			<ul id="exportable-list"></ul>
+				<h4>Session List</h4>
+				<ul id="sessionList"></ul>
+			</div>
 
-			<hr />
-			<hr />
-
-			<h3>History</h3>
-			<div id="session-history"></div>
+			<div class="sessionDivider">
+				<h3>History</h3>
+				<div id="sessionHistory"></div>
+			</div>
 		</div>
 
+		<div class="recordPreview"></div>
 		<button id="hide-control-panel">Hide Control Panel</button>
 
 		<hr />
@@ -208,9 +209,9 @@
 				</label>
 			</fieldset>
 
-			<!-- User Extra Details -->
+			<!-- Interaction Details -->
 			<fieldset>
-				<legend>User Extra Details</legend>
+				<legend>Interaction Details</legend>
 				<div class="incTemplateWrapper">
 					<label>
 						Possible Major Incident?
@@ -376,19 +377,23 @@
 
 				<label for="nextActions"> Next Action(s): </label>
 				<select name="nextActions" id="nextActions">
-					<option value="N/A" default>N/A</option>
+					<option value="None" default>None</option>
 					<option value="Wait for Line-Manager Approval">
 						Wait for Line-Manager Approval
 					</option>
 					<option value="Route the ticket to the next resolver team">
-						Route the ticket to the next resolver team
+						Route the Ticket to the next Resolver Team
 					</option>
-					<option value="Set ticket to pending">Set ticket to pending</option>
-					<option value="Set ticket to resolved">Set ticket to resolved</option>
-					<option value="Set ticket to fulfilled">
-						Set ticket to fulfilled
+					<option value="Set Ticket to 'On-Hold' Status">
+						Set Ticket to 'On-Hold' Status
 					</option>
-					<option value="Cancel ticket">Cancel ticket</option>
+					<option value="Set Ticket to 'Resolved' Status">
+						Set Ticket to 'Resolved' Status
+					</option>
+					<option value="Set ticket to 'Fulfilled' Status">
+						Set ticket to 'Fulfilled' Status
+					</option>
+					<option value="Cancel Ticket">Cancel ticket</option>
 				</select>
 
 				<label for="userAgreedResolved">
@@ -411,6 +416,7 @@
 				<button type="button" id="newNoteUserInfoRetainedButton">
 					New Note(Multiple Issue)
 				</button>
+				<button type="button" id="saveChangesButton">Save Changes</button>
 			</fieldset>
 		</form>
 
