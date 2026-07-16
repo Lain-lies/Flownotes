@@ -116,676 +116,285 @@ Session List: ${this.getSessionList()}`);
 	},
 };
 
-const fieldState = {
-	fieldModified: false,
-	fieldSaved: false,
-	fieldData: {},
-	IsCaller: true,
-	IsIncident: true,
-	IsAD: false,
-	IsResolved: false,
-	IsEditMode: false,
-	// SETTERS //
+class managedStateObject {
+	constructor(state, subscribers = []) {
+		this.state = state;
+		this.subscribers = subscribers;
+	}
+	setState(value) {
+		this.state = value;
+		console.log(this.state);
+	}
 
-	debug() {
-		console.log(`
-<< FIELD STATE >> 
+	getState(value) {
+		return this.state;
+	}
 
-data : ${this.fieldData}
-modified: ${this.fieldModified}
-saved : ${this.fieldSaved}
-isCaller : ${this.IsCaller}
-isIncident : ${this.IsIncident}
-isResolved : ${this.IsResolved}
-isAD : ${this.IsAD}
+	subscribe(subscriber) {
+		this.subscribers = [...this.subscribers, subscriber];
+	}
+}
 
-`);
+const fieldStateManager = {
+	managedState: {
+		isModified: new managedStateObject(false),
+		isSaved: new managedStateObject(false),
+		savedData: new managedStateObject({}),
+		isEditMode: new managedStateObject(false),
+
+		callerType: new managedStateObject("Affected User"),
+		templateType: new managedStateObject("Standard"),
+
+		possibleMajorIncident: new managedStateObject("No"),
+		contactType: new managedStateObject("Phone"),
+
+		resetType: new managedStateObject("Non-AD"),
+		newHire: new managedStateObject("No"),
+		mfaRegistered: new managedStateObject("Yes"),
+		ssprOffered: new managedStateObject("No"),
+
+		issueResolved: new managedStateObject("No"),
+		userAgreedResolved: new managedStateObject("No"),
 	},
 
-	setFieldModified: function (value) {
-		this.fieldModified = value;
+	setState(name, value) {
+		this.managedState[name].setState(value);
+		this.updateSubscribers(name);
 	},
 
-	setFieldSaved: function (value) {
-		this.fieldSaved = value;
+	getState(name) {
+		return this.managedState[name].getState();
 	},
 
-	setFieldData: function (value) {
-		this.fieldData = value;
+	subscribe(name, subscriber) {
+		this.managedState[name].subscribe(subscriber);
 	},
 
-	setIsCaller: function (value) {
-		this.IsCaller = value;
-	},
-
-	setIsIncident: function (value) {
-		this.IsIncident = value;
-	},
-
-	setIsAD: function (value) {
-		this.IsAD = value;
-	},
-
-	setIsResolved: function (value) {
-		this.IsResolved = value;
-	},
-
-	// GETTERS //
-
-	getFieldModified: function () {
-		return this.fieldModified;
-	},
-
-	getFieldSaved: function () {
-		return this.fieldSaved;
-	},
-
-	getFieldData: function () {
-		return this.fieldData;
-	},
-
-	getIsCaller: function () {
-		return this.IsCaller;
-	},
-
-	getIsIncident: function () {
-		return this.IsIncident;
-	},
-
-	getIsAD: function () {
-		return this.IsAD;
-	},
-
-	getIsResolved: function () {
-		return this.IsResolved;
-	},
-	// HELPERS //
-
-	onSaveHelper: function (data) {
-		if (this.getFieldModified() === false) {
-			alert("No changes detected! Please modify the form before saving.");
-			return;
-		}
-
-		if (this.getFieldSaved() === false) {
-			this.setFieldSaved(true);
-		}
-
-		// console.log(data);
-		this.setFieldData(data);
-		copyToClipboard(data);
-		this.debug();
-		alert("Record Saved and Copied to Clipboard");
-	},
-
-	onNewNoteHelper: function () {
-		storageState.syncWithLocalStorage(this.getFieldData());
-		this.resetState();
-	},
-
-	resetState: function () {
-		this.setFieldModified(false);
-		this.setFieldSaved(false);
-		this.setFieldData({});
-		this.setIsCaller(true);
-		this.setIsIncident(true);
-		this.setIsAD(false);
-	},
-
-	isAllowedtoSwitchSession: function () {
-		return this.getFieldSaved() === false && this.getFieldModified() === false
-			? true
-			: false;
-	},
-
-	OBFieldRemover(data) {
-		if (this.getIsCaller()) {
-			console.log(1);
-			const {
-				OBemployeeId,
-				OBemployeeLocation,
-				OBfullName,
-				OBemail,
-				OBcontactNumber,
-				OBavailability,
-				OBtimezone,
-				...OBremoved
-			} = data;
-			OBremoved.isCaller = true;
-			return OBremoved;
-		}
-
-		return { isCaller: false, ...data };
-	},
-
-	ResoNoteRemover(data) {
-		if (!this.getIsResolved()) {
-			const { resolutionNotes, ...purified } = data;
-			purified.isResolved = false;
-			return purified;
-		}
-
-		return { isResolved: true, ...data };
-	},
-
-	PWRFieldRemover(data) {
-		const { newHire, mfaRegistered, ssprOffered, ssprOutcome, ...purified } =
-			data;
-
-		purified.isIncident = true;
-		return purified;
-	},
-
-	INCFieldRemover(data) {
-		const {
-			possibleMajorIncident,
-			contactType,
-			machineName,
-			nexthinkChecklist,
-			...purified
-		} = data;
-
-		purified.isIncident = false;
-		purified.isAD = true;
-
-		if (this.getIsAD() === false) {
-			const { newHire, mfaRegistered, ssprOffered, ssprOutcome, ...purified2 } =
-				purified;
-
-			purified2.isAD = false;
-			return purified2;
-		}
-
-		return purified;
-	},
-
-	fieldDataFilter: function (data) {
-		return this.getIsIncident()
-			? this.PWRFieldRemover(this.ResoNoteRemover(this.OBFieldRemover(data)))
-			: this.INCFieldRemover(this.ResoNoteRemover(this.OBFieldRemover(data)));
+	updateSubscribers(name) {
+		const state = this.managedState[name];
+		state.subscribers.forEach((subscriber) => subscriber(state.getState()));
 	},
 };
 
+const setState = fieldStateManager.setState.bind(fieldStateManager);
+const getState = fieldStateManager.getState.bind(fieldStateManager);
+const subscribe = fieldStateManager.subscribe.bind(fieldStateManager);
+
 const fieldUI = {
-	util: {
-		onBehalfOfWrapper: document.querySelector("#onBehalfOfWrapper"),
-		incTemplateWrapper: document.querySelector(".incTemplateWrapper"),
-		pwrTemplateWrapper: document.querySelector(".pwrTemplateWrapper"),
-		ssprTemplateWrapper: document.querySelector(".ssprTemplateWrapper"),
-		callTypeButton: document.querySelector("#callTypeButton"),
-		templateTypeButton: document.querySelector("#templateTypeButton"),
-		templateDependentTexts: document.querySelectorAll(".templateDependentText"),
-		resolutionNotesWrapper: document.querySelector("[name=resolutionNotes]")
-			.parentElement,
+	callerTypeSubscribe() {
+		const switchButton = document.querySelector("[name=callerType] + button");
 
-		onBehalfOfWrapperSwitchVisibility: function () {
-			this.onBehalfOfWrapper.classList.toggle("hidden");
-		},
+		subscribe("callerType", (value) => (switchButton.textContent = value));
 
-		incTemplateWrapperSwitchVisibility: function () {
-			this.incTemplateWrapper.classList.toggle("hidden");
-		},
-
-		pwrTemplateWrapperSwitchVisibility: function () {
-			this.pwrTemplateWrapper.classList.toggle("hidden");
-		},
-
-		ssprTemplateWrapperSwitchVisibility: function () {
-			this.ssprTemplateWrapper.classList.toggle("hidden");
-		},
-
-		resolutionNotesWrapperSwitchVisibility: function () {
-			if (!this.resolutionNotesWrapper.classList.contains("hidden")) {
-				this.resolutionNotesWrapper.classList.toggle("hidden");
-			}
-		},
-
-		backToTop: function () {
-			window.location.href = "#documentationField";
-		},
-
-		switchTemplateDependentTexts: function (option) {
-			const issueResolvedTextOptions = [
-				"Issue Resolved?:",
-				"Ticket Fulfilled?:",
-			];
-
-			const userAgreedResolvedTextOptions = [
-				"User agreed to set ticket to 'Resolved'?:",
-				"User agreed to set ticket to 'Fulfilled'?:",
-			];
-
-			this.templateDependentTexts[0].textContent =
-				issueResolvedTextOptions[option];
-			this.templateDependentTexts[1].textContent =
-				userAgreedResolvedTextOptions[option];
-		},
-
-		isAllowedToNewNote() {
-			if (
-				fieldState.getFieldSaved() === false &&
-				fieldState.getFieldModified() === false
-			) {
-				alert("No changes detected");
-				return false;
-			}
-			if (
-				fieldState.getFieldSaved() === false &&
-				fieldState.getFieldModified() === true
-			) {
-				alert("Please save current note");
-				return false;
-			}
-
-			return true;
-		},
-
-		injectValuesToField(data) {
-			Object.entries(data).forEach(([name, value]) => {
-				const field = document.querySelector(`[name="${name}"]`);
-				if (field) {
-					field.value = value;
-
-					if (
-						field.nextElementSibling &&
-						field.nextElementSibling.classList.contains("switchClickButton") &&
-						field.nextElementSibling.textContent !== value
-					) {
-						field.nextElementSibling.click();
-					}
-				}
-			});
-		},
-
-		triggerEditMode() {},
-	},
-
-	resetSwitch: function () {
-		const switchClickButtons = document.querySelectorAll(".switchClickButton");
-
-		switchClickButtons.forEach((button) => {
-			button.remove();
+		subscribe("callerType", (value) => {
+			document.querySelector("[name=callerType]").value = value;
 		});
 
-		this.initSwitch();
+		subscribe("callerType", (value) => {
+			document.querySelector("#onBehalfOfWrapper").classList.toggle("hidden");
+		});
+
+		switchButton.addEventListener("click", () => {
+			getState("callerType") === "Affected User"
+				? setState("callerType", "On Behalf")
+				: setState("callerType", "Affected User");
+		});
 	},
 
-	resetCallType: function () {
-		if (fieldState.getIsCaller() === false) {
-			this.util.callTypeButton.click();
-		}
-	},
+	templateTypeSubscribe() {
+		const switchButton = document.querySelector("[name=templateType] + button");
 
-	resetTemplateType: function () {
-		fieldState.debug();
-		if (fieldState.getIsIncident() === false) {
-			this.util.templateTypeButton.click();
-			console.log(1);
-		}
-	},
+		subscribe("templateType", (value) => (switchButton.textContent = value));
 
-	reset: function () {
-		this.resetSwitch();
-		this.resetCallType();
-		this.resetTemplateType();
-		this.util.resolutionNotesWrapperSwitchVisibility();
-		this.util.backToTop();
-	},
+		subscribe("templateType", (value) => {
+			document.querySelector("[name=templateType]").value = value;
+		});
 
-	setupSwitch(element, options = ["No", "Yes"], handler = null) {
-		let current = 0;
+		subscribe("templateType", (value) => {
+			document
+				.querySelector(".standardTemplateWrapper")
+				.classList.toggle("hidden");
 
-		element.value = options[current];
-		element.style.display = "none";
+			document.querySelector(".pwrTemplateWrapper").classList.toggle("hidden");
+		});
 
-		const parent = element.parentElement;
-		const button = document.createElement("button");
+		subscribe("templateType", (value) => {
+			const textOne = document.querySelector("#templateDependentText-1");
+			const textTwo = document.querySelector("#templateDependentText-2");
 
-		button.textContent = options[current];
-		button.type = "button";
-		button.classList.add("switchClickButton");
-
-		button.addEventListener("click", () => {
-			current = 1 - current;
-			button.textContent = options[current];
-			element.value = options[current];
-			if (handler !== null) {
-				handler();
+			if (value === "Standard") {
+				textOne.textContent = "Issue Resolved?:";
+				textTwo.textContent = "User agreed to set ticket to 'Resolved'?:";
+			} else {
+				textOne.textContent = "Ticket Fulfilled?:";
+				textTwo.textContent = "User agreed to set ticket to 'Fulfilled'?:";
 			}
 		});
 
-		parent.appendChild(button);
+		switchButton.addEventListener("click", () => {
+			getState("templateType") === "Standard"
+				? setState("templateType", "Password Reset")
+				: setState("templateType", "Standard");
+		});
 	},
 
-	initSwitch: function () {
-		// INC
-		this.setupSwitch(document.querySelector("[name=possibleMajorIncident]"));
-		this.setupSwitch(document.querySelector("[name=contactType]"), [
-			"Phone",
-			"Chat",
-		]);
+	possibleMajorIncidentSubscribe() {
+		const switchButton = document.querySelector(
+			"[name=possibleMajorIncident] + button",
+		);
+		subscribe(
+			"possibleMajorIncident",
+			(value) => (switchButton.textContent = value),
+		);
+		subscribe("possibleMajorIncident", (value) => {
+			document.querySelector("[name=possibleMajorIncident]").value = value;
+		});
+		switchButton.addEventListener("click", () => {
+			getState("possibleMajorIncident") === "No"
+				? setState("possibleMajorIncident", "Yes")
+				: setState("possibleMajorIncident", "No");
+		});
+	},
 
-		// PWR
-		this.setupSwitch(document.querySelector("[name=newHire]"));
-		this.setupSwitch(document.querySelector("[name=mfaRegistered]"));
+	contactTypeSubscribe() {
+		const switchButton = document.querySelector("[name=contactType] + button");
+		subscribe("contactType", (value) => (switchButton.textContent = value));
+		subscribe("contactType", (value) => {
+			document.querySelector("[name=contactType]").value = value;
+		});
+		switchButton.addEventListener("click", () => {
+			getState("contactType") === "Phone"
+				? setState("contactType", "Chat")
+				: setState("contactType", "Phone");
+		});
+	},
 
-		this.setupSwitch(
-			document.querySelector("[name=issueResolved]"),
-			["No", "Yes"],
-			() => {
-				const resolutionNotesWrapper = document.querySelector(
-					"[name=resolutionNotes]",
-				).parentElement;
+	resetTypeSubscribe() {
+		const switchButton = document.querySelector("[name=resetType] + button");
 
-				console.log(resolutionNotesWrapper);
+		subscribe("resetType", (value) => (switchButton.textContent = value));
 
-				fieldState.setIsResolved(!fieldState.getIsResolved());
-				resolutionNotesWrapper.classList.toggle("hidden");
-			},
+		subscribe("resetType", (value) => {
+			document.querySelector("[name=resetType]").value = value;
+		});
+
+		subscribe("resetType", (value) => {
+			document.querySelector("#ssprDetailsWrapper").classList.toggle("hidden");
+		});
+
+		switchButton.addEventListener("click", () => {
+			getState("resetType") === "Non-AD"
+				? setState("resetType", "Active Directory")
+				: setState("resetType", "Non-AD");
+		});
+	},
+
+	newHireSubscribe() {
+		const switchButton = document.querySelector("[name=newHire] + button");
+		subscribe("newHire", (value) => (switchButton.textContent = value));
+		subscribe("newHire", (value) => {
+			document.querySelector("[name=newHire]").value = value;
+		});
+		switchButton.addEventListener("click", () => {
+			getState("newHire") === "No"
+				? setState("newHire", "Yes")
+				: setState("newHire", "No");
+		});
+	},
+
+	mfaSubscribe() {
+		const switchButton = document.querySelector(
+			"[name=mfaRegistered] + button",
+		);
+		subscribe("mfaRegistered", (value) => (switchButton.textContent = value));
+		subscribe("mfaRegistered", (value) => {
+			document.querySelector("[name=mfaRegistered]").value = value;
+		});
+		switchButton.addEventListener("click", () => {
+			getState("mfaRegistered") === "Yes"
+				? setState("mfaRegistered", "No")
+				: setState("mfaRegistered", "Yes");
+		});
+	},
+
+	ssprSubscribe() {
+		const switchButton = document.querySelector("[name=ssprOffered] + button");
+
+		subscribe("ssprOffered", (value) => (switchButton.textContent = value));
+
+		subscribe("ssprOffered", (value) => {
+			document.querySelector("[name=ssprOffered]").value = value;
+		});
+
+		subscribe("ssprOffered", (value) => {
+			document.querySelector("#noOptGroup").classList.toggle("hidden");
+			document.querySelector("#yesOptGroup").classList.toggle("hidden");
+		});
+
+		switchButton.addEventListener("click", () => {
+			getState("ssprOffered") === "No"
+				? setState("ssprOffered", "Yes")
+				: setState("ssprOffered", "No");
+		});
+	},
+
+	issueResolvedSubscribe() {
+		const switchButton = document.querySelector(
+			"[name=issueResolved] + button",
 		);
 
-		this.setupSwitch(document.querySelector("[name=userAgreedResolved]"));
+		subscribe("issueResolved", (value) => (switchButton.textContent = value));
 
-		this.setupSwitch(
-			document.querySelector("[name=ssprOffered]"),
-			["No", "Yes"],
-			() => {
-				const noOptGroup = document.querySelector("#noOptGroup");
-				const yesOptGroup = document.querySelector("#yesOptGroup");
+		subscribe("issueResolved", (value) => {
+			document.querySelector("[name=issueResolved]").value = value;
+		});
 
-				noOptGroup.hidden = !noOptGroup.hidden;
-				yesOptGroup.hidden = !yesOptGroup.hidden;
-			},
+		subscribe("issueResolved", (value) => {
+			document
+				.querySelector("#resolutionNotesWrapper")
+				.classList.toggle("hidden");
+		});
+
+		switchButton.addEventListener("click", () => {
+			getState("issueResolved") === "No"
+				? setState("issueResolved", "Yes")
+				: setState("issueResolved", "No");
+		});
+	},
+
+	userAgreedSubscribe() {
+		const switchButton = document.querySelector(
+			"[name=userAgreedResolved] + button",
 		);
-	},
-
-	initCallTypeSwitch: function () {
-		const callTypeButton = document.querySelector("#callTypeButton");
-		const options = ["Caller", "On Behalf Of"];
-		let current = 0;
-
-		callTypeButton.addEventListener("click", (e) => {
-			fieldState.setIsCaller(!fieldState.getIsCaller());
-			this.util.onBehalfOfWrapperSwitchVisibility();
-			current = 1 - current;
-			callTypeButton.textContent = options[current];
-		});
-	},
-
-	initTemplateTypeSwitch: function () {
-		const templateTypeButton = document.querySelector("#templateTypeButton");
-		const options = ["Standard", "Password Reset"];
-		let current = 0;
-
-		templateTypeButton.addEventListener("click", (e) => {
-			e.preventDefault();
-			fieldState.setIsIncident(!fieldState.getIsIncident());
-			this.util.incTemplateWrapperSwitchVisibility();
-			this.util.pwrTemplateWrapperSwitchVisibility();
-			current = 1 - current;
-			templateTypeButton.textContent = options[current];
-			this.util.switchTemplateDependentTexts(current);
-			fieldState.debug();
-		});
-	},
-
-	initSSPRTemplateSwitch: function () {
-		const ssprSwitchButton = document.querySelector("#ssprSwitchButton");
-		let options = ["No", "Yes"];
-		let current = 0;
-
-		ssprSwitchButton.addEventListener("click", (e) => {
-			e.preventDefault();
-			fieldState.setIsAD(!fieldState.getIsAD());
-			this.util.ssprTemplateWrapperSwitchVisibility();
-			current = 1 - current;
-			ssprSwitchButton.textContent = options[current];
-		});
-	},
-
-	initAutoFillMinimumDataSet: function () {
-		const element = document.querySelector("[name=troubleshootingSteps]");
-		const parent = element.parentElement;
-
-		const buttonOne = document.createElement("button");
-		buttonOne.textContent = "PW Reset VERIFIED";
-		const buttonTwo = document.createElement("button");
-		buttonTwo.textContent = "PW Reset NOT VERIFIED";
-
-		const buttonThree = document.createElement("button");
-		buttonThree.textContent = "Incident Routed";
-		const buttonFour = document.createElement("button");
-		buttonFour.textContent = "Incident Resolved";
-
-		buttonOne.type = "button";
-		buttonTwo.type = "button";
-		buttonThree.type = "button";
-		buttonFour.type = "button";
-
-		buttonOne.addEventListener("click", () => {
-			const resetType = element.value;
-			element.value = `
-- Checked Users account via ${resetType}
-- User account is active
-- Verified the user via verification tool
-- User is verified
-- Successfully reset user's password 
-- Provided the password to the user
-- User tried the password on his/her end
-- User successfully signed in
-- Provided ticket number to user
-- User acknowledged
-- End call`;
-		});
-
-		buttonTwo.addEventListener("click", () => {
-			const resetType = element.value;
-			element.value += `
-- Checked Users account via  ${resetType}
-- Verified the user via verification tool
-- User is not verified
-- Filed a password reset request for user 
-- Advised user that the request is subject to line-manager's approval
-- Provided Ticket Number
-- User Acknowledged
-- End call`;
-		});
-
-		buttonThree.addEventListener("click", () => {
-			element.value += `
-- Advised user ticket will be routed to [NAME] team
-- Provided ticket number to the user
-- User Acknowledged
-- End call`;
-		});
-
-		buttonFour.addEventListener("click", () => {
-			element.value += `
-- Issue Resolved
-- Provided ticket number to the user
-- Confirmed with user ticket can now be set to resolved
-- End call`;
-		});
-		parent.appendChild(buttonOne);
-		parent.appendChild(buttonTwo);
-		parent.appendChild(buttonThree);
-		parent.appendChild(buttonFour);
-	},
-
-	initTextAreaAutoFormat: function () {
-		const resolutionNotesElement = document.querySelector(
-			"[name=troubleshootingSteps]",
+		subscribe(
+			"userAgreedResolved",
+			(value) => (switchButton.textContent = value),
 		);
-
-		resolutionNotesElement.addEventListener("keydown", (e) => {
-			if (e.key === "Enter") {
-				e.preventDefault();
-				e.target.value += `
-- `;
-			}
+		subscribe("userAgreedResolved", (value) => {
+			document.querySelector("[name=userAgreedResolved]").value = value;
 		});
-
-		const issueDescriptionElement = document.querySelector(
-			"[name=issueDescription]",
-		);
-
-		issueDescriptionElement.addEventListener("keydown", (e) => {
-			if (e.key === "Enter") {
-				e.preventDefault();
-				e.target.value += `
-- `;
-			}
+		switchButton.addEventListener("click", () => {
+			getState("userAgreedResolved") === "No"
+				? setState("userAgreedResolved", "Yes")
+				: setState("userAgreedResolved", "No");
 		});
 	},
-
-	initKBShortcut: function () {
-		const kbaElement = document.querySelector("[name=kbArticle]");
-
-		const shortcuts = {
-			ad: "KB0034635",
-			css: "KB0036245",
-			ds: "KB0036249",
-			ldap: "KB0034367",
-			cwq: "KB0034367",
-			arcos: "KB0011194",
-			max: "KB0050099",
-			power: "KB0010724",
-			sap: "KB0028648",
-			win11: "KB0042494",
-			laptop: "KB0041117",
-			mobile: "KB0041555",
-			avd: "KB0042642",
-			o365: "KB0034763",
-			outlook: "KB0035272",
-			intune: "KB0035752",
-			mfa: "KB0040875",
-			myhub: "KB0040883",
-			teams: "KB0041367",
-			adsup: "KB0035746",
-		};
-
-		kbaElement.addEventListener("keydown", (e) => {
-			if (e.key === "Enter") {
-				e.preventDefault();
-				const value = shortcuts[e.target.value];
-				if (value === null || value === undefined) return;
-				e.target.value = value;
-			}
-		});
-	},
-
-	initSaveChangesButton: function () {
-		const saveChangesButton = document.querySelector("#saveChangesButton");
-
-    saveChangesButton.addEventListener("click", )
-	},
-	initField: function () {
-		const documentationField = document.querySelector("#documentationField");
-		documentationField.addEventListener("input", () => {
-			fieldState.setFieldModified(true);
-		});
-
-		documentationField.addEventListener("submit", (event) => {
-			event.preventDefault();
-			const formData = new FormData(event.target);
-			const data = Object.fromEntries(formData.entries());
-			const cleanedData = fieldState.fieldDataFilter(data);
-			fieldState.onSaveHelper(cleanedData);
-		});
-
-		const resetButton = document.querySelector("#cancelButton");
-		resetButton.addEventListener("click", () => {
-			if (
-				confirm(
-					"Are you sure you want to cancel? All unsaved changes will be lost.",
-				)
-			) {
-				documentationField.reset();
-				this.reset();
-				fieldState.resetState();
-			}
-		});
-
-		const newNoteButton = document.querySelector("#newNoteButton");
-		newNoteButton.addEventListener("click", () => {
-			if (this.util.isAllowedToNewNote()) {
-				documentationField.reset();
-				this.reset();
-				fieldState.onNewNoteHelper();
-			}
-			return;
-		});
-
-		const newNoteUserInfoRetainedButton = document.querySelector(
-			"#newNoteUserInfoRetainedButton",
-		);
-		newNoteUserInfoRetainedButton.addEventListener("click", () => {
-			if (!this.util.isAllowedToNewNote()) return;
-			const {
-				employeeId,
-				fullName,
-				email,
-				contactNumber,
-				availability,
-				timezone,
-				location,
-				OBemployeeId,
-				OBfullName,
-				OBemail,
-				OBcontactNumber,
-				OBavailability,
-				OBtimezone,
-				OBlocation,
-			} = fieldState.getFieldData();
-
-			const userEntitlementData = {
-				employeeId,
-				fullName,
-				email,
-				contactNumber,
-				availability,
-				timezone,
-				location,
-				OBemployeeId,
-				OBfullName,
-				OBemail,
-				OBcontactNumber,
-				OBavailability,
-				OBtimezone,
-				OBlocation,
-			};
-
-			documentationField.reset();
-			this.reset();
-			fieldState.onNewNoteHelper();
-			console.log(userEntitlementData);
-
-			Object.entries(userEntitlementData).forEach(([name, value]) => {
-				const field = document.querySelector(`[name="${name}"]`);
-
-				if (field) {
-					field.value = value;
-
-					const switchButton =
-						field.parentElement?.querySelector(".switch-click");
-
-					if (switchButton) {
-						switchButton.textContent = value;
-					}
-				}
-			});
-		});
+	// INC
+	stateSubscribe() {
+		this.possibleMajorIncidentSubscribe();
+		this.contactTypeSubscribe();
+		this.templateTypeSubscribe();
+		this.callerTypeSubscribe();
+		this.resetTypeSubscribe();
+		this.newHireSubscribe();
+		this.mfaSubscribe();
+		this.ssprSubscribe();
+		this.issueResolvedSubscribe();
+		this.userAgreedSubscribe();
 	},
 
 	init() {
-		this.initSwitch();
-		this.initCallTypeSwitch();
-		this.initTemplateTypeSwitch();
-		this.initSSPRTemplateSwitch();
-		this.initAutoFillMinimumDataSet();
-		this.initTextAreaAutoFormat();
-		this.initKBShortcut();
-		this.initField();
+		this.stateSubscribe();
 	},
 };
 

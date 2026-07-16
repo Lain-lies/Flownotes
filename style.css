@@ -6,8 +6,41 @@
 input,
 textarea {
 	font-size: 1rem;
-	margin-bottom: 1rem;
-	display: block;
+}
+
+label {
+	font-size: 1rem;
+}
+
+select {
+	padding: 0;
+	margin: 0;
+}
+
+#documentationField {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+.fieldWrapper {
+	display: flex;
+	gap: 10px;
+	margin-top: 1rem;
+	align-items: center;
+}
+
+fieldset {
+	padding: 0rem 1rem 1rem 1rem;
+	margin-top: 1.5rem;
+	border: 2px solid black;
+}
+
+legend {
+	margin: 0 auto;
+	font-size: 0.7rem;
+	font-weight: 700;
 }
 
 input[name="resolutionNotes"] {
@@ -25,10 +58,6 @@ header {
 	gap: 1rem;
 }
 
-h1 {
-	display: inline-block;
-}
-
 .logo {
 	display: inline-block;
 	width: 60px;
@@ -42,38 +71,11 @@ img {
 
 button {
 	display: block;
-	margin-bottom: 1rem;
 }
 
 button:hover {
 	cursor: pointer;
 	filter: brightness(1.2);
-}
-
-#saveTicketButton {
-	padding: 1rem;
-}
-
-.switchClickButton {
-	margin-top: 0.5rem;
-	font-size: 1rem;
-	padding: 0.5rem 1rem;
-}
-
-#session-individual-record > button {
-	font-size: 1rem;
-	padding: 0.75rem 0.5rem;
-}
-
-#mode-and-type {
-	display: flex;
-	gap: 0.5rem;
-	align-items: center;
-}
-
-#mode-and-type > button {
-	margin-bottom: 0;
-	font-size: 1rem;
 }
 
 .availability-container {
@@ -86,32 +88,12 @@ button:hover {
 	font-size: 0.8rem;
 }
 
-.adpwrWrapper {
-	display: none;
-}
-
 .visible {
 	display: block;
 }
 
 .hidden {
 	display: none;
-}
-
-[name="nextActions"] {
-	display: block;
-	margin-bottom: 1rem;
-}
-
-legend {
-	display: block;
-	width: auto;
-	margin-left: auto;
-	margin-right: auto;
-}
-
-fieldset {
-	padding: 1.5rem 1rem;
 }
 
 .controlPanel {
