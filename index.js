@@ -123,6 +123,7 @@ class managedStateObject {
 	}
 	setState(value) {
 		this.state = value;
+		this.updateSubscribers();
 		console.log(this.state);
 	}
 
@@ -133,33 +134,36 @@ class managedStateObject {
 	subscribe(subscriber) {
 		this.subscribers = [...this.subscribers, subscriber];
 	}
+
+	updateSubscribers() {
+		this.subscribers.forEach((subscriber) => subscriber(this.getState()));
+	}
 }
 
 const fieldStateManager = {
-	managedState: {
-		isModified: new managedStateObject(false),
-		isSaved: new managedStateObject(false),
-		savedData: new managedStateObject({}),
-		isEditMode: new managedStateObject(false),
+	DEFAULT_MANAGED_STATE: {
+		isModified: false,
+		isSaved: false,
+		savedData: {},
+		isEditMode: false,
 
-		callerType: new managedStateObject("Affected User"),
-		templateType: new managedStateObject("Standard"),
+		callerType: "Affected User",
+		templateType: "Standard",
 
-		possibleMajorIncident: new managedStateObject("No"),
-		contactType: new managedStateObject("Phone"),
+		possibleMajorIncident: "No",
+		contactType: "Phone",
 
-		resetType: new managedStateObject("Non-AD"),
-		newHire: new managedStateObject("No"),
-		mfaRegistered: new managedStateObject("Yes"),
-		ssprOffered: new managedStateObject("No"),
+		resetType: "Non-AD",
+		newHire: "No",
+		mfaRegistered: "Yes",
+		ssprOffered: "No",
 
-		issueResolved: new managedStateObject("No"),
-		userAgreedResolved: new managedStateObject("No"),
+		issueResolved: "No",
+		userAgreedResolved: "No",
 	},
 
 	setState(name, value) {
 		this.managedState[name].setState(value);
-		this.updateSubscribers(name);
 	},
 
 	getState(name) {
@@ -170,15 +174,25 @@ const fieldStateManager = {
 		this.managedState[name].subscribe(subscriber);
 	},
 
-	updateSubscribers(name) {
-		const state = this.managedState[name];
-		state.subscribers.forEach((subscriber) => subscriber(state.getState()));
+	resetState() {
+		Object.entries(this.DEFAULT_MANAGED_STATE).forEach(([key, value]) =>
+			this.setState(key, value),
+		);
+	},
+
+	init() {
+		this.managedState = Object.fromEntries(
+			Object.entries(this.DEFAULT_MANAGED_STATE).map(([key, value]) => {
+				return [key, new managedStateObject(value)];
+			}),
+		);
 	},
 };
 
 const setState = fieldStateManager.setState.bind(fieldStateManager);
 const getState = fieldStateManager.getState.bind(fieldStateManager);
 const subscribe = fieldStateManager.subscribe.bind(fieldStateManager);
+const resetAllState = fieldStateManager.resetState.bind(fieldStateManager);
 
 const fieldUI = {
 	callerTypeSubscribe() {
@@ -379,7 +393,7 @@ const fieldUI = {
 				: setState("userAgreedResolved", "No");
 		});
 	},
-	// INC
+
 	stateSubscribe() {
 		this.possibleMajorIncidentSubscribe();
 		this.contactTypeSubscribe();
@@ -393,8 +407,69 @@ const fieldUI = {
 		this.userAgreedSubscribe();
 	},
 
+	fieldInit() {
+		const field = document.querySelector("#documentationField");
+
+		field.addEventListener("input", () => {
+			setState("isModified", true);
+		});
+	},
+
+	saveButtonInit() {
+		const field = document.querySelector("#documentationField");
+
+		field.addEventListener("submit", (e) => {
+			e.preventDefault();
+
+			if (getState("isModified") === false) {
+				alert("No Changes Detected");
+				return;
+			}
+
+			if (getState("isSaved") === false) {
+				setState("isSaved", true);
+			}
+
+			const formData = new FormData(event.target);
+			const data = Object.fromEntries(formData.entries());
+
+			setState("savedData", data);
+		});
+	},
+
+	newNoteButtonInit() {
+		document.querySelector("#newNoteButton").addEventListener("click", () => {
+			if (getState("isSaved") === false) {
+				alert("Please save current notes");
+				return;
+			}
+			storageState.syncWithLocalStorage(getState("savedData"));
+			document.querySelector("#documentationField").reset();
+			resetAllState();
+			window.location.href = "#documentationField";
+		});
+	},
+
+	cancelButtonInit() {
+		document.querySelector("#cancelButton").addEventListener("click", () => {
+			if (
+				confirm(
+					"Are you sure you want to cancel? All unsaved changes will be lost.",
+				)
+			) {
+				document.querySelector("#documentationField").reset();
+				resetAllState();
+				window.location.href = "#documentationField";
+			}
+		});
+	},
+
 	init() {
 		this.stateSubscribe();
+		this.fieldInit();
+		this.saveButtonInit();
+		this.newNoteButtonInit();
+		this.cancelButtonInit();
 	},
 };
 
@@ -419,7 +494,7 @@ const controlPanelDisplayState = {
 			const button = document.createElement("button");
 			button.textContent = session;
 			button.addEventListener("click", () => {
-				if (fieldState.isAllowedtoSwitchSession()) {
+				if (getState("isModified") === false) {
 					storageState.loadSession(session);
 					storageState.saveLastSession();
 					this.renderCurrentSessionName(storageState.getCurrentSessionName());
@@ -491,9 +566,10 @@ const controlPanelDisplayState = {
 // UTILITIES //
 
 async function copyToClipboard(data) {
-	const text = data.isIncident
-		? incidentTypeFormatter(data)
-		: pwrTypeFormatter(data);
+	const text =
+		data.templateType === "Standard"
+			? standardTemplateFormatter(data)
+			: pwrTypeFormatter(data);
 	try {
 		await navigator.clipboard.writeText(text);
 	} catch (err) {
@@ -531,23 +607,12 @@ function exportSession(sessionName) {
 }
 
 function exportIndividualRecord(data) {
-	const textContent = data.isIncident
-		? incidentTypeFormatter(data, data.isCaller)
-		: pwrTypeFormatter(data);
-
-	const blob = new Blob([textContent], {
-		type: "text/plain",
-	});
-
-	const url = URL.createObjectURL(blob);
-
-	const a = document.createElement("a");
-	a.href = url;
-	a.download = `${data.fullName}.txt`;
-
-	a.click();
-
-	URL.revokeObjectURL(url);
+	const text =
+		data.templateType === "Standard"
+			? standardTemplateFormatter(data)
+			: pwrTypeFormatter(data);
+	console.log(text);
+	document.querySelector("#previewText").textContent = text;
 }
 
 function initCreateNewSessionForm() {
@@ -573,23 +638,24 @@ function initCreateNewSessionForm() {
 	});
 }
 
-function incidentTypeFormatter(data) {
+function standardTemplateFormatter(data) {
 	console.log(data);
+
 	let onBehalfDetails = "";
-	if (data.isCaller === false) {
+	if (data.callerType === "On Behalf") {
 		onBehalfDetails = `
 USER
 Employee ID: ${data.OBemployeeId}
 Name: ${data.OBfullName}
 Email Address: ${data.OBemail}
 Contact Number: ${data.OBcontactNumber}
-Availability Hours: ${data.OBbestTimeToReach} ${data.OBtimezone}
+Availability Hours: ${data.OBavailability} ${data.OBtimezone}
 Location: ${data.OBlocation}
 `;
 	}
 
 	let resolutionNotes = "";
-	if (data.isResolved) {
+	if (data.issueResolved === true) {
 		resolutionNotes = `
 RESOLUTION NOTES:
 ${data.resolutionNotes}`;
@@ -601,7 +667,7 @@ Employee ID: ${data.employeeId}
 Name: ${data.fullName}
 Email Address: ${data.email}
 Contact Number: ${data.contactNumber}
-Availability Hours: ${data.bestTimeToReach}${data.timezone}
+Availability Hours: ${data.availability}${data.timezone}
 Location: ${data.location}
 ${onBehalfDetails}
 Existing Ticket? ${data.existingTicket}
@@ -627,9 +693,22 @@ User agreed to set data to Resolved? ${data.userAgreedResolved}`;
 }
 
 function pwrTypeFormatter(data) {
-	let adDetails = "";
-	if (data.isAD === true) {
-		adDetails = `
+	let onBehalfDetails = "";
+	if (data.callerType === "On Behalf") {
+		onBehalfDetails = `
+USER
+Employee ID: ${data.OBemployeeId}
+Name: ${data.OBfullName}
+Email Address: ${data.OBemail}
+Contact Number: ${data.OBcontactNumber}
+Availability Hours: ${data.OBavailability} ${data.OBtimezone}
+Location: ${data.OBlocation}
+`;
+	}
+
+	let ssprDetails = "";
+	if (data.resetType === "Active Directory") {
+		ssprDetails = `
 New Hire: ${data.newHire}
 MFA Registered? ${data.mfaRegistered}
 SSPR Offered? ${data.ssprOffered}
@@ -637,7 +716,7 @@ SSPR Outcome: ${data.ssprOutcome}`;
 	}
 
 	let resolutionNotes = "";
-	if (data.isResolved) {
+	if (data.issueResolved === true) {
 		resolutionNotes = `
 RESOLUTION NOTES:
 ${data.resolutionNotes}`;
@@ -648,10 +727,11 @@ Employee ID: ${data.employeeId}
 Name: ${data.fullName}
 Email Address: ${data.email}
 Contact Number: ${data.contactNumber}
-Availability Hours: ${data.bestTimeToReach} ${data.timezone}
+Availability Hours: ${data.availability} ${data.timezone}
 Location: ${data.location}
 Existing Ticket? ${data.existingTicket}
-${adDetails}
+${onBehalfDetails}
+${ssprDetails}
 
 ISSUE DESCRIPTION:
 ${data.issueDescription}
@@ -668,16 +748,19 @@ User agreed to fulfill ticket? ${data.userAgreedResolved}`;
 	return documentation;
 }
 
-function init() {
+function appInit() {
 	window.addEventListener("beforeunload", (e) => {
 		e.preventDefault();
 	});
+	fieldStateManager.init();
+	resetAllState(); // prevent browser cache from desyncing from state
 
 	const isFreshStart = !storageState.resumeLastSession();
 	console.log(`isFreshStart: ${isFreshStart}`);
 	if (isFreshStart) storageState.init();
 
 	fieldUI.init();
+
 	controlPanelDisplayState.init();
 	initCreateNewSessionForm();
 }
@@ -743,4 +826,4 @@ function fillTestData() {
 
 document.querySelector("#fillTestData").addEventListener("click", fillTestData);
 
-init();
+appInit();
