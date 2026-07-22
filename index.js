@@ -121,13 +121,14 @@ class managedStateObject {
 		this.state = state;
 		this.subscribers = subscribers;
 	}
+
 	setState(value) {
 		this.state = value;
 		this.updateSubscribers();
 		console.log(this.state);
 	}
 
-	getState(value) {
+	getState() {
 		return this.state;
 	}
 
@@ -205,7 +206,11 @@ const fieldUI = {
 		});
 
 		subscribe("callerType", (value) => {
-			document.querySelector("#onBehalfOfWrapper").classList.toggle("hidden");
+			const onBehalfOfWrapper = document.querySelector("#onBehalfOfWrapper");
+
+			value === "Affected User"
+				? onBehalfOfWrapper.classList.add("hidden")
+				: onBehalfOfWrapper.classList.remove("hidden");
 		});
 
 		switchButton.addEventListener("click", () => {
@@ -225,11 +230,19 @@ const fieldUI = {
 		});
 
 		subscribe("templateType", (value) => {
-			document
-				.querySelector(".standardTemplateWrapper")
-				.classList.toggle("hidden");
+			const standardTemplateWrapper = document.querySelector(
+				".standardTemplateWrapper",
+			);
 
-			document.querySelector(".pwrTemplateWrapper").classList.toggle("hidden");
+			const pwrTemplateWrapper = document.querySelector(".pwrTemplateWrapper");
+
+			if (value === "Standard") {
+				standardTemplateWrapper.classList.remove("hidden");
+				pwrTemplateWrapper.classList.add("hidden");
+			} else {
+				standardTemplateWrapper.classList.add("hidden");
+				pwrTemplateWrapper.classList.remove("hidden");
+			}
 		});
 
 		subscribe("templateType", (value) => {
@@ -293,7 +306,11 @@ const fieldUI = {
 		});
 
 		subscribe("resetType", (value) => {
-			document.querySelector("#ssprDetailsWrapper").classList.toggle("hidden");
+			const ssprDetailsWrapper = document.querySelector("#ssprDetailsWrapper");
+
+			value === "Non-AD"
+				? ssprDetailsWrapper.classList.add("hidden")
+				: ssprDetailsWrapper.classList.remove("hidden");
 		});
 
 		switchButton.addEventListener("click", () => {
@@ -364,9 +381,13 @@ const fieldUI = {
 		});
 
 		subscribe("issueResolved", (value) => {
-			document
-				.querySelector("#resolutionNotesWrapper")
-				.classList.toggle("hidden");
+			const resolutionNotesWrapper = document.querySelector(
+				"#resolutionNotesWrapper",
+			);
+
+			value === "No"
+				? resolutionNotesWrapper.classList.add("hidden")
+				: resolutionNotesWrapper.classList.remove("hidden");
 		});
 
 		switchButton.addEventListener("click", () => {
@@ -430,9 +451,9 @@ const fieldUI = {
 				setState("isSaved", true);
 			}
 
-			const formData = new FormData(event.target);
+			const formData = new FormData(e.target);
 			const data = Object.fromEntries(formData.entries());
-
+			console.log(data);
 			setState("savedData", data);
 		});
 	},
@@ -448,6 +469,43 @@ const fieldUI = {
 			resetAllState();
 			window.location.href = "#documentationField";
 		});
+	},
+
+	newNoteUserRetainedButtonInit() {
+		document
+			.querySelector("#newNoteUserRetainedButton")
+			.addEventListener("click", () => {
+				if (getState("isSaved") === false) {
+					alert("Please save current notes");
+					return;
+				}
+				const data = { ...getState("savedData") };
+
+				storageState.syncWithLocalStorage(data);
+				document.querySelector("#documentationField").reset();
+
+				const fields = [
+					"employeeId",
+					"fullName",
+					"email",
+					"contactNumber",
+					"timezone",
+					"location",
+					"OBemployeeId",
+					"OBfullName",
+					"OBemail",
+					"OBcontactNumber",
+					"OBtimezone",
+					"OBlocation",
+				];
+
+				fields.forEach((key) => {
+					document.querySelector(`[name="${key}"]`).value = data[key];
+				});
+
+				resetAllState();
+				window.location.href = "#documentationField";
+			});
 	},
 
 	cancelButtonInit() {
@@ -470,6 +528,7 @@ const fieldUI = {
 		this.saveButtonInit();
 		this.newNoteButtonInit();
 		this.cancelButtonInit();
+		this.newNoteUserRetainedButtonInit();
 	},
 };
 
@@ -513,7 +572,7 @@ const controlPanelDisplayState = {
 		this.controlPanelSessionHistoryElement.replaceChildren();
 
 		const exportAllButton = document.createElement("button");
-		exportAllButton.textContent = "Export ALL";
+		exportAllButton.textContent = "Export All";
 		exportAllButton.addEventListener("click", () => exportSession(sessionName));
 
 		this.controlPanelSessionHistoryElement.appendChild(exportAllButton);
@@ -532,9 +591,7 @@ const controlPanelDisplayState = {
 			});
 
 			editButton.textContent = "EDIT";
-			editButton.addEventListener("click", () => {
-				fieldUI.util.injectValuesToField(storageState.getDataInRecord(index));
-			});
+			editButton.addEventListener("click", () => {});
 
 			wrapper.appendChild(previewButton);
 			wrapper.appendChild(editButton);
@@ -612,7 +669,7 @@ function exportIndividualRecord(data) {
 			? standardTemplateFormatter(data)
 			: pwrTypeFormatter(data);
 	console.log(text);
-	document.querySelector("#previewText").textContent = text;
+	document.querySelector("#previewContainer").textContent = text;
 }
 
 function initCreateNewSessionForm() {
@@ -655,7 +712,7 @@ Location: ${data.OBlocation}
 	}
 
 	let resolutionNotes = "";
-	if (data.issueResolved === true) {
+	if (data.issueResolved === "Yes") {
 		resolutionNotes = `
 RESOLUTION NOTES:
 ${data.resolutionNotes}`;
@@ -716,13 +773,15 @@ SSPR Outcome: ${data.ssprOutcome}`;
 	}
 
 	let resolutionNotes = "";
-	if (data.issueResolved === true) {
+	if (data.issueResolved === "Yes") {
 		resolutionNotes = `
 RESOLUTION NOTES:
 ${data.resolutionNotes}`;
 	}
 
 	const documentation = `
+Caller
+
 Employee ID: ${data.employeeId}
 Name: ${data.fullName}
 Email Address: ${data.email}
@@ -783,7 +842,7 @@ function fillTestData() {
 
 		existingTicket: "No",
 		machineName: "US-L-A1234",
-		nexthinkChecklist: "N/A",
+
 		issueDescription: `
 - User is trying to access myhub
 - Error message "Invalid Login"
@@ -819,9 +878,7 @@ function fillTestData() {
 		}
 	});
 
-	if (typeof fieldState !== "undefined") {
-		fieldState.setFieldModified(true);
-	}
+	setState("isModified", true);
 }
 
 document.querySelector("#fillTestData").addEventListener("click", fillTestData);

@@ -48,9 +48,7 @@
 			</div>
 		</div>
 
-		<div id="previewContainer">
-			<textarea id="previewText" rows="15" cols="10"></textarea>
-		</div>
+		<div id="previewContainer"></div>
 		<div class="recordPreview"></div>
 		<button id="hide-control-panel">Hide Control Panel</button>
 
@@ -442,8 +440,7 @@
 						id="issueDescription"
 						rows="5"
 						placeholder="Describe the issue"
-						required>
-					</textarea>
+						required></textarea>
 
 					<label for="troubleshootingSteps"> Troubleshooting Steps: </label>
 					<textarea
@@ -451,8 +448,7 @@
 						id="troubleshootingSteps"
 						rows="10"
 						placeholder="List the steps taken to troubleshoot the issue"
-						required>
-					</textarea>
+						required></textarea>
 				</div>
 			</fieldset>
 
@@ -548,11 +544,11 @@
 			<fieldset>
 				<legend>Field Controls</legend>
 				<button type="submit" id="saveNoteButton">Save Note & Copy</button>
-				<button type="button" id="cancelButton">Cancel</button>
 				<button type="button" id="newNoteButton">New Note</button>
-				<button type="button" id="newNoteUserInfoRetainedButton">
+				<button type="button" id="newNoteUserRetainedButton">
 					New Note(Multiple Issue)
 				</button>
+				<button type="button" id="cancelButton">Cancel</button>
 				<button type="button" id="saveChangesButton">Save Changes</button>
 			</fieldset>
 		</form>
