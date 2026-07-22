@@ -3,6 +3,16 @@
 	font-family: sans-serif;
 }
 
+#appControlsWrapper {
+	border: 1px solid black;
+	padding: 1rem;
+}
+
+.headerWrapper-c {
+	display: flex;
+	justify-content: center;
+}
+
 input,
 textarea {
 	font-size: 1rem;

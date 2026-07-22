@@ -18,41 +18,38 @@
 		</header>
 		<p>ver 2.0.0</p>
 
-		<div class="controlPanel">
-			<div class="sessionDivider">
+		<div id="appControlsWrapper">
+			<h5>Control Panel</h5>
+
+			<div class="headerWrapper-c">
 				<form id="createSessionForm">
-					<label for="sessionName">
-						Create New Session :
-						<input
-							type="text"
-							id="sessionName"
-							name="sessionName"
-							placeholder="Enter session name"
-							required />
-					</label>
-
-					<button type="submit">Create Session</button>
+					<div class="fieldWrapper">
+						<label for="sessionName">Create New Session:</label>
+						<input type="text" id="sessionName" name="sessionName" />
+						<button type="submit">Submit</button>
+					</div>
 				</form>
+			</div>
 
-				<div>
-					<span>Current Session:</span> <span id="currentSessionName"></span>
-				</div>
-
-				<h4>Session List</h4>
+			<div class="headerWrapper">
+				<h5>Session List</h5>
 				<ul id="sessionList"></ul>
 			</div>
 
-			<div class="sessionDivider">
-				<h3>History</h3>
-				<div id="sessionHistory"></div>
+			<div class="headerWrapper-c">
+				<h5>Current Session: <span id="currentSessionName"></span></h5>
+			</div>
+
+			<div class="headerWrapper">
+				<h5>Session History</h5>
+				<ul id="sessionHistory"></ul>
+			</div>
+
+			<div class="headerWrapper">
+				<h5>Note Preview</h5>
+				<div id="previewContainer"></div>
 			</div>
 		</div>
-
-		<div id="previewContainer"></div>
-		<div class="recordPreview"></div>
-		<button id="hide-control-panel">Hide Control Panel</button>
-
-		<hr />
 
 		<form id="documentationField">
 			<!--  Caller and Template Type -->
@@ -549,7 +546,7 @@
 					New Note(Multiple Issue)
 				</button>
 				<button type="button" id="cancelButton">Cancel</button>
-				<button type="button" id="saveChangesButton">Save Changes</button>
+				<button type="submit" id="saveChangesButton">Save Changes</button>
 			</fieldset>
 		</form>
 

@@ -1,4 +1,4 @@
-const storageState = {
+const app = {
 	record: null,
 	currentSessionName: "",
 	sessionList: [],
@@ -16,6 +16,10 @@ const storageState = {
 		this.sessionList = [...sessionList];
 	},
 
+	setIndexBeingEdited: function (index) {
+		this.indexBeingEdited = index;
+	},
+
 	getRecord: function () {
 		return this.record;
 	},
@@ -28,6 +32,7 @@ const storageState = {
 		return [...this.sessionList];
 	},
 
+	// HELPERS //
 	getSessionListFromLocalStorage: function () {
 		const sessionList = Object.entries(localStorage)
 			.map(([key]) => key)
@@ -37,19 +42,8 @@ const storageState = {
 		return sessionList;
 	},
 
-	// HELPERS //
-	resumeLastSession: function () {
-		const lastSessionName = localStorage.getItem("lastSessionName");
-
-		if (lastSessionName === null || lastSessionName === undefined) {
-			console.log("No last session");
-			return false;
-		}
-
-		const sessionList = this.getSessionListFromLocalStorage(lastSessionName);
-		this.setSessionList(sessionList);
-		this.loadSession(lastSessionName);
-		return true;
+	getIndexBeingEdited: function () {
+		return this.indexBeingEdited;
 	},
 
 	loadSession: function (sessionName) {
@@ -64,6 +58,7 @@ const storageState = {
 
 		this.setRecord(sessionData);
 		this.setCurrentSessionName(sessionName);
+		localStorage.setItem("lastSessionName", sessionName);
 
 		console.log(`
 Current Session: ${this.getCurrentSessionName()}
@@ -71,7 +66,7 @@ Current Record: ${this.getRecord()}
 Session List: ${this.getSessionList()}`);
 	},
 
-	syncWithLocalStorage: function (newRecord) {
+	updateRecordAndSync: function (newRecord) {
 		this.setRecord([...this.getRecord(), newRecord]);
 
 		localStorage.setItem(
@@ -79,19 +74,13 @@ Session List: ${this.getSessionList()}`);
 			JSON.stringify(this.getRecord()),
 		);
 
-		alert("Local Storage Synced!");
-
-		return true;
+		alert("Storage Synced!");
 	},
 
-	updateSessionList: function () {
+	updateSessionList: function (newSessionName) {
+		localStorage.setItem(newSessionName, JSON.stringify([]));
 		const newSessionList = this.getSessionListFromLocalStorage();
 		this.setSessionList(newSessionList);
-	},
-
-	saveLastSession: function () {
-		console.log(`savelastsession: ${this.getCurrentSessionName()} `);
-		localStorage.setItem("lastSessionName", this.getCurrentSessionName());
 	},
 
 	getDataInRecord(index) {
@@ -101,9 +90,26 @@ Session List: ${this.getSessionList()}`);
 
 	updateDataInRecord(index, newData) {
 		this.getRecord()[index] = newData;
+		localStorage.setItem(
+			this.getCurrentSessionName(),
+			JSON.stringify(this.getRecord()),
+		);
 	},
 
 	// INIT //
+	resumeLastSession: function () {
+		const lastSessionName = localStorage.getItem("lastSessionName");
+
+		if (lastSessionName === null || lastSessionName === undefined) {
+			console.log("No last session");
+			return false;
+		}
+
+		const sessionList = this.getSessionListFromLocalStorage(lastSessionName);
+		this.setSessionList(sessionList);
+		this.loadSession(lastSessionName);
+		return true;
+	},
 
 	init: function () {
 		const now = Date.now();
@@ -112,7 +118,7 @@ Session List: ${this.getSessionList()}`);
 		localStorage.setItem(currentDate, JSON.stringify([]));
 		this.setSessionList([currentDate]);
 		this.loadSession(currentDate);
-		this.saveLastSession();
+		localStorage.setItem(lastSessionName, currentDate);
 	},
 };
 
@@ -125,7 +131,7 @@ class managedStateObject {
 	setState(value) {
 		this.state = value;
 		this.updateSubscribers();
-		console.log(this.state);
+		// console.log(this.state);
 	}
 
 	getState() {
@@ -181,6 +187,12 @@ const fieldStateManager = {
 		);
 	},
 
+	setMultipleState(referenceObject) {
+		Object.keys(this.DEFAULT_MANAGED_STATE).forEach((key) => {
+			this.setState(key, referenceObject[key]);
+		});
+	},
+
 	init() {
 		this.managedState = Object.fromEntries(
 			Object.entries(this.DEFAULT_MANAGED_STATE).map(([key, value]) => {
@@ -194,6 +206,8 @@ const setState = fieldStateManager.setState.bind(fieldStateManager);
 const getState = fieldStateManager.getState.bind(fieldStateManager);
 const subscribe = fieldStateManager.subscribe.bind(fieldStateManager);
 const resetAllState = fieldStateManager.resetState.bind(fieldStateManager);
+const setMultipleState =
+	fieldStateManager.setMultipleState.bind(fieldStateManager);
 
 const fieldUI = {
 	callerTypeSubscribe() {
@@ -464,7 +478,7 @@ const fieldUI = {
 				alert("Please save current notes");
 				return;
 			}
-			storageState.syncWithLocalStorage(getState("savedData"));
+			app.updateRecordAndSync(getState("savedData"));
 			document.querySelector("#documentationField").reset();
 			resetAllState();
 			window.location.href = "#documentationField";
@@ -481,7 +495,7 @@ const fieldUI = {
 				}
 				const data = { ...getState("savedData") };
 
-				storageState.syncWithLocalStorage(data);
+				app.updateRecordAndSync(data);
 				document.querySelector("#documentationField").reset();
 
 				const fields = [
@@ -522,6 +536,21 @@ const fieldUI = {
 		});
 	},
 
+	saveChangesButtonInit() {
+		const field = document.querySelector("#documentationField");
+
+		field.addEventListener("submit", (e) => {
+			e.preventDefault();
+
+			const formData = new FormData(e.target);
+			const data = Object.fromEntries(formData.entries());
+			app.updateDataInRecord(app.getIndexBeingEdited(), data);
+			document.querySelector("#documentationField").reset();
+			resetAllState();
+			window.location.href = "#documentationField";
+		});
+	},
+
 	init() {
 		this.stateSubscribe();
 		this.fieldInit();
@@ -529,93 +558,116 @@ const fieldUI = {
 		this.newNoteButtonInit();
 		this.cancelButtonInit();
 		this.newNoteUserRetainedButtonInit();
+		this.saveChangesButtonInit();
 	},
 };
 
-const controlPanelDisplayState = {
-	controlPanelElement: document.querySelector(".controlPanel"),
-	controlPanelCurrentSessionNameElement: document.querySelector(
-		"#currentSessionName",
-	),
-	controlPanelSessionListElement: document.querySelector("#sessionList"),
-	controlPanelSessionHistoryElement: document.querySelector("#sessionHistory"),
+const appControls = {
+	createSessionListItem(parentNode, session, handler) {
+		const li = document.createElement("li");
+		const sessionButton = document.createElement("button");
 
-	renderCurrentSessionName: function (value) {
-		this.controlPanelCurrentSessionNameElement.textContent = value;
+		sessionButton.textContent = session;
+		sessionButton.addEventListener("click", handler);
+
+		li.appendChild(sessionButton);
+		parentNode.appendChild(li);
 	},
 
-	renderSessionList: function () {
-		this.controlPanelSessionListElement.replaceChildren();
+	createHistoryListItem(parentNode, data, previewHandler, editHandler) {
+		const li = document.createElement("li");
+		const previewButton = document.createElement("button");
+		const editButton = document.createElement("button");
 
-		const sessionList = storageState.getSessionList();
-		sessionList.forEach((session) => {
-			const li = document.createElement("li");
-			const button = document.createElement("button");
-			button.textContent = session;
-			button.addEventListener("click", () => {
-				if (getState("isModified") === false) {
-					storageState.loadSession(session);
-					storageState.saveLastSession();
-					this.renderCurrentSessionName(storageState.getCurrentSessionName());
-					this.renderSessionHistory(storageState.getCurrentSessionName());
-					this.renderSessionList();
+		previewButton.textContent = `${data.ticketNumber} | ${data.fullName}`;
+		previewButton.addEventListener("click", previewHandler);
+
+		editButton.textContent = "Edit";
+		editButton.addEventListener("click", editHandler);
+
+		li.appendChild(previewButton);
+		li.appendChild(editButton);
+
+		parentNode.appendChild(li);
+	},
+
+	createSessionFormInit() {
+		document
+			.querySelector("#createSessionForm")
+			.addEventListener("submit", (e) => {
+				e.preventDefault();
+				const formData = new FormData(e.target);
+				const newSessionName = formData.get("sessionName").trim();
+
+				if (newSessionName === "") {
+					alert("Session name cannot be empty!");
 					return;
 				}
-				alert("Please SAVE current notes before switching or CANCEL");
+
+				if (localStorage.getItem(newSessionName)) {
+					alert("Session name already exists! Please choose a different name.");
+					return;
+				}
+
+				app.updateSessionList(newSessionName);
+				this.renderSessionList();
+				e.target.reset();
 			});
-			li.appendChild(button);
-			this.controlPanelSessionListElement.appendChild(li);
+	},
+
+	renderSessionList() {
+		const sessionList = app.getSessionList();
+		const ul = document.querySelector("#sessionList");
+		ul.replaceChildren();
+		console.log(sessionList);
+		sessionList.forEach((session) => {
+			const handler = () => {
+				if (getState("isModified")) {
+					alert("Please save or cancel current notes before switching session");
+					return;
+				}
+				app.loadSession(session);
+				document.querySelector("#currentSessionName").textContent = session;
+				this.renderHistoryList();
+			};
+			console.log(session);
+			this.createSessionListItem(ul, session, handler);
+			this.renderHistoryList();
 		});
 	},
 
-	renderSessionHistory: function (sessionName) {
-		this.controlPanelSessionHistoryElement.replaceChildren();
+	renderHistoryList() {
+		const record = app.getRecord();
+		const ul = document.querySelector("#sessionHistory");
+		ul.replaceChildren();
+		record.forEach((record, index) => {
+			previewHandler = () => previewRecord(app.getDataInRecord(index));
 
-		const exportAllButton = document.createElement("button");
-		exportAllButton.textContent = "Export All";
-		exportAllButton.addEventListener("click", () => exportSession(sessionName));
+			editHandler = () => {
+				if (getState("isModified")) {
+					alert("Unable to edit record: Please save or cancel notes");
+					return;
+				}
+				app.setIndexBeingEdited(index);
+				const data = app.getDataInRecord(index);
+				console.log(app.getIndexBeingEdited());
 
-		this.controlPanelSessionHistoryElement.appendChild(exportAllButton);
+				Object.entries(data).forEach(([key, value]) => {
+					const el = document.querySelector(`[name="${key}"]`);
 
-		const sessionHistory = JSON.parse(localStorage.getItem(sessionName));
+					el.value = value;
+				});
+				setMultipleState(data);
+			};
 
-		sessionHistory.forEach((record, index) => {
-			const wrapper = document.createElement("div");
-			const previewButton = document.createElement("button");
-			const editButton = document.createElement("button");
-			const doctype = record.isIncident ? "Standard" : "Password Reset";
-
-			previewButton.textContent = `${record.fullName} | ${doctype}`;
-			previewButton.addEventListener("click", () => {
-				exportIndividualRecord(record);
-			});
-
-			editButton.textContent = "EDIT";
-			editButton.addEventListener("click", () => {});
-
-			wrapper.appendChild(previewButton);
-			wrapper.appendChild(editButton);
-
-			this.controlPanelSessionHistoryElement.appendChild(wrapper);
+			this.createHistoryListItem(ul, record, previewHandler, editHandler);
 		});
 	},
 
-	init: function () {
-		const hideControlPanelButton = document.querySelector(
-			"#hide-control-panel",
-		);
-
-		hideControlPanelButton.addEventListener("click", () => {
-			if (this.controlPanelElement.style.display === "none") {
-				this.controlPanelElement.style.display = "flex";
-				hideControlPanelButton.textContent = "HIDE CONTROL PANEL";
-			} else {
-				this.controlPanelElement.style.display = "none";
-				hideControlPanelButton.textContent = "SHOW CONTROL PANEL";
-			}
-		});
-
-		this.renderCurrentSessionName(storageState.getCurrentSessionName());
+	init() {
+		document.querySelector("#currentSessionName").textContent =
+			app.getCurrentSessionName();
+		this.createSessionFormInit();
 		this.renderSessionList();
 	},
 };
@@ -663,36 +715,13 @@ function exportSession(sessionName) {
 	URL.revokeObjectURL(url);
 }
 
-function exportIndividualRecord(data) {
+function previewRecord(data) {
 	const text =
 		data.templateType === "Standard"
 			? standardTemplateFormatter(data)
 			: pwrTypeFormatter(data);
 	console.log(text);
 	document.querySelector("#previewContainer").textContent = text;
-}
-
-function initCreateNewSessionForm() {
-	const createSessionForm = document.querySelector("#createSessionForm");
-	createSessionForm.addEventListener("submit", (event) => {
-		event.preventDefault();
-		const formData = new FormData(event.target);
-		const newSessionName = formData.get("sessionName").trim();
-		console.log(newSessionName);
-		if (newSessionName === "") {
-			alert("Session name cannot be empty!");
-			return;
-		}
-
-		if (localStorage.getItem(newSessionName)) {
-			alert("Session name already exists! Please choose a different name.");
-			return;
-		}
-
-		localStorage.setItem(newSessionName, JSON.stringify([]));
-		storageState.updateSessionList();
-		controlPanelDisplayState.renderAllControlPanelList();
-	});
 }
 
 function standardTemplateFormatter(data) {
@@ -811,17 +840,16 @@ function appInit() {
 	window.addEventListener("beforeunload", (e) => {
 		e.preventDefault();
 	});
+	const isFreshStart = !app.resumeLastSession();
+	if (isFreshStart) app.init();
+
+	console.log(`isFreshStart: ${isFreshStart}`);
+
 	fieldStateManager.init();
 	resetAllState(); // prevent browser cache from desyncing from state
 
-	const isFreshStart = !storageState.resumeLastSession();
-	console.log(`isFreshStart: ${isFreshStart}`);
-	if (isFreshStart) storageState.init();
-
 	fieldUI.init();
-
-	controlPanelDisplayState.init();
-	initCreateNewSessionForm();
+	appControls.init();
 }
 
 function fillTestData() {
