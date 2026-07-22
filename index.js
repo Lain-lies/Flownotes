@@ -118,7 +118,7 @@ Session List: ${this.getSessionList()}`);
 		localStorage.setItem(currentDate, JSON.stringify([]));
 		this.setSessionList([currentDate]);
 		this.loadSession(currentDate);
-		localStorage.setItem(lastSessionName, currentDate);
+		localStorage.setItem("lastSessionName", currentDate);
 	},
 };
 
@@ -469,6 +469,8 @@ const fieldUI = {
 			const data = Object.fromEntries(formData.entries());
 			console.log(data);
 			setState("savedData", data);
+			copyToClipboard(data);
+			alert("Saved and Copied to Clipboard");
 		});
 	},
 
@@ -537,12 +539,11 @@ const fieldUI = {
 	},
 
 	saveChangesButtonInit() {
-		const field = document.querySelector("#documentationField");
+		const saveChangesButton = document.querySelector("#saveChangesButton");
 
-		field.addEventListener("submit", (e) => {
-			e.preventDefault();
-
-			const formData = new FormData(e.target);
+		saveChangesButton.addEventListener("click", (e) => {
+			const form = document.querySelector("#documentationField");
+			const formData = new FormData(form);
 			const data = Object.fromEntries(formData.entries());
 			app.updateDataInRecord(app.getIndexBeingEdited(), data);
 			document.querySelector("#documentationField").reset();
@@ -639,6 +640,10 @@ const appControls = {
 	renderHistoryList() {
 		const record = app.getRecord();
 		const ul = document.querySelector("#sessionHistory");
+		const exportAllButton = document.querySelector("#exportAll");
+		exportAllButton.addEventListener("click", () =>
+			exportSession(app.getCurrentSessionName()),
+		);
 		ul.replaceChildren();
 		record.forEach((record, index) => {
 			previewHandler = () => previewRecord(app.getDataInRecord(index));
@@ -692,9 +697,10 @@ function exportSession(sessionName) {
 	let textContent = "";
 
 	records.forEach((record, index) => {
-		textContent += record.isIncident
-			? incidentTypeFormatter(record, record.isCaller)
-			: pwrTypeFormatter(record);
+		textContent +=
+			record.templateType === "Standard"
+				? standardTemplateFormatter(record)
+				: pwrTypeFormatter(record);
 		textContent += `
 =============================================================
 `;
