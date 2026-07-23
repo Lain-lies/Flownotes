@@ -18,16 +18,14 @@
 		</header>
 		<p>ver 2.0.0</p>
 
-		<div id="appControlsWrapper">
+		<div id="appControlsWrapper" class="hidden">
 			<h5>Control Panel</h5>
 
 			<div class="headerWrapper-c">
 				<form id="createSessionForm">
-					<div class="fieldWrapper">
-						<label for="sessionName">Create New Session:</label>
-						<input type="text" id="sessionName" name="sessionName" />
-						<button type="submit">Submit</button>
-					</div>
+					<label for="sessionName">Create New Session:</label>
+					<input type="text" id="sessionName" name="sessionName" />
+					<button type="submit">Submit</button>
 				</form>
 			</div>
 
@@ -43,14 +41,17 @@
 			<div class="headerWrapper">
 				<h5>Session History</h5>
 				<button id="exportAll">Export All</button>
-				<ul id="sessionHistory"></ul>
+				<ol id="sessionHistory"></ol>
 			</div>
 
 			<div class="headerWrapper">
 				<h5>Note Preview</h5>
 				<div id="previewContainer"></div>
+				<button id="closePreviewButton">Close Preview</button>
 			</div>
 		</div>
+
+		<button id="hideControlPanelButton">Hide Control Panel</button>
 
 		<form id="documentationField">
 			<!--  Caller and Template Type -->
@@ -61,6 +62,7 @@
 					<label for="callerType">Caller Type:</label>
 					<input
 						type="text"
+						class="hidden"
 						id="callerType"
 						name="callerType"
 						value="Affected User"
@@ -72,6 +74,7 @@
 					<label for="templateType">Template Type:</label>
 					<input
 						type="text"
+						class="hidden"
 						id="templateType"
 						name="templateType"
 						value="Standard"
@@ -83,16 +86,6 @@
 			<!-- User Entitlement -->
 			<fieldset>
 				<legend>User Entitlement</legend>
-
-				<div class="fieldWrapper">
-					<label for="employeeId">Employee ID:</label>
-					<input
-						type="text"
-						id="employeeId"
-						name="employeeId"
-						placeholder="Enter Employee ID"
-						required />
-				</div>
 
 				<div class="fieldWrapper">
 					<label for="fullName">Name:</label>
@@ -124,9 +117,9 @@
 						required />
 				</div>
 
-				<div class="availability-container">
-					<div class="fieldWrapper">
-						<label for="availability">Availability Hours:</label>
+				<div class="availabilityWrapper">
+					<label for="availability">Availability Hours:</label>
+					<div class="insideWrapper">
 						<input
 							type="text"
 							id="availability"
@@ -134,9 +127,7 @@
 							placeholder="Enter Best Time to Reach"
 							value="09:00-16:00"
 							required />
-					</div>
 
-					<div class="fieldWrapper">
 						<select name="timezone">
 							<option value="EST" selected>EST</option>
 							<option value="DST">DST</option>
@@ -202,24 +193,21 @@
 								required />
 						</div>
 
-						<div class="availability-container">
-							<div class="fieldWrapper">
-								<label for="OBavailability">Availability Hours:</label>
+						<div class="availabilityWrapper">
+							<label for="OBavailability">Availability Hours:</label>
+							<div class="insideWrapper">
 								<input
 									type="text"
 									id="OBavailability"
 									name="OBavailability"
 									placeholder="Enter Best Time to Reach"
-									value="N/A"
+									value="09:00-16:00"
 									required />
-							</div>
 
-							<div class="fieldWrapper">
-								<select id="OBtimezone" name="OBtimezone">
-									<option value="EST">EST</option>
+								<select name="OBtimezone">
+									<option value="EST" selected>EST</option>
 									<option value="DST">DST</option>
 									<option value="IST">IST</option>
-									<option value="N/A" selected>N/A</option>
 								</select>
 							</div>
 						</div>
@@ -259,6 +247,7 @@
 						<input
 							type="text"
 							id="possibleMajorIncident"
+							class="hidden"
 							name="possibleMajorIncident"
 							value="No" />
 
@@ -269,6 +258,7 @@
 						<label for="contactType">Contact Type:</label>
 						<input
 							type="text"
+							class="hidden"
 							id="contactType"
 							name="contactType"
 							value="Phone" />
@@ -303,6 +293,7 @@
 						<label for="resetType">Password Reset?:</label>
 						<input
 							type="text"
+							class="hidden"
 							id="resetType"
 							name="resetType"
 							value="Non-AD"
@@ -317,6 +308,7 @@
 							<label for="newHire">New Hire:</label>
 							<input
 								type="text"
+								class="hidden"
 								id="newHire"
 								name="newHire"
 								value="No"
@@ -328,6 +320,7 @@
 							<label for="mfaRegistered">MFA Registered:</label>
 							<input
 								type="text"
+								class="hidden"
 								id="mfaRegistered"
 								name="mfaRegistered"
 								value="Yes"
@@ -339,6 +332,7 @@
 							<label for="ssprOffered">SSPR Offered:</label>
 							<input
 								type="text"
+								class="hidden"
 								id="ssprOffered"
 								value="No"
 								required
@@ -438,6 +432,7 @@
 						id="issueDescription"
 						rows="5"
 						placeholder="Describe the issue"
+						minlength="50"
 						required></textarea>
 
 					<label for="troubleshootingSteps"> Troubleshooting Steps: </label>
@@ -471,6 +466,7 @@
 						</label>
 						<input
 							type="text"
+							class="hidden"
 							id="issueResolved"
 							name="issueResolved"
 							value="No"
@@ -520,6 +516,7 @@
 						</label>
 						<input
 							type="text"
+							class="hidden"
 							id="userAgreedResolved"
 							name="userAgreedResolved"
 							value="No"
@@ -539,7 +536,7 @@
 			</fieldset>
 
 			<!-- Field Controls -->
-			<fieldset>
+			<fieldset id="normalModeWrapper">
 				<legend>Field Controls</legend>
 				<button type="submit" id="saveNoteButton">Save Note & Copy</button>
 				<button type="button" id="newNoteButton">New Note</button>
@@ -547,6 +544,10 @@
 					New Note(Multiple Issue)
 				</button>
 				<button type="button" id="cancelButton">Cancel</button>
+			</fieldset>
+
+			<fieldset id="editModeWrapper" class="hidden">
+				<legend>Edit Mode Controls</legend>
 				<button type="button" id="saveChangesButton">Save Changes</button>
 			</fieldset>
 		</form>

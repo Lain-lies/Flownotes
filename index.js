@@ -210,6 +210,21 @@ const setMultipleState =
 	fieldStateManager.setMultipleState.bind(fieldStateManager);
 
 const fieldUI = {
+	isEditModeSubscribe() {
+		subscribe("isEditMode", (value) => {
+			const normalModeWrapper = document.querySelector("#normalModeWrapper");
+			const editModeWrapper = document.querySelector("#editModeWrapper");
+
+			if (value) {
+				editModeWrapper.classList.remove("hidden");
+				normalModeWrapper.classList.add("hidden");
+			} else {
+				editModeWrapper.classList.add("hidden");
+				normalModeWrapper.classList.remove("hidden");
+			}
+		});
+	},
+
 	callerTypeSubscribe() {
 		const switchButton = document.querySelector("[name=callerType] + button");
 
@@ -430,10 +445,11 @@ const fieldUI = {
 	},
 
 	stateSubscribe() {
+		this.isEditModeSubscribe();
+		this.callerTypeSubscribe();
+		this.templateTypeSubscribe();
 		this.possibleMajorIncidentSubscribe();
 		this.contactTypeSubscribe();
-		this.templateTypeSubscribe();
-		this.callerTypeSubscribe();
 		this.resetTypeSubscribe();
 		this.newHireSubscribe();
 		this.mfaSubscribe();
@@ -542,13 +558,16 @@ const fieldUI = {
 		const saveChangesButton = document.querySelector("#saveChangesButton");
 
 		saveChangesButton.addEventListener("click", (e) => {
-			const form = document.querySelector("#documentationField");
-			const formData = new FormData(form);
-			const data = Object.fromEntries(formData.entries());
-			app.updateDataInRecord(app.getIndexBeingEdited(), data);
+			if (confirm("Are you sure you want to save changes?")) {
+				const form = document.querySelector("#documentationField");
+				const formData = new FormData(form);
+				const data = Object.fromEntries(formData.entries());
+				app.updateDataInRecord(app.getIndexBeingEdited(), data);
+			}
 			document.querySelector("#documentationField").reset();
 			resetAllState();
 			window.location.href = "#documentationField";
+			console.log("done");
 		});
 	},
 
@@ -577,6 +596,9 @@ const appControls = {
 
 	createHistoryListItem(parentNode, data, previewHandler, editHandler) {
 		const li = document.createElement("li");
+		const div = document.createElement("div");
+		div.classList.add("liWrapper");
+
 		const previewButton = document.createElement("button");
 		const editButton = document.createElement("button");
 
@@ -586,8 +608,10 @@ const appControls = {
 		editButton.textContent = "Edit";
 		editButton.addEventListener("click", editHandler);
 
-		li.appendChild(previewButton);
-		li.appendChild(editButton);
+		div.appendChild(previewButton);
+		div.appendChild(editButton);
+
+		li.appendChild(div);
 
 		parentNode.appendChild(li);
 	},
@@ -662,11 +686,30 @@ const appControls = {
 
 					el.value = value;
 				});
+
 				setMultipleState(data);
+				setState("isEditMode", true);
 			};
 
 			this.createHistoryListItem(ul, record, previewHandler, editHandler);
 		});
+	},
+
+	closePreviewButtonInit() {
+		const previewContainer = document.querySelector("#previewContainer");
+		document
+			.querySelector("#closePreviewButton")
+			.addEventListener("click", () => (previewContainer.textContent = ""));
+	},
+
+	hideControlPanelButtonInit() {
+		const appControlsWrapper = document.querySelector("#appControlsWrapper");
+
+		document
+			.querySelector("#hideControlPanelButton")
+			.addEventListener("click", () =>
+				appControlsWrapper.classList.toggle("hidden"),
+			);
 	},
 
 	init() {
@@ -674,6 +717,8 @@ const appControls = {
 			app.getCurrentSessionName();
 		this.createSessionFormInit();
 		this.renderSessionList();
+		this.closePreviewButtonInit();
+		this.hideControlPanelButtonInit();
 	},
 };
 
@@ -737,6 +782,7 @@ function standardTemplateFormatter(data) {
 	if (data.callerType === "On Behalf") {
 		onBehalfDetails = `
 USER
+
 Employee ID: ${data.OBemployeeId}
 Name: ${data.OBfullName}
 Email Address: ${data.OBemail}
@@ -755,7 +801,7 @@ ${data.resolutionNotes}`;
 
 	const documentation = `
 CALLER
-Employee ID: ${data.employeeId}
+
 Name: ${data.fullName}
 Email Address: ${data.email}
 Contact Number: ${data.contactNumber}
@@ -775,7 +821,6 @@ ${data.issueDescription}
 TROUBLESHOOTING STEPS:
 ${data.troubleshootingSteps}
 ${resolutionNotes}
-
 KB Article: ${data.kbArticle}
 Issue Resolved? ${data.issueResolved}
 Next Action(s): ${data.nextActions}
@@ -789,6 +834,7 @@ function pwrTypeFormatter(data) {
 	if (data.callerType === "On Behalf") {
 		onBehalfDetails = `
 USER
+
 Employee ID: ${data.OBemployeeId}
 Name: ${data.OBfullName}
 Email Address: ${data.OBemail}
@@ -817,15 +863,13 @@ ${data.resolutionNotes}`;
 	const documentation = `
 Caller
 
-Employee ID: ${data.employeeId}
 Name: ${data.fullName}
 Email Address: ${data.email}
 Contact Number: ${data.contactNumber}
 Availability Hours: ${data.availability} ${data.timezone}
 Location: ${data.location}
 Existing Ticket? ${data.existingTicket}
-${onBehalfDetails}
-${ssprDetails}
+${onBehalfDetails}${ssprDetails}
 
 ISSUE DESCRIPTION:
 ${data.issueDescription}
@@ -833,7 +877,6 @@ ${data.issueDescription}
 TROUBLESHOOTING STEPS:
 ${data.troubleshootingSteps}
 ${resolutionNotes}
-
 KB Article: ${data.kbArticle}
 Ticket Fulfilled: ${data.issueResolved}
 Next Action(s): ${data.nextActions}
