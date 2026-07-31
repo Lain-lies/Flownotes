@@ -287,6 +287,33 @@ const fieldUI = {
 			}
 		});
 
+		subscribe("templateType", (value) => {
+			const standardTemplateAutofillButtonsWrapper = document.querySelector(
+				"#standardTemplateAutofillButtonsWrapper",
+			);
+
+			value === "Standard"
+				? standardTemplateAutofillButtonsWrapper.classList.remove("hidden")
+				: standardTemplateAutofillButtonsWrapper.classList.add("hidden");
+		});
+
+		subscribe("templateType", (value) => {
+			const standardTemplateExclusiveOptGroup = document.querySelector(
+				"#standardTemplateExclusiveOptGroup",
+			);
+			const pwrTemplateExclusiveOptGroup = document.querySelector(
+				"#pwrTemplateExclusiveOptGroup",
+			);
+
+			if (value === "Standard") {
+				standardTemplateExclusiveOptGroup.classList.remove("hidden");
+				pwrTemplateExclusiveOptGroup.classList.add("hidden");
+			} else {
+				standardTemplateExclusiveOptGroup.classList.add("hidden");
+				pwrTemplateExclusiveOptGroup.classList.remove("hidden");
+			}
+		});
+
 		switchButton.addEventListener("click", () => {
 			getState("templateType") === "Standard"
 				? setState("templateType", "Password Reset")
@@ -500,6 +527,7 @@ const fieldUI = {
 			document.querySelector("#documentationField").reset();
 			resetAllState();
 			window.location.href = "#documentationField";
+			appControls.renderHistoryList();
 		});
 	},
 
@@ -532,11 +560,12 @@ const fieldUI = {
 				];
 
 				fields.forEach((key) => {
+					console.log(key);
 					document.querySelector(`[name="${key}"]`).value = data[key];
 				});
-
 				resetAllState();
 				window.location.href = "#documentationField";
+				appControls.renderHistoryList();
 			});
 	},
 
@@ -562,12 +591,43 @@ const fieldUI = {
 				const form = document.querySelector("#documentationField");
 				const formData = new FormData(form);
 				const data = Object.fromEntries(formData.entries());
+				copyToClipboard(data);
 				app.updateDataInRecord(app.getIndexBeingEdited(), data);
+				alert("Changes saved and copied to clipboard");
 			}
 			document.querySelector("#documentationField").reset();
 			resetAllState();
 			window.location.href = "#documentationField";
 			console.log("done");
+		});
+	},
+
+	standardTroubleshootingStepsAutofillInit() {
+		const troubleShootingStepsField = document.querySelector(
+			"[name=troubleshootingSteps]",
+		);
+
+		const incidentResolvedAFButton = document.querySelector(
+			"#incidentResolvedAFButton",
+		);
+		const incidentRoutedAFButton = document.querySelector(
+			"#incidentRoutedAFButton",
+		);
+
+		incidentResolvedAFButton.addEventListener("click", () => {
+			troubleShootingStepsField.value += `
+- Issue Resolved
+- Provided ticket number to the user
+- Confirmed with user ticket can now be set to resolved
+- End Interaction`;
+		});
+
+		incidentRoutedAFButton.addEventListener("click", () => {
+			troubleShootingStepsField.value += `
+- Advised user ticket will be routed to the next resolver team
+- Provided ticket number to the user
+- User Acknowledged
+- End Interaction`;
 		});
 	},
 
@@ -579,6 +639,7 @@ const fieldUI = {
 		this.cancelButtonInit();
 		this.newNoteUserRetainedButtonInit();
 		this.saveChangesButtonInit();
+		this.standardTroubleshootingStepsAutofillInit();
 	},
 };
 
@@ -704,12 +765,33 @@ const appControls = {
 
 	hideControlPanelButtonInit() {
 		const appControlsWrapper = document.querySelector("#appControlsWrapper");
-
+		const options = ["Show Control Panel", "Hide Control Panel"];
+		let current = 0;
 		document
 			.querySelector("#hideControlPanelButton")
-			.addEventListener("click", () =>
-				appControlsWrapper.classList.toggle("hidden"),
-			);
+			.addEventListener("click", (e) => {
+				appControlsWrapper.classList.toggle("hidden");
+				current = 1 - current;
+				e.target.textContent = options[current];
+			});
+	},
+
+	createSessionAutoFillInit() {
+		const createSessionAFButton = document.querySelector(
+			"#createSessionAFButton",
+		);
+
+		createSessionAFButton.addEventListener("click", () => {
+			const phTime = new Date().toLocaleString("en-US", {
+				timeZone: "Asia/Manila",
+				dateStyle: "short",
+			});
+
+			// const now = Date.now();
+			// const dateObject = new Date(now);
+			// const currentDate = dateObject.toLocaleDateString();
+			document.querySelector("[name=sessionName]").value = phTime;
+		});
 	},
 
 	init() {
@@ -719,6 +801,7 @@ const appControls = {
 		this.renderSessionList();
 		this.closePreviewButtonInit();
 		this.hideControlPanelButtonInit();
+		this.createSessionAutoFillInit();
 	},
 };
 
@@ -782,7 +865,6 @@ function standardTemplateFormatter(data) {
 	if (data.callerType === "On Behalf") {
 		onBehalfDetails = `
 USER
-
 Employee ID: ${data.OBemployeeId}
 Name: ${data.OBfullName}
 Email Address: ${data.OBemail}
@@ -795,13 +877,12 @@ Location: ${data.OBlocation}
 	let resolutionNotes = "";
 	if (data.issueResolved === "Yes") {
 		resolutionNotes = `
-RESOLUTION NOTES:
-${data.resolutionNotes}`;
+RESOLUTION NOTES: ${data.resolutionNotes}`;
 	}
 
 	const documentation = `
 CALLER
-
+Employee ID: ${data.employeeId}
 Name: ${data.fullName}
 Email Address: ${data.email}
 Contact Number: ${data.contactNumber}
@@ -834,7 +915,6 @@ function pwrTypeFormatter(data) {
 	if (data.callerType === "On Behalf") {
 		onBehalfDetails = `
 USER
-
 Employee ID: ${data.OBemployeeId}
 Name: ${data.OBfullName}
 Email Address: ${data.OBemail}
@@ -861,8 +941,8 @@ ${data.resolutionNotes}`;
 	}
 
 	const documentation = `
-Caller
-
+CALLER
+Employee ID: ${data.employeeId}
 Name: ${data.fullName}
 Email Address: ${data.email}
 Contact Number: ${data.contactNumber}
@@ -903,14 +983,14 @@ function appInit() {
 
 function fillTestData() {
 	const testData = {
-		employeeId: "7012345",
+		employeeId: "70123456",
 		fullName: "John Doe",
 		email: "john.doe@nationalgrid.com",
 		contactNumber: "555-123-4567",
 		availability: "9am-4pm",
 		location: "Waltham Data Drive",
 
-		OBemployeeId: "7054321",
+		OBemployeeId: "70654321",
 		OBfullName: "Jane Smith",
 		OBemail: "jane.smith@nationalgrid.com",
 		OBcontactNumber: "555-987-6543",
@@ -920,14 +1000,12 @@ function fillTestData() {
 		existingTicket: "No",
 		machineName: "US-L-A1234",
 
-		issueDescription: `
-- User is trying to access myhub
+		issueDescription: `- User is trying to access myhub
 - Error message "Invalid Login"
 - User was able to access myhub before
 `,
 
-		troubleshootingSteps: `
-- Remote user via LMI.
+		troubleshootingSteps: `- Remote user via LMI.
 - Cleared Cache and Cookies
 - Removed Favorites folder/bookmark
 - Restart Browser

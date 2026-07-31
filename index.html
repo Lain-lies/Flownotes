@@ -16,7 +16,6 @@
 					alt="Flownotes Logo" />
 			</div>
 		</header>
-		<p>ver 2.0.0</p>
 
 		<div id="appControlsWrapper" class="hidden">
 			<h5>Control Panel</h5>
@@ -25,7 +24,12 @@
 				<form id="createSessionForm">
 					<label for="sessionName">Create New Session:</label>
 					<input type="text" id="sessionName" name="sessionName" />
-					<button type="submit">Submit</button>
+					<div id="createSessionButtonsWrapper">
+						<button type="button" id="createSessionAFButton">
+							Current Date
+						</button>
+						<button type="submit">Submit</button>
+					</div>
 				</form>
 			</div>
 
@@ -51,7 +55,7 @@
 			</div>
 		</div>
 
-		<button id="hideControlPanelButton">Hide Control Panel</button>
+		<button id="hideControlPanelButton">Show Control Panel</button>
 
 		<form id="documentationField">
 			<!--  Caller and Template Type -->
@@ -86,6 +90,16 @@
 			<!-- User Entitlement -->
 			<fieldset>
 				<legend>User Entitlement</legend>
+
+				<div class="fieldWrapper">
+					<label for="employeeId">Employee ID:</label>
+					<input
+						type="text"
+						id="employeeId"
+						name="employeeId"
+						placeholder="Enter Employee ID"
+						required />
+				</div>
 
 				<div class="fieldWrapper">
 					<label for="fullName">Name:</label>
@@ -346,23 +360,33 @@
 							<select id="ssprOutcome" name="ssprOutcome">
 								<optgroup label="SSPR Offered: No" id="noOptGroup">
 									<option
+										value="N/A: User is calling on behalf of someone else."
+										selected>
+										N/A: User is calling on behalf of someone else..
+									</option>
+									<option
 										value="N/A: User is not yet registered to MFA."
 										selected>
 										N/A: User is not yet registered to MFA.
 									</option>
-									<option
-										value="N/A: User just had a password reset within 24 hours.">
-										N/A: User just had a password reset within 24 hours.
-									</option>
-									<option value="N/A: User is calling for an admin account.">
-										N/A: User is calling for an admin account.
-									</option>
+
 									<option value="N/A: User's AD account is locked out.">
 										N/A: User's AD account is locked out.
 									</option>
+
 									<option
 										value="N/A: User's AD account is deactivated/disabled.">
 										N/A: User's AD account is deactivated/disabled.
+									</option>
+
+									<option value="N/A: User is calling for an admin account.">
+										N/A: User is calling for an admin account.
+									</option>
+
+									<option
+										value="N/A: User just had a password reset within 24 hours. Option is still locked.">
+										N/A: User just had a password reset within 24 hours. Option
+										is still locked.
 									</option>
 								</optgroup>
 
@@ -371,19 +395,27 @@
 									id="yesOptGroup"
 									class="hidden">
 									<option
-										value="User refused: User prefers the agent to do the password change."
+										value="Success: User was able to change the password via the self-service tool."
 										selected>
-										User refused: User prefers the agent to do the password
-										change.
+										Success: User was able to change the password via the
+										self-service tool.
+									</option>
+
+									<!-- ERROR -->
+
+									<option value="Error: User is unable to access aka.ms/sspr.">
+										Error: User is unable to access aka.ms/sspr.
 									</option>
 									<option
-										value="User refused: User don't want to use their mobile phone.">
-										User refused: User don't want to use their mobile phone.
+										value="Error: Account doesn't exist. Contact administrator.">
+										Error: Account doesn't exist. Contact administrator.
 									</option>
 									<option
-										value="User refused: User prefers to keep their current password.">
-										User refused: User prefers to keep their current password.
+										value="Error: You haven't registered for a password reset.">
+										Error: You haven't registered for a password reset.
 									</option>
+
+									<!-- FAILED  -->
 
 									<option
 										value="Failed: User cannot correctly input the CAPTCHA.">
@@ -404,16 +436,20 @@
 										Failed: User was disconnected; Unable to reach back.
 									</option>
 
-									<option value="Error: User is unable to access aka.ms/sspr.">
-										Error: User is unable to access aka.ms/sspr.
+									<!-- USER REFUSED  -->
+									<option
+										value="User refused: User prefers the agent to do the password change."
+										selected>
+										User refused: User prefers the agent to do the password
+										change.
 									</option>
 									<option
-										value="Error: Account doesn't exist. Contact administrator.">
-										Error: Account doesn't exist. Contact administrator.
+										value="User refused: User don't want to use their mobile phone.">
+										User refused: User don't want to use their mobile phone.
 									</option>
 									<option
-										value="Error: You haven't registered for a password reset.">
-										Error: You haven't registered for a password reset.
+										value="User refused: User prefers to keep their current password.">
+										User refused: User prefers to keep their current password.
 									</option>
 								</optgroup>
 							</select>
@@ -425,23 +461,30 @@
 			<!-- Issue Identification and Troubleshooting -->
 			<fieldset>
 				<legend>Issue Identification and Troubleshooting</legend>
-				<div class="centerWrapper">
-					<label for="issueDescription"> Issue Description: </label>
-					<textarea
-						name="issueDescription"
-						id="issueDescription"
-						rows="5"
-						placeholder="Describe the issue"
-						minlength="50"
-						required></textarea>
+				<label for="issueDescription"> Issue Description: </label>
+				<textarea
+					name="issueDescription"
+					id="issueDescription"
+					rows="5"
+					placeholder="Describe the issue"
+					minlength="50"
+					required></textarea>
 
-					<label for="troubleshootingSteps"> Troubleshooting Steps: </label>
-					<textarea
-						name="troubleshootingSteps"
-						id="troubleshootingSteps"
-						rows="10"
-						placeholder="List the steps taken to troubleshoot the issue"
-						required></textarea>
+				<label for="troubleshootingSteps"> Troubleshooting Steps: </label>
+				<textarea
+					name="troubleshootingSteps"
+					id="troubleshootingSteps"
+					rows="10"
+					placeholder="List the steps taken to troubleshoot the issue"
+					required></textarea>
+
+				<div id="standardTemplateAutofillButtonsWrapper">
+					<button type="button" id="incidentResolvedAFButton">
+						Incident Resolved
+					</button>
+					<button type="button" id="incidentRoutedAFButton">
+						Incident Routed
+					</button>
 				</div>
 			</fieldset>
 
@@ -488,23 +531,37 @@
 					<div class="fieldWrapper">
 						<label for="nextActions">Next Action(s):</label>
 						<select id="nextActions" name="nextActions">
-							<option value="None" selected>None</option>
-							<option value="Wait for Line-Manager Approval">
-								Wait for Line-Manager Approval
+							<option value="Complete the interaction">
+								Complete the interaction
 							</option>
-							<option value="Route the ticket to the next resolver team">
-								Route the Ticket to the next Resolver Team
-							</option>
-							<option value="Set Ticket to 'On-Hold' Status">
-								Set Ticket to 'On-Hold' Status
-							</option>
-							<option value="Set Ticket to 'Resolved' Status">
-								Set Ticket to 'Resolved' Status
-							</option>
-							<option value="Set ticket to 'Fulfilled' Status">
-								Set Ticket to 'Fulfilled' Status
-							</option>
-							<option value="Cancel Ticket">Cancel Ticket</option>
+							<option value="Cancelled the ticket">Cancelled the ticket</option>
+							<option value="Escalated the ticket">Escalated the ticket</option>
+
+							<optgroup
+								label="Standard Template Options"
+								id="standardTemplateExclusiveOptGroup">
+								<option value="Set Ticket to 'On Hold' Status">
+									Set Ticket to 'On Hold' Status
+								</option>
+								<option value="Set Ticket to 'Resolved' Status">
+									Set Ticket to 'Resolved' Status
+								</option>
+								<option value="Route the Ticket to the Next Resolver Team">
+									Route the Ticket to the Next Resolver Team
+								</option>
+							</optgroup>
+
+							<optgroup
+								label="Password Reset Template Options"
+								id="pwrTemplateExclusiveOptGroup"
+								class="hidden">
+								<option value="Set Ticket to 'Fulfilled' Status">
+									Set Ticket to 'Fulfilled' Status
+								</option>
+								<option value="Line Manager's Approval Required">
+									Line Manager's Approval Required
+								</option>
+							</optgroup>
 						</select>
 					</div>
 
@@ -530,7 +587,8 @@
 							type="text"
 							id="ticketNumber"
 							name="ticketNumber"
-							placeholder="Not visible when copied" />
+							placeholder="Not visible when copied"
+							required />
 					</div>
 				</div>
 			</fieldset>
@@ -548,7 +606,9 @@
 
 			<fieldset id="editModeWrapper" class="hidden">
 				<legend>Edit Mode Controls</legend>
-				<button type="button" id="saveChangesButton">Save Changes</button>
+				<button type="button" id="saveChangesButton">
+					Save Changes & Copy to Clipboard
+				</button>
 			</fieldset>
 		</form>
 
@@ -561,6 +621,13 @@
 				<a href="https://github.com/Lain-lies/worknotes" target="_blank"
 					>Flownotes</a
 				>
+				| Made by: Kenjie Tarasona
+			</p>
+
+			<p>
+				For questions, suggestions, or bug reports please send an email to
+				<a href="mailto:annabel.tejoso@atos.ai">annabel.tejoso@atos.ai</a> or
+				send a message on teams.
 			</p>
 		</footer>
 	</body>

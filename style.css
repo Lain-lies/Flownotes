@@ -18,7 +18,6 @@
 
 body {
 	line-height: 1.5;
-
 	-webkit-font-smoothing: antialiased;
 }
 
@@ -73,17 +72,26 @@ h6 {
 #appControlsWrapper {
 	border: 1px solid black;
 	padding: 1rem;
+	margin-bottom: 1rem;
 }
 
 #createSessionForm {
-	display: flex;
-	justify-content: center;
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
 	align-items: center;
-	gap: 0.5rem;
+	justify-content: center;
+	gap: 2px;
+}
+
+#createSessionButtonsWrapper {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	align-items: center;
+	gap: 2px;
 }
 
 .headerWrapper-c {
-	display: flex;
+	display: grid;
 	justify-content: center;
 }
 
@@ -94,11 +102,6 @@ li {
 .liWrapper {
 	display: flex;
 	gap: 5px;
-}
-
-input,
-textarea {
-	font-size: 1rem;
 }
 
 label {
@@ -130,6 +133,7 @@ input[type="text"] {
 #documentationField {
 	display: grid;
 	justify-content: center;
+	margin-top: 1rem;
 }
 
 .fieldWrapper,
@@ -139,17 +143,15 @@ input[type="text"] {
 	justify-content: start;
 	align-items: center;
 	gap: 5px;
-	margin-top: 0.3rem;
 }
 
 fieldset {
 	margin: 0.5rem 0.3rem;
-	border: 2px solid black;
+	border: 2px solid;
 }
 
 legend {
 	margin: 0 auto;
-	font-size: 0.7rem;
 	font-weight: 700;
 }
 
@@ -189,11 +191,11 @@ button {
 
 #normalModeWrapper {
 	display: flex;
-	gap: 5px;
+	justify-content: space-evenly;
 }
 
 #normalModeWrapper > button {
-	padding: 0;
+	padding: 0rem 0.3rem;
 	font-size: 0.9rem;
 }
 
@@ -220,4 +222,23 @@ select:hover {
 
 #cancelButton {
 	background-color: #bc544b;
+}
+
+#standardTemplateAutofillButtonsWrapper,
+#pwrTemplateAutofillButtonsWrapper {
+	display: flex;
+	justify-content: space-evenly;
+}
+
+footer {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 1rem;
+	padding: 5px;
+}
+
+footer > p {
+	text-align: center;
 }
