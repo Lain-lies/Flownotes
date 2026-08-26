@@ -92,17 +92,7 @@
 				<legend>User Entitlement</legend>
 
 				<div class="fieldWrapper">
-					<label for="employeeId">Employee ID:</label>
-					<input
-						type="text"
-						id="employeeId"
-						name="employeeId"
-						placeholder="Enter Employee ID"
-						required />
-				</div>
-
-				<div class="fieldWrapper">
-					<label for="fullName">Name:</label>
+					<label for="fullName">Full Name:</label>
 					<input
 						type="text"
 						id="fullName"
@@ -118,6 +108,16 @@
 						id="email"
 						name="email"
 						placeholder="Enter Email"
+						required />
+				</div>
+
+				<div class="fieldWrapper">
+					<label for="employeeId">Employee ID:</label>
+					<input
+						type="text"
+						id="employeeId"
+						name="employeeId"
+						placeholder="Enter Employee ID"
 						required />
 				</div>
 
@@ -144,7 +144,9 @@
 
 						<select name="timezone">
 							<option value="EST" selected>EST</option>
+							<option value="BST">BST</option>
 							<option value="DST">DST</option>
+							<option value="GMT">GMT</option>
 							<option value="IST">IST</option>
 						</select>
 					</div>
@@ -165,18 +167,7 @@
 						<legend>On Behalf Of</legend>
 
 						<div class="fieldWrapper">
-							<label for="OBemployeeId">Employee ID:</label>
-							<input
-								type="text"
-								id="OBemployeeId"
-								name="OBemployeeId"
-								placeholder="Enter Employee ID"
-								value="N/A"
-								required />
-						</div>
-
-						<div class="fieldWrapper">
-							<label for="OBfullName">Name:</label>
+							<label for="OBfullName">Full Name:</label>
 							<input
 								type="text"
 								id="OBfullName"
@@ -194,6 +185,17 @@
 								name="OBemail"
 								value="N/A@email.com"
 								placeholder="Enter Email Address" />
+						</div>
+
+						<div class="fieldWrapper">
+							<label for="OBemployeeId">Employee ID:</label>
+							<input
+								type="text"
+								id="OBemployeeId"
+								name="OBemployeeId"
+								placeholder="Enter Employee ID"
+								value="N/A"
+								required />
 						</div>
 
 						<div class="fieldWrapper">
@@ -220,7 +222,9 @@
 
 								<select name="OBtimezone">
 									<option value="EST" selected>EST</option>
+									<option value="BST">BST</option>
 									<option value="DST">DST</option>
+									<option value="GMT">GMT</option>
 									<option value="IST">IST</option>
 								</select>
 							</div>
@@ -281,7 +285,7 @@
 					</div>
 
 					<div class="fieldWrapper">
-						<label for="machineName">Machine Name:</label>
+						<label for="machineName">Device Name:</label>
 						<input
 							type="text"
 							id="machineName"
@@ -304,7 +308,7 @@
 
 				<div class="pwrTemplateWrapper hidden">
 					<div class="fieldWrapper">
-						<label for="resetType">Password Reset?:</label>
+						<label for="resetType">Reset Type:</label>
 						<input
 							type="text"
 							class="hidden"
@@ -359,10 +363,15 @@
 
 							<select id="ssprOutcome" name="ssprOutcome">
 								<optgroup label="SSPR Offered: No" id="noOptGroup">
+
 									<option
 										value="N/A: User is calling on behalf of someone else."
 										selected>
 										N/A: User is calling on behalf of someone else..
+									</option>
+									<option
+										value="N/A: User already have an existing ticket for password reset.">
+										N/A: User already have an existing ticket for password reset.
 									</option>
 									<option
 										value="N/A: User is not yet registered to MFA."

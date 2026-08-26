@@ -105,7 +105,7 @@ Session List: ${this.getSessionList()}`);
 			return false;
 		}
 
-		const sessionList = this.getSessionListFromLocalStorage(lastSessionName);
+		const sessionList = this.getSessionListFromLocalStorage();
 		this.setSessionList(sessionList);
 		this.loadSession(lastSessionName);
 		return true;
@@ -120,6 +120,7 @@ Session List: ${this.getSessionList()}`);
 		this.loadSession(currentDate);
 		localStorage.setItem("lastSessionName", currentDate);
 	},
+
 };
 
 class managedStateObject {
@@ -865,9 +866,9 @@ function standardTemplateFormatter(data) {
 	if (data.callerType === "On Behalf") {
 		onBehalfDetails = `
 USER
-Employee ID: ${data.OBemployeeId}
 Name: ${data.OBfullName}
 Email Address: ${data.OBemail}
+Employee ID: ${data.OBemployeeId}
 Contact Number: ${data.OBcontactNumber}
 Availability Hours: ${data.OBavailability} ${data.OBtimezone}
 Location: ${data.OBlocation}
@@ -882,9 +883,9 @@ RESOLUTION NOTES: ${data.resolutionNotes}`;
 
 	const documentation = `
 CALLER
-Employee ID: ${data.employeeId}
-Name: ${data.fullName}
+Full Name: ${data.fullName}
 Email Address: ${data.email}
+Employee ID: ${data.employeeId}
 Contact Number: ${data.contactNumber}
 Availability Hours: ${data.availability}${data.timezone}
 Location: ${data.location}
@@ -893,7 +894,7 @@ Existing Ticket? ${data.existingTicket}
 Possible Major Incident? ${data.possibleMajorIncident}
 Contact Type: ${data.contactType}
 
-Machine Name: ${data.machineName}
+Device Name: ${data.machineName}
 Nexthink Checklist: ${data.nexthinkChecklist}
 
 ISSUE DESCRIPTION:
@@ -915,9 +916,9 @@ function pwrTypeFormatter(data) {
 	if (data.callerType === "On Behalf") {
 		onBehalfDetails = `
 USER
-Employee ID: ${data.OBemployeeId}
 Name: ${data.OBfullName}
 Email Address: ${data.OBemail}
+Employee ID: ${data.OBemployeeId}
 Contact Number: ${data.OBcontactNumber}
 Availability Hours: ${data.OBavailability} ${data.OBtimezone}
 Location: ${data.OBlocation}
@@ -942,9 +943,9 @@ ${data.resolutionNotes}`;
 
 	const documentation = `
 CALLER
-Employee ID: ${data.employeeId}
 Name: ${data.fullName}
 Email Address: ${data.email}
+Employee ID: ${data.employeeId}
 Contact Number: ${data.contactNumber}
 Availability Hours: ${data.availability} ${data.timezone}
 Location: ${data.location}
