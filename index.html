@@ -17,7 +17,7 @@
 			</div>
 		</header>
 
-		<div id="appControlsWrapper" class="hidden">
+		<div id="appControlsWrapper">
 			<h5>Control Panel</h5>
 
 			<div class="headerWrapper-c">
@@ -363,7 +363,6 @@
 
 							<select id="ssprOutcome" name="ssprOutcome">
 								<optgroup label="SSPR Offered: No" id="noOptGroup">
-
 									<option
 										value="N/A: User is calling on behalf of someone else."
 										selected>
@@ -371,7 +370,8 @@
 									</option>
 									<option
 										value="N/A: User already have an existing ticket for password reset.">
-										N/A: User already have an existing ticket for password reset.
+										N/A: User already have an existing ticket for password
+										reset.
 									</option>
 									<option
 										value="N/A: User is not yet registered to MFA."
@@ -618,6 +618,7 @@
 				<button type="button" id="saveChangesButton">
 					Save Changes & Copy to Clipboard
 				</button>
+				<button type="button" id="cancelEditButton">Cancel Edit</button>
 			</fieldset>
 		</form>
 

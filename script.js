@@ -1,127 +1,194 @@
-const app = {
-	record: null,
-	currentSessionName: "",
-	sessionList: [],
-	indexBeingEdited: 0,
+function currentDate() {
+	return new Date(Date.now()).toLocaleDateString();
+}
 
-	setRecord: function (record) {
-		this.record = record;
+const appModule = {
+	sessionObject: {},
+	currentSession: "",
+
+	updateSessionObject() {
+		this.sessionObject = { ...JSON.parse(localStorage.getItem("tempSO")) };
+		localStorage.setItem("sessionObject", JSON.stringify(this.sessionObject));
+		localStorage.removeItem("tempSO");
 	},
 
-	setCurrentSessionName: function (sessionName) {
-		this.currentSessionName = sessionName;
+	getSessionObject() {
+		return { ...this.sessionObject };
 	},
 
-	setSessionList: function (sessionList) {
-		this.sessionList = [...sessionList];
+	setCurrentSession(session) {
+		this.currentSession = session;
+		document.querySelector("#currentSessionName").textContent = session;
+		localStorage.setItem("lastSession", session);
+
+		console.log(`Session Object: ${JSON.stringify(this.sessionObject)}`);
+		console.log(`Current Session: ${this.currentSession}`);
 	},
 
-	setIndexBeingEdited: function (index) {
-		this.indexBeingEdited = index;
+	getCurrentSessionName() {
+		return this.currentSession;
 	},
 
-	getRecord: function () {
-		return this.record;
+	init() {
+		this.sessionObject =
+			JSON.parse(localStorage.getItem("sessionObject")) || {};
+		if (localStorage.getItem("lastSession")) {
+			this.setCurrentSession(localStorage.getItem("lastSession"));
+		} else {
+			this.sessionObject = { ...this.sessionObject, [currentDate()]: [] };
+			localStorage.setItem("sessionObject", JSON.stringify(this.sessionObject));
+			localStorage.setItem("lastSession", currentDate());
+			this.setCurrentSession(currentDate());
+		}
+	},
+};
+
+const sessionModule = {
+	fetchSessionListFromLocalStorage() {
+		this.sessionList =
+			Object.keys(JSON.parse(localStorage.getItem("sessionObject"))) || [];
 	},
 
-	getCurrentSessionName: function () {
-		return this.currentSessionName;
+	createSessionListItem(parentNode, session) {
+		const li = document.createElement("li");
+		const sessionButton = document.createElement("button");
+
+		sessionButton.textContent = session;
+		sessionButton.addEventListener("click", () => {
+			appModule.setCurrentSession(session);
+			historyModule.renderHistory();
+		});
+
+		li.appendChild(sessionButton);
+		parentNode.appendChild(li);
 	},
 
-	getSessionList: function () {
-		return [...this.sessionList];
+	renderSessionList() {
+		const ul = document.querySelector("#sessionList");
+		ul.replaceChildren();
+		this.fetchSessionListFromLocalStorage();
+		this.sessionList.forEach((session) => {
+			this.createSessionListItem(ul, session);
+		});
 	},
 
-	// HELPERS //
-	getSessionListFromLocalStorage: function () {
-		const sessionList = Object.entries(localStorage)
-			.map(([key]) => key)
-			.filter((key) => key !== "lastSessionName");
-		console.log(sessionList);
+	createSessionFormInit() {
+		document
+			.querySelector("#createSessionForm")
+			.addEventListener("submit", (e) => {
+				e.preventDefault();
+				const formData = new FormData(e.target);
+				const newSessionName = formData.get("sessionName").trim();
 
-		return sessionList;
+				if (newSessionName === "") {
+					alert("Session name cannot be empty!");
+					return;
+				}
+
+				this.fetchSessionListFromLocalStorage();
+
+				if (this.sessionList.includes(newSessionName)) {
+					alert("Session name already exists! Please choose a different name.");
+					return;
+				}
+
+				const tempSO = { ...appModule.getSessionObject() };
+				tempSO[newSessionName] = [];
+				localStorage.setItem("tempSO", JSON.stringify(tempSO));
+				appModule.updateSessionObject();
+
+				this.renderSessionList();
+				e.target.reset();
+			});
 	},
 
-	getIndexBeingEdited: function () {
-		return this.indexBeingEdited;
+	init() {
+		this.renderSessionList();
+		this.createSessionFormInit();
 	},
+};
 
-	loadSession: function (sessionName) {
-		const sessionData = JSON.parse(localStorage.getItem(sessionName));
+const historyModule = {
+	editIndex: null,
 
-		if (!Array.isArray(sessionData)) {
-			alert(
-				"Error encountered: The session loaded is not Array and will cause saving errors",
-			);
+	saveChangesHandler(data) {
+		if (this.editIndex === null) {
+			alert("No record selected for editing.");
 			return;
 		}
-
-		this.setRecord(sessionData);
-		this.setCurrentSessionName(sessionName);
-		localStorage.setItem("lastSessionName", sessionName);
-
-		console.log(`
-Current Session: ${this.getCurrentSessionName()}
-Current Record: ${this.getRecord()}
-Session List: ${this.getSessionList()}`);
+		const tempSO = { ...appModule.getSessionObject() };
+		tempSO[appModule.getCurrentSessionName()][this.editIndex] = data;
+		localStorage.setItem("tempSO", JSON.stringify(tempSO));
+		appModule.updateSessionObject();
+		this.editIndex = null;
+		this.renderHistory();
 	},
 
-	updateRecordAndSync: function (newRecord) {
-		this.setRecord([...this.getRecord(), newRecord]);
+	cancelEditHandler() {
+		this.editIndex = null;
+	},
 
-		localStorage.setItem(
-			this.getCurrentSessionName(),
-			JSON.stringify(this.getRecord()),
+	createHistoryListItem(parentNode, data, previewHandler, editHandler) {
+		const li = document.createElement("li");
+		const div = document.createElement("div");
+		div.classList.add("liWrapper");
+
+		const previewButton = document.createElement("button");
+		const editButton = document.createElement("button");
+
+		previewButton.textContent = `${data.ticketNumber} | ${data.fullName}`;
+		previewButton.addEventListener("click", previewHandler);
+
+		editButton.textContent = "Edit";
+		editButton.addEventListener("click", editHandler);
+
+		div.appendChild(previewButton);
+		div.appendChild(editButton);
+
+		li.appendChild(div);
+
+		parentNode.appendChild(li);
+	},
+
+	renderHistory() {
+		const ul = document.querySelector("#sessionHistory");
+		const exportAllButton = document.querySelector("#exportAll");
+		exportAllButton.addEventListener("click", () =>
+			exportSession(app.getCurrentSessionName()),
 		);
+		ul.replaceChildren();
+		appModule
+			.getSessionObject()
+			[appModule.getCurrentSessionName()].forEach((data, index) => {
+				previewHandler = () => previewRecord(data);
 
-		alert("Storage Synced!");
+				editHandler = () => {
+					if (getState("isModified")) {
+						alert("Unable to edit record: Please save or cancel notes");
+						return;
+					}
+
+					if (getState("isEditMode")) {
+						alert("Already in edit mode. Please save or cancel current edits.");
+						return;
+					}
+
+					this.editIndex = index;
+
+					Object.entries(data).forEach(([key, value]) => {
+						const el = document.querySelector(`[name="${key}"]`);
+						el.value = value;
+					});
+
+					setMultipleState(data);
+					setState("isEditMode", true);
+				};
+
+				this.createHistoryListItem(ul, data, previewHandler, editHandler);
+			});
 	},
-
-	updateSessionList: function (newSessionName) {
-		localStorage.setItem(newSessionName, JSON.stringify([]));
-		const newSessionList = this.getSessionListFromLocalStorage();
-		this.setSessionList(newSessionList);
-	},
-
-	getDataInRecord(index) {
-		const data = this.getRecord()[index];
-		return data;
-	},
-
-	updateDataInRecord(index, newData) {
-		this.getRecord()[index] = newData;
-		localStorage.setItem(
-			this.getCurrentSessionName(),
-			JSON.stringify(this.getRecord()),
-		);
-	},
-
-	// INIT //
-	resumeLastSession: function () {
-		const lastSessionName = localStorage.getItem("lastSessionName");
-
-		if (lastSessionName === null || lastSessionName === undefined) {
-			console.log("No last session");
-			return false;
-		}
-
-		const sessionList = this.getSessionListFromLocalStorage();
-		this.setSessionList(sessionList);
-		this.loadSession(lastSessionName);
-		return true;
-	},
-
-	init: function () {
-		const now = Date.now();
-		const dateObject = new Date(now);
-		const currentDate = dateObject.toLocaleDateString();
-		localStorage.setItem(currentDate, JSON.stringify([]));
-		this.setSessionList([currentDate]);
-		this.loadSession(currentDate);
-		localStorage.setItem("lastSessionName", currentDate);
-	},
-
 };
+
 
 class managedStateObject {
 	constructor(state, subscribers = []) {
@@ -132,7 +199,6 @@ class managedStateObject {
 	setState(value) {
 		this.state = value;
 		this.updateSubscribers();
-		// console.log(this.state);
 	}
 
 	getState() {
@@ -514,6 +580,13 @@ const fieldUI = {
 			console.log(data);
 			setState("savedData", data);
 			copyToClipboard(data);
+			const tempSO = { ...appModule.getSessionObject() };
+			tempSO[appModule.getCurrentSessionName()] = [
+				...tempSO[appModule.getCurrentSessionName()],
+				data,
+			];
+			localStorage.setItem("tempSO", JSON.stringify(tempSO));
+			console.log(JSON.parse(localStorage.getItem("tempSO")));
 			alert("Saved and Copied to Clipboard");
 		});
 	},
@@ -524,11 +597,11 @@ const fieldUI = {
 				alert("Please save current notes");
 				return;
 			}
-			app.updateRecordAndSync(getState("savedData"));
+			appModule.updateSessionObject();
+			historyModule.renderHistory();
 			document.querySelector("#documentationField").reset();
 			resetAllState();
 			window.location.href = "#documentationField";
-			appControls.renderHistoryList();
 		});
 	},
 
@@ -592,14 +665,26 @@ const fieldUI = {
 				const form = document.querySelector("#documentationField");
 				const formData = new FormData(form);
 				const data = Object.fromEntries(formData.entries());
+				historyModule.saveChangesHandler(data);
 				copyToClipboard(data);
-				app.updateDataInRecord(app.getIndexBeingEdited(), data);
 				alert("Changes saved and copied to clipboard");
+				document.querySelector("#documentationField").reset();
+				resetAllState();
+				window.location.href = "#documentationField";
 			}
-			document.querySelector("#documentationField").reset();
-			resetAllState();
-			window.location.href = "#documentationField";
-			console.log("done");
+		});
+	},
+
+	cancelEditButtonInit() {
+		const cancelEditButton = document.querySelector("#cancelEditButton");
+
+		cancelEditButton.addEventListener("click", (e) => {
+			if (confirm("Are you sure you want to cancel editing?")) {
+				document.querySelector("#documentationField").reset();
+				resetAllState();
+				window.location.href = "#documentationField";
+				historyModule.cancelEditHandler();
+			}
 		});
 	},
 
@@ -640,169 +725,8 @@ const fieldUI = {
 		this.cancelButtonInit();
 		this.newNoteUserRetainedButtonInit();
 		this.saveChangesButtonInit();
+		this.cancelEditButtonInit();
 		this.standardTroubleshootingStepsAutofillInit();
-	},
-};
-
-const appControls = {
-	createSessionListItem(parentNode, session, handler) {
-		const li = document.createElement("li");
-		const sessionButton = document.createElement("button");
-
-		sessionButton.textContent = session;
-		sessionButton.addEventListener("click", handler);
-
-		li.appendChild(sessionButton);
-		parentNode.appendChild(li);
-	},
-
-	createHistoryListItem(parentNode, data, previewHandler, editHandler) {
-		const li = document.createElement("li");
-		const div = document.createElement("div");
-		div.classList.add("liWrapper");
-
-		const previewButton = document.createElement("button");
-		const editButton = document.createElement("button");
-
-		previewButton.textContent = `${data.ticketNumber} | ${data.fullName}`;
-		previewButton.addEventListener("click", previewHandler);
-
-		editButton.textContent = "Edit";
-		editButton.addEventListener("click", editHandler);
-
-		div.appendChild(previewButton);
-		div.appendChild(editButton);
-
-		li.appendChild(div);
-
-		parentNode.appendChild(li);
-	},
-
-	createSessionFormInit() {
-		document
-			.querySelector("#createSessionForm")
-			.addEventListener("submit", (e) => {
-				e.preventDefault();
-				const formData = new FormData(e.target);
-				const newSessionName = formData.get("sessionName").trim();
-
-				if (newSessionName === "") {
-					alert("Session name cannot be empty!");
-					return;
-				}
-
-				if (localStorage.getItem(newSessionName)) {
-					alert("Session name already exists! Please choose a different name.");
-					return;
-				}
-
-				app.updateSessionList(newSessionName);
-				this.renderSessionList();
-				e.target.reset();
-			});
-	},
-
-	renderSessionList() {
-		const sessionList = app.getSessionList();
-		const ul = document.querySelector("#sessionList");
-		ul.replaceChildren();
-		console.log(sessionList);
-		sessionList.forEach((session) => {
-			const handler = () => {
-				if (getState("isModified")) {
-					alert("Please save or cancel current notes before switching session");
-					return;
-				}
-				app.loadSession(session);
-				document.querySelector("#currentSessionName").textContent = session;
-				this.renderHistoryList();
-			};
-			console.log(session);
-			this.createSessionListItem(ul, session, handler);
-			this.renderHistoryList();
-		});
-	},
-
-	renderHistoryList() {
-		const record = app.getRecord();
-		const ul = document.querySelector("#sessionHistory");
-		const exportAllButton = document.querySelector("#exportAll");
-		exportAllButton.addEventListener("click", () =>
-			exportSession(app.getCurrentSessionName()),
-		);
-		ul.replaceChildren();
-		record.forEach((record, index) => {
-			previewHandler = () => previewRecord(app.getDataInRecord(index));
-
-			editHandler = () => {
-				if (getState("isModified")) {
-					alert("Unable to edit record: Please save or cancel notes");
-					return;
-				}
-				app.setIndexBeingEdited(index);
-				const data = app.getDataInRecord(index);
-				console.log(app.getIndexBeingEdited());
-
-				Object.entries(data).forEach(([key, value]) => {
-					const el = document.querySelector(`[name="${key}"]`);
-
-					el.value = value;
-				});
-
-				setMultipleState(data);
-				setState("isEditMode", true);
-			};
-
-			this.createHistoryListItem(ul, record, previewHandler, editHandler);
-		});
-	},
-
-	closePreviewButtonInit() {
-		const previewContainer = document.querySelector("#previewContainer");
-		document
-			.querySelector("#closePreviewButton")
-			.addEventListener("click", () => (previewContainer.textContent = ""));
-	},
-
-	hideControlPanelButtonInit() {
-		const appControlsWrapper = document.querySelector("#appControlsWrapper");
-		const options = ["Show Control Panel", "Hide Control Panel"];
-		let current = 0;
-		document
-			.querySelector("#hideControlPanelButton")
-			.addEventListener("click", (e) => {
-				appControlsWrapper.classList.toggle("hidden");
-				current = 1 - current;
-				e.target.textContent = options[current];
-			});
-	},
-
-	createSessionAutoFillInit() {
-		const createSessionAFButton = document.querySelector(
-			"#createSessionAFButton",
-		);
-
-		createSessionAFButton.addEventListener("click", () => {
-			const phTime = new Date().toLocaleString("en-US", {
-				timeZone: "Asia/Manila",
-				dateStyle: "short",
-			});
-
-			// const now = Date.now();
-			// const dateObject = new Date(now);
-			// const currentDate = dateObject.toLocaleDateString();
-			document.querySelector("[name=sessionName]").value = phTime;
-		});
-	},
-
-	init() {
-		document.querySelector("#currentSessionName").textContent =
-			app.getCurrentSessionName();
-		this.createSessionFormInit();
-		this.renderSessionList();
-		this.closePreviewButtonInit();
-		this.hideControlPanelButtonInit();
-		this.createSessionAutoFillInit();
 	},
 };
 
@@ -860,8 +784,6 @@ function previewRecord(data) {
 }
 
 function standardTemplateFormatter(data) {
-	console.log(data);
-
 	let onBehalfDetails = "";
 	if (data.callerType === "On Behalf") {
 		onBehalfDetails = `
@@ -967,19 +889,17 @@ User agreed to fulfill ticket? ${data.userAgreedResolved}`;
 }
 
 function appInit() {
-	window.addEventListener("beforeunload", (e) => {
-		e.preventDefault();
-	});
-	const isFreshStart = !app.resumeLastSession();
-	if (isFreshStart) app.init();
+	// window.addEventListener("beforeunload", (e) => {
+	// 	e.preventDefault();
+	// });
 
-	console.log(`isFreshStart: ${isFreshStart}`);
-
+	appModule.init();
+	sessionModule.init();
+	historyModule.renderHistory();
 	fieldStateManager.init();
 	resetAllState(); // prevent browser cache from desyncing from state
 
 	fieldUI.init();
-	appControls.init();
 }
 
 function fillTestData() {
