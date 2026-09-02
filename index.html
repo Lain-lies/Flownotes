@@ -7,6 +7,7 @@
 		<title>Flownotes</title>
 		<link rel="stylesheet" href="style.css" />
 	</head>
+
 	<body>
 		<header>
 			<h1>Flownotes</h1>
@@ -17,6 +18,35 @@
 			</div>
 		</header>
 
+		<div id="preferencesWrapper">
+			<form id="preferencesForm">
+				<label for="backgroundColor">Background Color:</label>
+
+				<input
+					type="text"
+					id="backgroundColor"
+					name="backgroundColor"
+					placeholder="Background Color" />
+
+				<label for="fontColor">Font Color:</label>
+				<input
+					type="text"
+					id="fontColor"
+					name="fontColor"
+					placeholder="Font Color" />
+
+				<label for="buttonColor">Button Color:</label>
+				<input
+					type="text"
+					id="buttonColor"
+					name="buttonColor"
+					placeholder="Button Color" />
+			</form>
+			<button type="submit" id="applyPreferenceButton" form="preferencesForm">
+				Apply
+			</button>
+		</div>
+		<button id="userPreferencesButton">Show/Hide User Preferences</button>
 		<div id="appControlsWrapper">
 			<h5>Control Panel</h5>
 

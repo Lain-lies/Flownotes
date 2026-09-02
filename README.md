@@ -67,3 +67,7 @@ The code structure that is used here is the same one, except ofcourse for field 
 - The main purpose of this is for Quality of Life improvements.
 
 Thank u :)
+
+Save Note => appModule
+New Note => appModule
+Save Changes => historyModule => appModule

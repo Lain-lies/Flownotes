@@ -2,6 +2,106 @@ function currentDate() {
 	return new Date(Date.now()).toLocaleDateString();
 }
 
+const preferenceModule = {
+	init() {
+		this.root = document.body;
+		this.h1 = document.querySelector("h1");
+		this.prevContainer = document.querySelector("#previewContainer");
+		this.appControlsWrapper = document.querySelector("#appControlsWrapper");
+
+		this.labels = document.querySelectorAll("label");
+		this.inputs = document.querySelectorAll("input");
+		this.textareas = document.querySelectorAll("textarea");
+		this.headers = document.querySelectorAll("h5");
+		this.buttons = document.querySelectorAll("button");
+		this.selects = document.querySelectorAll("select");
+		this.legends = document.querySelectorAll("legend");
+		this.fieldsets = document.querySelectorAll("fieldset");
+		this.footerEl = document.querySelectorAll("footer > *");
+		this.links = document.querySelectorAll("a");
+		this.li = document.querySelectorAll("li");
+
+		document
+			.querySelector("#preferencesForm")
+			.addEventListener("submit", (e) => {
+				e.preventDefault();
+				const formData = new FormData(e.target);
+				const backgroundColor = formData.get("backgroundColor").trim();
+				const fontColor = formData.get("fontColor").trim();
+				const buttonBgColor = formData.get("buttonColor").trim();
+
+				preferenceModule.apply(backgroundColor, fontColor, buttonBgColor);
+			});
+
+		document
+			.querySelector("#userPreferencesButton")
+			.addEventListener("click", (e) => {
+				document
+					.querySelector("#preferencesWrapper")
+					.classList.toggle("hidden");
+			});
+	},
+
+	apply(backgroundColor, fontColor, buttonBgColor) {
+		this.root.style.backgroundColor = backgroundColor;
+
+		this.h1.style.color = fontColor;
+		this.prevContainer.style.color = fontColor;
+		this.appControlsWrapper.style.borderColor = fontColor;
+
+		this.labels.forEach((label) => {
+			label.style.color = fontColor;
+		});
+
+		this.inputs.forEach((input) => {
+			input.style.borderColor = fontColor;
+			input.style.backgroundColor = backgroundColor;
+			input.style.color = fontColor;
+		});
+
+		this.textareas.forEach((textarea) => {
+			textarea.style.borderColor = fontColor;
+			textarea.style.backgroundColor = backgroundColor;
+			textarea.style.color = fontColor;
+		});
+
+		this.headers.forEach((header) => {
+			header.style.color = fontColor;
+		});
+
+		this.buttons.forEach((button) => {
+			button.style.borderColor = fontColor;
+			button.style.backgroundColor = buttonBgColor;
+		});
+
+		this.selects.forEach((select) => {
+			select.style.backgroundColor = backgroundColor;
+			select.style.color = fontColor;
+			select.style.borderColor = fontColor;
+		});
+
+		this.legends.forEach((legend) => {
+			legend.style.color = fontColor;
+		});
+
+		this.fieldsets.forEach((fieldset) => {
+			fieldset.style.borderColor = fontColor;
+		});
+
+		this.footerEl.forEach((item) => {
+			item.style.color = fontColor;
+		});
+
+		this.links.forEach((link) => {
+			link.style.color = buttonBgColor;
+		});
+
+		this.li.forEach((item) => {
+			item.style.color = fontColor;
+		});
+	},
+};
+
 const appModule = {
 	sessionObject: {},
 	currentSession: "",
@@ -188,7 +288,6 @@ const historyModule = {
 			});
 	},
 };
-
 
 class managedStateObject {
 	constructor(state, subscribers = []) {
@@ -892,11 +991,11 @@ function appInit() {
 	// window.addEventListener("beforeunload", (e) => {
 	// 	e.preventDefault();
 	// });
-
 	appModule.init();
 	sessionModule.init();
 	historyModule.renderHistory();
 	fieldStateManager.init();
+	preferenceModule.init();
 	resetAllState(); // prevent browser cache from desyncing from state
 
 	fieldUI.init();

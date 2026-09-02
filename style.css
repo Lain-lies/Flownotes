@@ -68,6 +68,41 @@ h6 {
 	box-sizing: border-box;
 	font-family: sans-serif;
 }
+#preferencesWrapper {
+	background-color: white !important;
+	padding: 1rem;
+}
+
+#preferencesForm {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	justify-content: center;
+	align-items: center;
+	gap: 2px;
+	background-color: white !important;
+}
+
+#preferencesForm > input,
+#preferencesForm > label {
+	color: black !important;
+}
+
+#preferencesForm > input {
+	width: 15ch;
+	border-color: black !important;
+	background-color: white !important;
+}
+
+#userPreferencesButton,
+#applyPreferenceButton {
+	background-color: white !important;
+	color: black !important;
+	margin: 0 auto;
+	margin-top: 0.5rem;
+}
+#preferencesForm > label {
+	text-align: end;
+}
 
 #appControlsWrapper {
 	border: 1px solid black;
