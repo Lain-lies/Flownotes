@@ -28,9 +28,9 @@ const preferenceModule = {
 				const formData = new FormData(e.target);
 				const backgroundColor = formData.get("backgroundColor").trim();
 				const fontColor = formData.get("fontColor").trim();
-				const buttonBgColor = formData.get("buttonColor").trim();
+				const buttonColor = formData.get("buttonColor").trim();
 
-				preferenceModule.apply(backgroundColor, fontColor, buttonBgColor);
+				preferenceModule.apply(backgroundColor, fontColor, buttonColor);
 			});
 
 		document
@@ -40,9 +40,41 @@ const preferenceModule = {
 					.querySelector("#preferencesWrapper")
 					.classList.toggle("hidden");
 			});
+
+		if (localStorage.getItem("userPreferences")) {
+			const userPreferences = JSON.parse(
+				localStorage.getItem("userPreferences"),
+			);
+			preferenceModule.apply(
+				userPreferences.backgroundColor,
+				userPreferences.fontColor,
+				userPreferences.buttonColor,
+			);
+		} else {
+			userPreferences = {
+				backgroundColor: "#f0f0f0",
+				fontColor: "#000000",
+				buttonColor: "#007bff",
+			};
+			localStorage.setItem("userPreferences", JSON.stringify(userPreferences));
+			preferenceModule.apply(
+				userPreferences.backgroundColor,
+				userPreferences.fontColor,
+				userPreferences.buttonColor,
+			);
+		}
 	},
 
-	apply(backgroundColor, fontColor, buttonBgColor) {
+	apply(backgroundColor, fontColor, buttonColor) {
+		localStorage.setItem(
+			"userPreferences",
+			JSON.stringify({
+				backgroundColor,
+				fontColor,
+				buttonColor,
+			}),
+		);
+
 		this.root.style.backgroundColor = backgroundColor;
 
 		this.h1.style.color = fontColor;
@@ -54,13 +86,13 @@ const preferenceModule = {
 		});
 
 		this.inputs.forEach((input) => {
-			input.style.borderColor = fontColor;
+			input.style.border = `1px solid ${fontColor}`;
 			input.style.backgroundColor = backgroundColor;
 			input.style.color = fontColor;
 		});
 
 		this.textareas.forEach((textarea) => {
-			textarea.style.borderColor = fontColor;
+			textarea.style.border = `1px solid ${fontColor}`;
 			textarea.style.backgroundColor = backgroundColor;
 			textarea.style.color = fontColor;
 		});
@@ -70,14 +102,15 @@ const preferenceModule = {
 		});
 
 		this.buttons.forEach((button) => {
-			button.style.borderColor = fontColor;
-			button.style.backgroundColor = buttonBgColor;
+			button.style.border = `1px solid ${fontColor}`;
+			button.style.color = fontColor;
+			button.style.backgroundColor = buttonColor;
 		});
 
 		this.selects.forEach((select) => {
 			select.style.backgroundColor = backgroundColor;
 			select.style.color = fontColor;
-			select.style.borderColor = fontColor;
+			select.style.border = `1px solid ${fontColor}`;
 		});
 
 		this.legends.forEach((legend) => {
@@ -85,7 +118,7 @@ const preferenceModule = {
 		});
 
 		this.fieldsets.forEach((fieldset) => {
-			fieldset.style.borderColor = fontColor;
+			fieldset.style.border = `1px solid ${fontColor}`;
 		});
 
 		this.footerEl.forEach((item) => {
@@ -93,7 +126,7 @@ const preferenceModule = {
 		});
 
 		this.links.forEach((link) => {
-			link.style.color = buttonBgColor;
+			link.style.color = fontColor;
 		});
 
 		this.li.forEach((item) => {
@@ -130,12 +163,12 @@ const appModule = {
 	},
 
 	init() {
-		this.sessionObject =
-			JSON.parse(localStorage.getItem("sessionObject")) || {};
 		if (localStorage.getItem("lastSession")) {
+			this.sessionObject =
+				JSON.parse(localStorage.getItem("sessionObject")) || {};
 			this.setCurrentSession(localStorage.getItem("lastSession"));
 		} else {
-			this.sessionObject = { ...this.sessionObject, [currentDate()]: [] };
+			this.sessionObject = { [currentDate()]: [] };
 			localStorage.setItem("sessionObject", JSON.stringify(this.sessionObject));
 			localStorage.setItem("lastSession", currentDate());
 			this.setCurrentSession(currentDate());

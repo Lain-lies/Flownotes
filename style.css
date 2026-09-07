@@ -161,7 +161,11 @@ input[type="text"] {
 }
 
 [name="timezone"],
-[name="OBtimezone"] {
+[name="OBtimezone"],
+[name="workSetup"],
+[name="OBworkSetup"],
+[name="contactPreference"],
+[name="OBcontactPreference"] {
 	width: min-content;
 }
 

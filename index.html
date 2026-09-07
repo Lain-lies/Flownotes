@@ -46,7 +46,9 @@
 				Apply
 			</button>
 		</div>
+
 		<button id="userPreferencesButton">Show/Hide User Preferences</button>
+
 		<div id="appControlsWrapper">
 			<h5>Control Panel</h5>
 
@@ -183,13 +185,21 @@
 				</div>
 
 				<div class="fieldWrapper">
-					<label for="location">Location:</label>
-					<input
-						type="text"
-						id="location"
-						name="location"
-						placeholder="Enter Location"
-						required />
+					<label for="workSetup">Work Setup:</label>
+					<select name="workSetup">
+						<option value="WFH" selected>WFH</option>
+						<option value="Office">Office</option>
+						<option value="Field">Field</option>
+					</select>
+				</div>
+
+				<div class="fieldWrapper">
+					<label for="contactPreference">Contact Preference:</label>
+					<select name="contactPreference">
+						<option value="Phone" selected>Phone</option>
+						<option value="Teams">Teams</option>
+						<option value="Email">Email</option>
+					</select>
 				</div>
 
 				<div id="onBehalfOfWrapper" class="hidden">
@@ -261,14 +271,21 @@
 						</div>
 
 						<div class="fieldWrapper">
-							<label for="OBlocation">Location:</label>
-							<input
-								type="text"
-								id="OBlocation"
-								name="OBlocation"
-								placeholder="Enter Location"
-								value="N/A"
-								required />
+							<label for="OBworkSetup">Work Setup:</label>
+							<select name="OBworkSetup">
+								<option value="WFH" selected>WFH</option>
+								<option value="Office">Office</option>
+								<option value="Field">Field</option>
+							</select>
+						</div>
+
+						<div class="fieldWrapper">
+							<label for="OBcontactPreference">Contact Preference:</label>
+							<select name="OBcontactPreference">
+								<option value="Phone" selected>Phone</option>
+								<option value="Teams">Teams</option>
+								<option value="Email">Email</option>
+							</select>
 						</div>
 					</fieldset>
 				</div>
