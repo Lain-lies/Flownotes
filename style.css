@@ -184,6 +184,12 @@ input[type="text"] {
 	gap: 5px;
 }
 
+.inputWithButtonWrapper {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+}
+
 fieldset {
 	margin: 0.5rem 0.3rem;
 	border: 2px solid;

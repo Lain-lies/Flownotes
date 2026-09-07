@@ -356,6 +356,12 @@ const fieldStateManager = {
 		callerType: "Affected User",
 		templateType: "Standard",
 
+		emailProvided: "Provided",
+		OBemailProvided: "Provided",
+
+		employeeIdProvided: "Provided",
+		OBemployeeIdProvided: "Provided",
+
 		possibleMajorIncident: "No",
 		contactType: "Phone",
 
@@ -446,6 +452,82 @@ const fieldUI = {
 				? setState("callerType", "On Behalf")
 				: setState("callerType", "Affected User");
 		});
+	},
+
+	emailProvidedSubscribe() {
+		subscribe("emailProvided", (value) => {
+			document.querySelector("[name='emailProvided']").value = value;
+		});
+
+		subscribe("emailProvided", (value) => {
+			const button = document.querySelector("#emailProvidedButton");
+			button.textContent = value === "Provided" ? "✓" : "x";
+		});
+
+		document
+			.querySelector("#emailProvidedButton")
+			.addEventListener("click", () => {
+				getState("emailProvided") === "Provided"
+					? setState("emailProvided", "Not Provided")
+					: setState("emailProvided", "Provided");
+			});
+	},
+
+	OBemailProvidedSubscribe() {
+		subscribe("OBemailProvided", (value) => {
+			document.querySelector("[name='OBemailProvided']").value = value;
+		});
+
+		subscribe("OBemailProvided", (value) => {
+			const button = document.querySelector("#OBemailProvidedButton");
+			button.textContent = value === "Provided" ? "✓" : "x";
+		});
+
+		document
+			.querySelector("#OBemailProvidedButton")
+			.addEventListener("click", () => {
+				getState("OBemailProvided") === "Provided"
+					? setState("OBemailProvided", "Not Provided")
+					: setState("OBemailProvided", "Provided");
+			});
+	},
+
+	employeeIdProvidedSubscribe() {
+		subscribe("employeeIdProvided", (value) => {
+			document.querySelector("[name='employeeIdProvided']").value = value;
+		});
+
+		subscribe("employeeIdProvided", (value) => {
+			const button = document.querySelector("#employeeIdProvidedButton");
+			button.textContent = value === "Provided" ? "✓" : "x";
+		});
+
+		document
+			.querySelector("#employeeIdProvidedButton")
+			.addEventListener("click", () => {
+				getState("employeeIdProvided") === "Provided"
+					? setState("employeeIdProvided", "Not Provided")
+					: setState("employeeIdProvided", "Provided");
+			});
+	},
+
+	OBemployeeIdProvidedSubscribe() {
+		subscribe("OBemployeeIdProvided", (value) => {
+			document.querySelector("[name='OBemployeeIdProvided']").value = value;
+		});
+
+		subscribe("OBemployeeIdProvided", (value) => {
+			const button = document.querySelector("#OBemployeeIdProvidedButton");
+			button.textContent = value === "Provided" ? "✓" : "x";
+		});
+
+		document
+			.querySelector("#OBemployeeIdProvidedButton")
+			.addEventListener("click", () => {
+				getState("OBemployeeIdProvided") === "Provided"
+					? setState("OBemployeeIdProvided", "Not Provided")
+					: setState("OBemployeeIdProvided", "Provided");
+			});
 	},
 
 	templateTypeSubscribe() {
@@ -674,6 +756,10 @@ const fieldUI = {
 		this.isEditModeSubscribe();
 		this.callerTypeSubscribe();
 		this.templateTypeSubscribe();
+		this.emailProvidedSubscribe();
+		this.OBemailProvidedSubscribe();
+		this.employeeIdProvidedSubscribe();
+		this.OBemployeeIdProvidedSubscribe();
 		this.possibleMajorIncidentSubscribe();
 		this.contactTypeSubscribe();
 		this.resetTypeSubscribe();
@@ -921,8 +1007,8 @@ function standardTemplateFormatter(data) {
 		onBehalfDetails = `
 USER
 Name: ${data.OBfullName}
-Email Address: ${data.OBemail}
-Employee ID: ${data.OBemployeeId}
+Email Address: ${data.OBemailProvided} | ${data.OBemail}
+Employee ID: ${data.OBemployeeIdProvided} | ${data.OBemployeeId}
 Contact Number: ${data.OBcontactNumber}
 Availability Hours: ${data.OBavailability} ${data.OBtimezone}
 Location: ${data.OBlocation}
@@ -938,8 +1024,8 @@ RESOLUTION NOTES: ${data.resolutionNotes}`;
 	const documentation = `
 CALLER
 Full Name: ${data.fullName}
-Email Address: ${data.email}
-Employee ID: ${data.employeeId}
+Email Address: ${data.emailProvided} | ${data.email}
+Employee ID: ${data.employeeIdProvided} | ${data.employeeId}
 Contact Number: ${data.contactNumber}
 Availability Hours: ${data.availability}${data.timezone}
 Location: ${data.location}
@@ -971,8 +1057,8 @@ function pwrTypeFormatter(data) {
 		onBehalfDetails = `
 USER
 Name: ${data.OBfullName}
-Email Address: ${data.OBemail}
-Employee ID: ${data.OBemployeeId}
+Email Address: ${data.OBemailProvided} | ${data.OBemail}
+Employee ID: ${data.OBemployeeIdProvided} | ${data.OBemployeeId}
 Contact Number: ${data.OBcontactNumber}
 Availability Hours: ${data.OBavailability} ${data.OBtimezone}
 Location: ${data.OBlocation}
@@ -998,8 +1084,8 @@ ${data.resolutionNotes}`;
 	const documentation = `
 CALLER
 Name: ${data.fullName}
-Email Address: ${data.email}
-Employee ID: ${data.employeeId}
+Email Address: ${data.emailProvided} | ${data.email}
+Employee ID: ${data.employeeIdProvided} | ${data.employeeId}
 Contact Number: ${data.contactNumber}
 Availability Hours: ${data.availability} ${data.timezone}
 Location: ${data.location}
