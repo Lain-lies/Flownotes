@@ -1148,8 +1148,6 @@ const temp = {
 			),
 		);
 
-		form.appendChild(callerFieldset);
-
 		//User Entitlement Fieldset
 		const userEntitlementFieldSet = document.createElement("fieldset");
 		const userEntitlementLegend = document.createElement("legend");
@@ -1599,6 +1597,7 @@ const temp = {
 		);
 
 		//Interaction Details Fieldset
+
 		const interactionDetailsFieldSet = document.createElement("fieldset");
 		const interactionDetailsLegend = document.createElement("legend");
 		interactionDetailsLegend.textContent = "Interaction Details";
@@ -1671,6 +1670,7 @@ const temp = {
 		const ssprDetailsWrapperLegend = document.createElement("legend");
 		ssprDetailsWrapperLegend.textContent = "Active Directory SSPR Details";
 		ssprDetailsWrapperFieldset.append(ssprDetailsWrapperLegend);
+
 		// ssprDetailsWrapperFieldset.classList.add("hidden");
 
 		ssprDetailsWrapperFieldset.appendChild(
@@ -1771,9 +1771,239 @@ const temp = {
 			),
 		);
 
+		// Issue Identification and Troubleshooting  Fieldset
+
+		const issueIdentificationFieldset = document.createElement("fieldset");
+		const issueIdentificationLegend = document.createElement("legend");
+		issueIdentificationLegend.textContent =
+			"Issue Identification and Troubleshooting";
+		issueIdentificationFieldset.appendChild(issueIdentificationLegend);
+
+		issueIdentificationFieldset.appendChild(
+			this.generateElement("label", { textContent: "Issue Description" }),
+		);
+
+		issueIdentificationFieldset.appendChild(
+			this.generateElement("textarea", {
+				name: "issueDescription",
+				placeholder: "Describe the Issue",
+				minLength: 50,
+				rows: 5,
+				required: true,
+			}),
+		);
+
+		issueIdentificationFieldset.appendChild(
+			this.generateElement("label", { textContent: "Troubleshooting Steps" }),
+		);
+
+		issueIdentificationFieldset.appendChild(
+			this.generateElement("textarea", {
+				name: "troubleshootingSteps",
+				placeholder: "List the steps take to troubleshoot the issue",
+				rows: 10,
+				required: true,
+			}),
+		);
+
+		// Closing Details Fieldset
+
+		const closingDetailsFieldset = document.createElement("fieldset");
+		const closingDetailsLegend = document.createElement("legend");
+		closingDetailsLegend.textContent = "Closing Details";
+		closingDetailsFieldset.appendChild(closingDetailsLegend);
+
+		closingDetailsFieldset.appendChild(
+			this.generateWrapper(
+				[
+					this.generateElement("label", { textContent: "KB Article:" }),
+					this.generateElement("input", {
+						type: "text",
+						name: "kbArticle",
+						placeholder: "KB Article Used",
+						required: true,
+					}),
+				],
+				["fieldWrapper"],
+			),
+		);
+
+		closingDetailsFieldset.appendChild(
+			this.generateWrapper(
+				[
+					this.generateElement("label", { textContent: "Issue Resolved?:" }),
+					this.generateElement("button", {
+						type: "button",
+						textContent: "No",
+						id: `issueResolvedButton${instance}`,
+					}),
+				],
+				["fieldWrapper"],
+				`issueResolvedWrapper${instance}`,
+			),
+		);
+
+		closingDetailsFieldset.appendChild(
+			this.generateWrapper(
+				[
+					this.generateElement("label", { textContent: "Ticket Fulfilled?:" }),
+					this.generateElement("button", {
+						type: "button",
+						textContent: "No",
+						id: `ticketFulfilledButton${instance}`,
+					}),
+				],
+				["fieldWrapper"],
+				`ticketFulfilledWrapper${instance}`,
+			),
+		);
+
+		closingDetailsFieldset.appendChild(
+			this.generateWrapper(
+				[
+					this.generateElement("label", { textContent: "Next Action:" }),
+					this.generateSelectElement(
+						"nextAction",
+						[
+							{ id: `standardTemplateExclusiveOptGroup${instance}` },
+							{ id: `pwrTemplateExclusiveOptGroup${instance}` },
+						],
+						[
+							[
+								"Complete the interaction",
+								"Cancel the ticket",
+								"Escalated the ticket",
+								"Set Ticket to 'On Hold' Status",
+								"Set Ticket to 'Resolved' Status",
+								"Route the Ticket to the Next Resolver Team",
+							],
+							[
+								"Complete the interaction",
+								"Cancel the ticket",
+								"Escalated the ticket",
+								"Set Ticket to 'Fulfilled' Status",
+								"Wait for Line Manager's Approval",
+							],
+						],
+					),
+				],
+				["fieldWrapper"],
+			),
+		);
+
+		closingDetailsFieldset.appendChild(
+			this.generateWrapper(
+				[
+					this.generateElement("label", {
+						textContent: "User Agreed to set ticket to 'Resolved'?:",
+					}),
+					this.generateElement("button", {
+						type: "button",
+						textContent: "No",
+						id: `userAgreedResolvedButton${instance}`,
+					}),
+				],
+				["fieldWrapper"],
+				`userAgreedResolvedWrapper${instance}`,
+			),
+		);
+
+		closingDetailsFieldset.appendChild(
+			this.generateWrapper(
+				[
+					this.generateElement("label", {
+						textContent: "User Agreed to set ticket to 'Fulfilled'?:",
+					}),
+					this.generateElement("button", {
+						type: "button",
+						textContent: "No",
+						id: `userAgreedFulfilled${instance}`,
+					}),
+				],
+				["fieldWrapper"],
+				`userAgreedFulfilled${instance}`,
+			),
+		);
+
+		closingDetailsFieldset.appendChild(
+			this.generateWrapper(
+				[
+					this.generateElement("label", { textContent: "Ticket Number" }),
+					this.generateElement("input", {
+						type: "text",
+						name: "ticketNumber",
+						placeholder: "Not visible when copied",
+						required: true,
+					}),
+				],
+				["fieldWrapper"],
+			),
+		);
+
+		const fieldControlsFieldSet = document.createElement("fieldset");
+		const fieldControlsLegend = document.createElement("legend");
+		fieldControlsLegend.textContent = "Field Controls";
+
+		fieldControlsFieldSet.appendChild(fieldControlsLegend);
+
+		fieldControlsFieldSet.appendChild(
+			this.generateElement("button", {
+				type: "submit",
+				textContent: "Save Note & Copy",
+				id: `saveButton${instance}`,
+			}),
+		);
+
+		fieldControlsFieldSet.appendChild(
+			this.generateElement("button", {
+				type: "button",
+				textContent: "Close Instance",
+				id: `closeInstanceButton${instance}`,
+			}),
+		);
+
+		fieldControlsFieldSet.appendChild(
+			this.generateElement("button", {
+				type: "button",
+				textContent: "Multiple Issue",
+				id: `multipleIssueButton${instance}`,
+			}),
+		);
+
+		fieldControlsFieldSet.appendChild(
+			this.generateElement("button", {
+				type: "button",
+				textContent: "Cancel",
+				id: `cancelButton${instance}`,
+			}),
+		);
+
+		fieldControlsFieldSet.appendChild(
+			this.generateWrapper(
+				[
+					this.generateElement("button", {
+						type: "button",
+						textContent: "Save Changes & Copy",
+						id: `saveChanges${instance}`,
+					}),
+					this.generateElement("button", {
+						type: "button",
+						textContent: "Cancel Edit",
+						id: `cancelEditButton${instance}`,
+					}),
+				],
+				[],
+				`editModeWrapper${instance}`,
+			),
+		);
+
 		interactionDetailsFieldSet.appendChild(ssprDetailsWrapperFieldset);
+		form.appendChild(callerFieldset);
 		form.appendChild(userEntitlementFieldSet);
 		form.appendChild(interactionDetailsFieldSet);
+		form.appendChild(issueIdentificationFieldset);
+		form.appendChild(closingDetailsFieldset);
+		form.appendChild(fieldControlsFieldSet);
 
 		document.querySelector("body").appendChild(form);
 	},
