@@ -1106,6 +1106,738 @@ User agreed to fulfill ticket? ${data.userAgreedResolved}`;
 	return documentation;
 }
 
+const temp = {
+	generateForm() {
+		const instance = 1;
+		const form = document.createElement("form");
+
+		//Caller and Template Type Fieldset
+		const callerFieldset = document.createElement("fieldset");
+		const callerLegend = document.createElement("legend");
+		callerLegend.textContent = "Caller and Template Type";
+
+		callerFieldset.appendChild(callerLegend);
+
+		// Caller Type
+		callerFieldset.appendChild(
+			this.generateWrapper(
+				[
+					this.generateElement("label", { textContent: "Caller Type:" }),
+					this.generateElement("button", {
+						type: "button",
+						textContent: "Affected User",
+						id: `callerTypeButton${instance}`,
+					}),
+				],
+				["fieldWrapper"],
+			),
+		);
+
+		// Template Type
+		callerFieldset.appendChild(
+			this.generateWrapper(
+				[
+					this.generateElement("label", { textContent: "Template Type:" }),
+					this.generateElement("button", {
+						type: "button",
+						textContent: "Standard",
+						id: `templateTypeButton${instance}`,
+					}),
+				],
+				["fieldWrapper"],
+			),
+		);
+
+		form.appendChild(callerFieldset);
+
+		//User Entitlement Fieldset
+		const userEntitlementFieldSet = document.createElement("fieldset");
+		const userEntitlementLegend = document.createElement("legend");
+		userEntitlementLegend.textContent = "User Entitlement";
+
+		userEntitlementFieldSet.appendChild(userEntitlementLegend);
+
+		//Full Name Field
+		userEntitlementFieldSet.appendChild(
+			this.generateWrapper(
+				[
+					this.generateElement("label", { textContent: "Full Name:" }),
+					this.generateElement("input", {
+						type: "text",
+						name: `fullName`,
+						required: true,
+						placeholder: "Enter Full Name",
+					}),
+				],
+				["fieldWrapper"],
+			),
+		);
+
+		// Email Field
+		userEntitlementFieldSet.appendChild(
+			this.generateWrapper(
+				[
+					this.generateElement("label", { textContent: "Email:" }),
+					this.generateWrapper(
+						[
+							this.generateElement("input", {
+								type: "email",
+								name: `email`,
+								required: true,
+								placeholder: "Enter Email Address",
+							}),
+							this.generateElement("button", {
+								type: "button",
+								textContent: "✓",
+								id: `emailProvidedButton${instance}`,
+							}),
+						],
+						["inputWithButtonWrapper"],
+					),
+				],
+				["fieldWrapper"],
+			),
+		);
+
+		// Employee ID Field
+		userEntitlementFieldSet.appendChild(
+			this.generateWrapper(
+				[
+					this.generateElement("label", { textContent: "Employee ID:" }),
+					this.generateWrapper(
+						[
+							this.generateElement("input", {
+								type: "text",
+								name: `employeeId`,
+								required: true,
+								placeholder: "Enter Employee ID",
+							}),
+							this.generateElement("button", {
+								type: "button",
+								textContent: "✓",
+								id: `employeeIdProvidedButton${instance}`,
+							}),
+						],
+						["inputWithButtonWrapper"],
+					),
+				],
+				["fieldWrapper"],
+			),
+		);
+
+		// Contact Number Field
+		userEntitlementFieldSet.appendChild(
+			this.generateWrapper(
+				[
+					this.generateElement("label", { textContent: "Contact Number:" }),
+					this.generateElement("input", {
+						type: "text",
+						name: `contactNumber`,
+						required: true,
+						placeholder: "Enter Contact Number",
+					}),
+				],
+				["fieldWrapper"],
+			),
+		);
+
+		// Availability Fields
+		userEntitlementFieldSet.appendChild(
+			this.generateWrapper(
+				[
+					this.generateElement("label", {
+						textContent: "Availability Hours:",
+					}),
+					this.generateWrapper(
+						[
+							this.generateElement("input", {
+								type: "text",
+								name: "availability",
+								placeholder: "Enter Best Time to Reach",
+								value: "09:00-16:00",
+								required: true,
+							}),
+							(() => {
+								const select = document.createElement("select");
+								select.appendChild(
+									this.generateElement("option", {
+										textContent: "EST",
+										value: "EST",
+										selected: true,
+									}),
+								);
+								select.appendChild(
+									this.generateElement("option", {
+										textContent: "BST",
+										value: "BST",
+									}),
+								);
+								select.appendChild(
+									this.generateElement("option", {
+										textContent: "DST",
+										value: "DST",
+									}),
+								);
+								select.appendChild(
+									this.generateElement("option", {
+										textContent: "GMT",
+										value: "GMT",
+									}),
+								);
+								select.appendChild(
+									this.generateElement("option", {
+										textContent: "IST",
+										value: "IST",
+									}),
+								);
+								select.name = "timezone";
+								return select;
+							})(),
+						],
+						["insideWrapper"],
+					),
+				],
+				["availabilityWrapper"],
+			),
+		);
+
+		// Work Setup Field
+		userEntitlementFieldSet.appendChild(
+			this.generateWrapper(
+				[
+					this.generateElement("label", {
+						textContent: "Work Setup",
+					}),
+					(() => {
+						const select = document.createElement("select");
+						select.appendChild(
+							this.generateElement("option", {
+								textContent: "WFH",
+								value: "WFH",
+								selected: true,
+							}),
+						);
+						select.appendChild(
+							this.generateElement("option", {
+								textContent: "Office",
+								value: "Office",
+							}),
+						);
+						select.appendChild(
+							this.generateElement("option", {
+								textContent: "Field",
+								value: "Field",
+							}),
+						);
+
+						select.name = "workSetup";
+						return select;
+					})(),
+				],
+				["fieldWrapper"],
+			),
+		);
+
+		// Contact Preference Field
+		userEntitlementFieldSet.appendChild(
+			this.generateWrapper(
+				[
+					this.generateElement("label", {
+						textContent: "Contact Preference",
+					}),
+					(() => {
+						const select = document.createElement("select");
+						select.appendChild(
+							this.generateElement("option", {
+								textContent: "Phone",
+								value: "Phone",
+								selected: true,
+							}),
+						);
+						select.appendChild(
+							this.generateElement("option", {
+								textContent: "Teams",
+								value: "Teams",
+							}),
+						);
+						select.appendChild(
+							this.generateElement("option", {
+								textContent: "Email",
+								value: "Email",
+							}),
+						);
+						select.name = "contactPreference";
+						return select;
+					})(),
+				],
+				["fieldWrapper"],
+			),
+		);
+
+		const onBehalfOfFieldSet = document.createElement("fieldset");
+		const onBehalfOfFieldLegend = document.createElement("legend");
+		onBehalfOfFieldLegend.textContent = "On Behalf Of";
+
+		onBehalfOfFieldSet.appendChild(onBehalfOfFieldLegend);
+
+		// OB Full Name Field
+		onBehalfOfFieldSet.appendChild(
+			this.generateWrapper(
+				[
+					this.generateElement("label", { textContent: "Full Name:" }),
+					this.generateElement("input", {
+						type: "text",
+						name: `OBfullName`,
+						required: true,
+						placeholder: "Enter Full Name",
+					}),
+				],
+				["fieldWrapper"],
+			),
+		);
+
+		// OB Email Field
+		onBehalfOfFieldSet.appendChild(
+			this.generateWrapper(
+				[
+					this.generateElement("label", { textContent: "Email:" }),
+					this.generateWrapper(
+						[
+							this.generateElement("input", {
+								type: "email",
+								name: `OBemail`,
+								required: true,
+								placeholder: "Enter Email Address",
+							}),
+							this.generateElement("button", {
+								type: "button",
+								textContent: "✓",
+								id: `OBemailProvidedButton${instance}`,
+							}),
+						],
+						["inputWithButtonWrapper"],
+					),
+				],
+				["fieldWrapper"],
+			),
+		);
+
+		// OB Employee ID Field
+		onBehalfOfFieldSet.appendChild(
+			this.generateWrapper(
+				[
+					this.generateElement("label", { textContent: "Employee ID:" }),
+					this.generateWrapper(
+						[
+							this.generateElement("input", {
+								type: "text",
+								name: `OBemployeeId`,
+								required: true,
+								placeholder: "Enter Employee ID",
+							}),
+							this.generateElement("button", {
+								type: "button",
+								textContent: "✓",
+								id: `OBemployeeIdProvidedButton${instance}`,
+							}),
+						],
+						["inputWithButtonWrapper"],
+					),
+				],
+				["fieldWrapper"],
+			),
+		);
+
+		// OB Contact Number Field
+		onBehalfOfFieldSet.appendChild(
+			this.generateWrapper(
+				[
+					this.generateElement("label", { textContent: "Contact Number:" }),
+					this.generateElement("input", {
+						type: "text",
+						name: `OBcontactNumber`,
+						required: true,
+						placeholder: "Enter Contact Number",
+					}),
+				],
+				["fieldWrapper"],
+			),
+		);
+
+		// OB Availability Fields
+		onBehalfOfFieldSet.appendChild(
+			this.generateWrapper(
+				[
+					this.generateElement("label", {
+						textContent: "Availability Hours:",
+					}),
+					this.generateWrapper(
+						[
+							this.generateElement("input", {
+								type: "text",
+								name: "OBavailability",
+								placeholder: "Enter Best Time to Reach",
+								value: "09:00-16:00",
+								required: true,
+							}),
+							(() => {
+								const select = document.createElement("select");
+								select.appendChild(
+									this.generateElement("option", {
+										textContent: "EST",
+										value: "EST",
+										selected: true,
+									}),
+								);
+								select.appendChild(
+									this.generateElement("option", {
+										textContent: "BST",
+										value: "BST",
+									}),
+								);
+								select.appendChild(
+									this.generateElement("option", {
+										textContent: "DST",
+										value: "DST",
+									}),
+								);
+								select.appendChild(
+									this.generateElement("option", {
+										textContent: "GMT",
+										value: "GMT",
+									}),
+								);
+								select.appendChild(
+									this.generateElement("option", {
+										textContent: "IST",
+										value: "IST",
+									}),
+								);
+								select.name = "OBtimezone";
+								return select;
+							})(),
+						],
+						["insideWrapper"],
+					),
+				],
+				["availabilityWrapper"],
+			),
+		);
+
+		// OB Work Setup Field
+		onBehalfOfFieldSet.appendChild(
+			this.generateWrapper(
+				[
+					this.generateElement("label", {
+						textContent: "Work Setup",
+					}),
+					(() => {
+						const select = document.createElement("select");
+						select.appendChild(
+							this.generateElement("option", {
+								textContent: "WFH",
+								value: "WFH",
+								selected: true,
+							}),
+						);
+						select.appendChild(
+							this.generateElement("option", {
+								textContent: "Office",
+								value: "Office",
+							}),
+						);
+						select.appendChild(
+							this.generateElement("option", {
+								textContent: "Field",
+								value: "Field",
+							}),
+						);
+
+						select.name = "OBworkSetup";
+						return select;
+					})(),
+				],
+				["fieldWrapper"],
+			),
+		);
+
+		// OB Contact Preference Field
+		onBehalfOfFieldSet.appendChild(
+			this.generateWrapper(
+				[
+					this.generateElement("label", {
+						textContent: "Contact Preference",
+					}),
+					this.generateSelectElement("OBcontactPreference", null, [
+						"Phone",
+						"Teams",
+						"Email",
+					]),
+				],
+				["fieldWrapper"],
+			),
+		);
+
+		userEntitlementFieldSet.appendChild(
+			this.generateWrapper([onBehalfOfFieldSet], [], instance),
+		);
+
+		userEntitlementFieldSet.appendChild(
+			this.generateWrapper(
+				[
+					this.generateElement("label", { textContent: "Existing Ticket?:" }),
+					this.generateElement("input", {
+						type: "text",
+						name: "existingTicket",
+						placeholder: "Existing Ticket Number",
+						value: "No",
+						required: true,
+					}),
+				],
+				["fieldWrapper"],
+			),
+		);
+
+		//Interaction Details Fieldset
+		const interactionDetailsFieldSet = document.createElement("fieldset");
+		const interactionDetailsLegend = document.createElement("legend");
+		interactionDetailsLegend.textContent = "Interaction Details";
+
+		interactionDetailsFieldSet.appendChild(interactionDetailsLegend);
+
+		interactionDetailsFieldSet.appendChild(
+			this.generateWrapper(
+				[
+					this.generateWrapper(
+						[
+							this.generateElement("label", {
+								textContent: "Possible Major Incident?:",
+							}),
+							this.generateElement("button", {
+								type: "button",
+								textContent: "No",
+								id: `possibleMajorIncident${instance}`,
+							}),
+						],
+						["fieldWrapper"],
+					),
+					this.generateWrapper(
+						[
+							this.generateElement("label", {
+								textContent: "Contact Type:",
+							}),
+							this.generateElement("button", {
+								type: "button",
+								textContent: "No",
+								id: `contactType${instance}`,
+							}),
+						],
+						["fieldWrapper"],
+					),
+					this.generateWrapper(
+						[
+							this.generateElement("label", {
+								textContent: "Device Name:",
+							}),
+							this.generateElement("input", {
+								type: "input",
+								name: "deviceName",
+								value: "N/A",
+								placeholder: "Device Name / Asset Tag",
+							}),
+						],
+						["fieldWrapper"],
+					),
+					this.generateWrapper(
+						[
+							this.generateElement("label", {
+								textContent: "Nexthink Checklist:",
+							}),
+							this.generateSelectElement("nextChecklist", null, [
+								"Not Applicable",
+								"Not Available(See Attachment)",
+								"Diagnostics Attached",
+							]),
+						],
+						["fieldWrapper"],
+					),
+				],
+				[],
+				`standardTemplateWrapper${instance}`,
+			),
+		);
+
+		const ssprDetailsWrapperFieldset = document.createElement("fieldset");
+		const ssprDetailsWrapperLegend = document.createElement("legend");
+		ssprDetailsWrapperLegend.textContent = "Active Directory SSPR Details";
+		ssprDetailsWrapperFieldset.append(ssprDetailsWrapperLegend);
+		// ssprDetailsWrapperFieldset.classList.add("hidden");
+
+		ssprDetailsWrapperFieldset.appendChild(
+			this.generateWrapper(
+				[
+					this.generateElement("label", { textContent: "New Hire:" }),
+					this.generateElement("button", {
+						type: "button",
+						textContent: "No",
+						id: `newHire${instance}`,
+					}),
+				],
+				["fieldWrapper"],
+			),
+		);
+
+		ssprDetailsWrapperFieldset.appendChild(
+			this.generateWrapper(
+				[
+					this.generateElement("label", { textContent: "MFA Registered:" }),
+					this.generateElement("button", {
+						type: "button",
+						textContent: "No",
+						id: `mfaRegistered${instance}`,
+					}),
+				],
+				["fieldWrapper"],
+			),
+		);
+
+		ssprDetailsWrapperFieldset.appendChild(
+			this.generateWrapper(
+				[
+					this.generateElement("label", { textContent: "SSPR Offered" }),
+					this.generateElement("button", {
+						type: "button",
+						textContent: "No",
+						id: `ssprOffered${instance}`,
+					}),
+				],
+				["fieldWrapper"],
+			),
+		);
+
+		ssprDetailsWrapperFieldset.appendChild(
+			this.generateWrapper(
+				[
+					this.generateElement("label", { textContent: "SSPR Outcome:" }),
+					this.generateSelectElement(
+						"ssprOutcome",
+						[{ id: "noOptGroup" }, { id: "yesOptGroup", class: "hidden" }],
+						[
+							[
+								"N/A: User is calling on behalf of someone else..",
+								"N/A: User already have an existing ticket for password reset.",
+								"N/A: User is not yet registered to MFA.",
+								"N/A: User's AD account is locked out.",
+								"N/A: User's AD account is deactivated/disabled.",
+								"N/A: User is calling for an admin account.",
+								"N/A: User just had a password reset within 24 hours. Option is still locked.",
+							],
+							[
+								"Error: User is unable to access aka.ms/sspr.",
+								"Error: Account doesn't exist. Contact administrator.",
+								"Error: You haven't registered for a password reset",
+								"Failed: User cannot correctly input the CAPTCHA.",
+								"Failed: User unable to change their password due to complexity requirements.",
+								"Failed: The user forgot the answers to the security questions.",
+								"Failed: User was disconnected; Unable to reach back.",
+								"User refused: User prefers the agent to do the password change.",
+								"User refused: User don't want to use their mobile phone.",
+								"User refused: User prefers to keep their current password.",
+							],
+						],
+					),
+				],
+				["fieldWrapper"],
+			),
+		);
+
+		interactionDetailsFieldSet.appendChild(
+			this.generateWrapper(
+				[
+					this.generateWrapper(
+						[
+							this.generateElement("label", { textContent: "Reset Type:" }),
+							this.generateElement("button", {
+								type: "button",
+								textContent: "Non-AD",
+								id: `resetType${instance}`,
+							}),
+						],
+						["fieldWrapper"],
+					),
+				],
+				[],
+				`pwrTemplateWrapper${instance}`,
+			),
+		);
+
+		interactionDetailsFieldSet.appendChild(ssprDetailsWrapperFieldset);
+		form.appendChild(userEntitlementFieldSet);
+		form.appendChild(interactionDetailsFieldSet);
+
+		document.querySelector("body").appendChild(form);
+	},
+
+	generateElement(type, properties = {}, classes = []) {
+		const element = document.createElement(type);
+
+		Object.assign(element, properties);
+
+		classes.forEach((className) => element.classList.add(className));
+
+		return element;
+	},
+
+	generateWrapper(children, classes = [], id = null) {
+		const wrapper = document.createElement("div");
+
+		classes.forEach((className) => wrapper.classList.add(className));
+		children.forEach((child) => wrapper.appendChild(child));
+
+		if (id) {
+			wrapper.id = id;
+		}
+		return wrapper;
+	},
+
+	generateSelectElement(name, optGroupProp, options) {
+		const select = document.createElement("select");
+
+		select.name = name;
+
+		if (optGroupProp) {
+			options.forEach((option, index) => {
+				const optgroup = document.createElement("optgroup");
+
+				optgroup.id = optGroupProp[index].id;
+
+				if (optGroupProp[index].class) {
+					optgroup.classList.add(optGroupProp[index].class);
+				}
+
+				option.forEach((item) => {
+					const option = document.createElement("option");
+					option.value = item;
+					option.textContent = item;
+					optgroup.appendChild(option);
+				});
+
+				select.appendChild(optgroup);
+			});
+
+			return select;
+		} else {
+			options.forEach((item) => {
+				const option = document.createElement("option");
+				option.value = item;
+				option.textContent = item;
+				select.appendChild(option);
+			});
+			return select;
+		}
+	},
+};
+
 function appInit() {
 	// window.addEventListener("beforeunload", (e) => {
 	// 	e.preventDefault();
@@ -1116,8 +1848,8 @@ function appInit() {
 	fieldStateManager.init();
 	preferenceModule.init();
 	resetAllState(); // prevent browser cache from desyncing from state
-
 	fieldUI.init();
+	temp.generateForm();
 }
 
 function fillTestData() {

@@ -333,7 +333,7 @@
 						type="text"
 						id="existingTicket"
 						name="existingTicket"
-						placeholder="Existing TIcket Number"
+						placeholder="Existing Ticket Number"
 						value="No"
 						required />
 				</div>
@@ -624,15 +624,18 @@
 					<div class="fieldWrapper">
 						<label for="nextActions">Next Action(s):</label>
 						<select id="nextActions" name="nextActions">
-							<option value="Complete the interaction">
-								Complete the interaction
-							</option>
-							<option value="Cancelled the ticket">Cancelled the ticket</option>
-							<option value="Escalated the ticket">Escalated the ticket</option>
-
 							<optgroup
-								label="Standard Template Options"
+								label="Select Option"
 								id="standardTemplateExclusiveOptGroup">
+								<option value="Complete the interaction">
+									Complete the interaction
+								</option>
+								<option value="Cancelled the ticket">
+									Cancelled the ticket
+								</option>
+								<option value="Escalated the ticket">
+									Escalated the ticket
+								</option>
 								<option value="Set Ticket to 'On Hold' Status">
 									Set Ticket to 'On Hold' Status
 								</option>
@@ -645,9 +648,18 @@
 							</optgroup>
 
 							<optgroup
-								label="Password Reset Template Options"
+								label="Select Option"
 								id="pwrTemplateExclusiveOptGroup"
 								class="hidden">
+								<option value="Complete the interaction">
+									Complete the interaction
+								</option>
+								<option value="Cancelled the ticket">
+									Cancelled the ticket
+								</option>
+								<option value="Escalated the ticket">
+									Escalated the ticket
+								</option>
 								<option value="Set Ticket to 'Fulfilled' Status">
 									Set Ticket to 'Fulfilled' Status
 								</option>
