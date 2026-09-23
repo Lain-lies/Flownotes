@@ -371,7 +371,9 @@ const fieldStateManager = {
 		ssprOffered: "No",
 
 		issueResolved: "No",
+		ticketFulfilled: "No",
 		userAgreedResolved: "No",
+		userAgreedFulfilled: "No",
 	},
 
 	setState(name, value) {
@@ -1106,10 +1108,78 @@ User agreed to fulfill ticket? ${data.userAgreedResolved}`;
 	return documentation;
 }
 
-const temp = {
-	generateForm() {
-		const instance = 1;
+class stateManager {
+	constructor() {
+		this.DEFAULT_MANAGED_STATE = {
+			isModified: false,
+			isSaved: false,
+			savedData: {},
+			isEditMode: false,
+
+			callerType: "Affected User",
+			templateType: "Standard",
+
+			emailProvided: "Provided",
+			OBemailProvided: "Provided",
+
+			employeeIdProvided: "Provided",
+			OBemployeeIdProvided: "Provided",
+
+			possibleMajorIncident: "No",
+			contactType: "Phone",
+
+			resetType: "Non-AD",
+			newHire: "No",
+			mfaRegistered: "Yes",
+			ssprOffered: "No",
+
+			nextAction: "",
+			issueResolved: "No",
+			ticketFulfilled: "No",
+			userAgreedResolved: "No",
+			userAgreedFulfilled: "No",
+		};
+
+		this.managedState = Object.fromEntries(
+			Object.entries(this.DEFAULT_MANAGED_STATE).map(([key, value]) => {
+				return [key, new managedStateObject(value)];
+			}),
+		);
+	}
+
+	setState(name, value) {
+		this.managedState[name].setState(value);
+	}
+
+	getState(name) {
+		return this.managedState[name].getState();
+	}
+
+	subscribe(name, subscriber) {
+		this.managedState[name].subscribe(subscriber);
+	}
+
+	resetState() {
+		Object.entries(this.DEFAULT_MANAGED_STATE).forEach(([key, value]) =>
+			this.setState(key, value),
+		);
+	}
+
+	setMultipleState(referenceObject) {
+		Object.keys(this.DEFAULT_MANAGED_STATE).forEach((key) => {
+			this.setState(key, referenceObject[key]);
+		});
+	}
+}
+
+const form = {
+	generate(instance = 1) {
 		const form = document.createElement("form");
+
+		// Instance ID
+		const instanceID = document.createElement("p");
+		instanceID.textContent = `instance id = ${instance}`;
+		form.appendChild(instanceID);
 
 		//Caller and Template Type Fieldset
 		const callerFieldset = document.createElement("fieldset");
@@ -1374,6 +1444,8 @@ const temp = {
 
 		const onBehalfOfFieldSet = document.createElement("fieldset");
 		const onBehalfOfFieldLegend = document.createElement("legend");
+		onBehalfOfFieldSet.classList.add("hidden");
+		onBehalfOfFieldSet.id = `onBehalfOfWrapper${instance}`;
 		onBehalfOfFieldLegend.textContent = "On Behalf Of";
 
 		onBehalfOfFieldSet.appendChild(onBehalfOfFieldLegend);
@@ -1615,7 +1687,7 @@ const temp = {
 							this.generateElement("button", {
 								type: "button",
 								textContent: "No",
-								id: `possibleMajorIncident${instance}`,
+								id: `possibleMajorIncidentButton${instance}`,
 							}),
 						],
 						["fieldWrapper"],
@@ -1627,8 +1699,8 @@ const temp = {
 							}),
 							this.generateElement("button", {
 								type: "button",
-								textContent: "No",
-								id: `contactType${instance}`,
+								textContent: "Phone",
+								id: `contactTypeButton${instance}`,
 							}),
 						],
 						["fieldWrapper"],
@@ -1666,62 +1738,68 @@ const temp = {
 			),
 		);
 
-		const ssprDetailsWrapperFieldset = document.createElement("fieldset");
+		const ssprDetailsFieldset = document.createElement("fieldset");
 		const ssprDetailsWrapperLegend = document.createElement("legend");
 		ssprDetailsWrapperLegend.textContent = "Active Directory SSPR Details";
-		ssprDetailsWrapperFieldset.append(ssprDetailsWrapperLegend);
+		ssprDetailsFieldset.append(ssprDetailsWrapperLegend);
 
-		// ssprDetailsWrapperFieldset.classList.add("hidden");
+		ssprDetailsFieldset.id = `ssprDetailsFieldset${instance}`;
+		ssprDetailsFieldset.classList.add("hidden");
 
-		ssprDetailsWrapperFieldset.appendChild(
+		// New Hire
+		ssprDetailsFieldset.appendChild(
 			this.generateWrapper(
 				[
 					this.generateElement("label", { textContent: "New Hire:" }),
 					this.generateElement("button", {
 						type: "button",
 						textContent: "No",
-						id: `newHire${instance}`,
+						id: `newHireButton${instance}`,
 					}),
 				],
 				["fieldWrapper"],
 			),
 		);
 
-		ssprDetailsWrapperFieldset.appendChild(
+		// MFA Registered
+		ssprDetailsFieldset.appendChild(
 			this.generateWrapper(
 				[
 					this.generateElement("label", { textContent: "MFA Registered:" }),
 					this.generateElement("button", {
 						type: "button",
-						textContent: "No",
-						id: `mfaRegistered${instance}`,
+						textContent: "Yes",
+						id: `mfaRegisteredButton${instance}`,
 					}),
 				],
 				["fieldWrapper"],
 			),
 		);
 
-		ssprDetailsWrapperFieldset.appendChild(
+		ssprDetailsFieldset.appendChild(
 			this.generateWrapper(
 				[
 					this.generateElement("label", { textContent: "SSPR Offered" }),
 					this.generateElement("button", {
 						type: "button",
 						textContent: "No",
-						id: `ssprOffered${instance}`,
+						id: `ssprOfferedButton${instance}`,
 					}),
 				],
 				["fieldWrapper"],
 			),
 		);
 
-		ssprDetailsWrapperFieldset.appendChild(
+		ssprDetailsFieldset.appendChild(
 			this.generateWrapper(
 				[
 					this.generateElement("label", { textContent: "SSPR Outcome:" }),
 					this.generateSelectElement(
 						"ssprOutcome",
-						[{ id: "noOptGroup" }, { id: "yesOptGroup", class: "hidden" }],
+						[
+							{ id: `noOptGroup${instance}` },
+							{ id: `yesOptGroup${instance}`, class: "hidden" },
+						],
 						[
 							[
 								"N/A: User is calling on behalf of someone else..",
@@ -1760,13 +1838,14 @@ const temp = {
 							this.generateElement("button", {
 								type: "button",
 								textContent: "Non-AD",
-								id: `resetType${instance}`,
+								id: `resetTypeButton${instance}`,
 							}),
 						],
 						["fieldWrapper"],
 					),
+					ssprDetailsFieldset,
 				],
-				[],
+				["hidden"],
 				`pwrTemplateWrapper${instance}`,
 			),
 		);
@@ -1813,6 +1892,7 @@ const temp = {
 		closingDetailsLegend.textContent = "Closing Details";
 		closingDetailsFieldset.appendChild(closingDetailsLegend);
 
+		// KB Article
 		closingDetailsFieldset.appendChild(
 			this.generateWrapper(
 				[
@@ -1828,6 +1908,7 @@ const temp = {
 			),
 		);
 
+		// Issue Resolved
 		closingDetailsFieldset.appendChild(
 			this.generateWrapper(
 				[
@@ -1843,21 +1924,59 @@ const temp = {
 			),
 		);
 
+		// Ticket Fulfilled
 		closingDetailsFieldset.appendChild(
 			this.generateWrapper(
 				[
-					this.generateElement("label", { textContent: "Ticket Fulfilled?:" }),
+					this.generateElement("label", {
+						textContent: "Ticket Fulfilled?:",
+					}),
 					this.generateElement("button", {
 						type: "button",
 						textContent: "No",
 						id: `ticketFulfilledButton${instance}`,
 					}),
 				],
-				["fieldWrapper"],
+				["fieldWrapper", "hidden"],
 				`ticketFulfilledWrapper${instance}`,
 			),
 		);
 
+		closingDetailsFieldset.appendChild(
+			this.generateWrapper(
+				[
+					this.generateElement("label", {
+						textContent: "Resolution Notes:",
+					}),
+					this.generateElement("input", {
+						type: "text",
+						name: "standardResolutionNotes",
+						placeholder: "Detailed step that resolved the issue",
+					}),
+				],
+				["fieldWrapper", "hidden"],
+				`standardResolutionNotesWrapper${instance}`,
+			),
+		);
+
+		closingDetailsFieldset.appendChild(
+			this.generateWrapper(
+				[
+					this.generateElement("label", {
+						textContent: "Resolution Notes:",
+					}),
+					this.generateElement("input", {
+						type: "text",
+						name: "pwrResolutionNotes",
+						placeholder: "Detailed step that resolved the issue",
+					}),
+				],
+				["fieldWrapper", "hidden"],
+				`pwrResolutionNotesWrapper${instance}`,
+			),
+		);
+
+		// Next Action
 		closingDetailsFieldset.appendChild(
 			this.generateWrapper(
 				[
@@ -1866,7 +1985,10 @@ const temp = {
 						"nextAction",
 						[
 							{ id: `standardTemplateExclusiveOptGroup${instance}` },
-							{ id: `pwrTemplateExclusiveOptGroup${instance}` },
+							{
+								id: `pwrTemplateExclusiveOptGroup${instance}`,
+								class: "hidden",
+							},
 						],
 						[
 							[
@@ -1885,12 +2007,31 @@ const temp = {
 								"Wait for Line Manager's Approval",
 							],
 						],
+						`nextActionSelect${instance}`,
 					),
 				],
 				["fieldWrapper"],
 			),
 		);
 
+		closingDetailsFieldset.appendChild(
+			this.generateWrapper(
+				[
+					this.generateElement("label", { textContent: "Location:" }),
+					this.generateElement("input", {
+						type: "text",
+						name: "location",
+						placeholder: "Affected User Location",
+						value: "N/A",
+						required: true,
+					}),
+				],
+				["fieldWrapper", "hidden"],
+				`locationWrapper${instance}`,
+			),
+		);
+
+		// User Agreed Resolved
 		closingDetailsFieldset.appendChild(
 			this.generateWrapper(
 				[
@@ -1908,6 +2049,7 @@ const temp = {
 			),
 		);
 
+		// User Agreed Fulfilled
 		closingDetailsFieldset.appendChild(
 			this.generateWrapper(
 				[
@@ -1917,11 +2059,11 @@ const temp = {
 					this.generateElement("button", {
 						type: "button",
 						textContent: "No",
-						id: `userAgreedFulfilled${instance}`,
+						id: `userAgreedFulfilledButton${instance}`,
 					}),
 				],
-				["fieldWrapper"],
-				`userAgreedFulfilled${instance}`,
+				["fieldWrapper", "hidden"],
+				`userAgreedFulfilledWrapper${instance}`,
 			),
 		);
 
@@ -1997,7 +2139,6 @@ const temp = {
 			),
 		);
 
-		interactionDetailsFieldSet.appendChild(ssprDetailsWrapperFieldset);
 		form.appendChild(callerFieldset);
 		form.appendChild(userEntitlementFieldSet);
 		form.appendChild(interactionDetailsFieldSet);
@@ -2030,10 +2171,12 @@ const temp = {
 		return wrapper;
 	},
 
-	generateSelectElement(name, optGroupProp, options) {
+	generateSelectElement(name, optGroupProp, options, id = null) {
 		const select = document.createElement("select");
 
 		select.name = name;
+
+		if (id) select.id = id;
 
 		if (optGroupProp) {
 			options.forEach((option, index) => {
@@ -2068,6 +2211,631 @@ const temp = {
 	},
 };
 
+class uiStateLinker {
+	constructor(instance, stateManager) {
+		this.instance = instance;
+		this.setState = stateManager.setState.bind(stateManager);
+		this.getState = stateManager.getState.bind(stateManager);
+		this.subscribe = stateManager.subscribe.bind(stateManager);
+		this.stateSubscribe();
+	}
+	// isEditModeSubscribe() {
+	// 	subscribe("isEditMode", (value) => {
+	// 		const normalModeWrapper = document.querySelector("#normalModeWrapper");
+	// 		const editModeWrapper = document.querySelector("#editModeWrapper");
+
+	// 		if (value) {
+	// 			editModeWrapper.classList.remove("hidden");
+	// 			normalModeWrapper.classList.add("hidden");
+	// 		} else {
+	// 			editModeWrapper.classList.add("hidden");
+	// 			normalModeWrapper.classList.remove("hidden");
+	// 		}
+	// 	});
+	// },
+
+	callerTypeSubscribe() {
+		const switchButton = document.querySelector(
+			`#callerTypeButton${this.instance}`,
+		);
+
+		this.subscribe("callerType", (value) => (switchButton.textContent = value));
+
+		this.subscribe("callerType", (value) => {
+			const onBehalfOfWrapper = document.querySelector(
+				`#onBehalfOfWrapper${this.instance}`,
+			);
+
+			value === "Affected User"
+				? onBehalfOfWrapper.classList.add("hidden")
+				: onBehalfOfWrapper.classList.remove("hidden");
+		});
+
+		switchButton.addEventListener("click", () => {
+			this.getState("callerType") === "Affected User"
+				? this.setState("callerType", "On Behalf")
+				: this.setState("callerType", "Affected User");
+		});
+	}
+
+	templateTypeSubscribe() {
+		const switchButton = document.querySelector(
+			`#templateTypeButton${this.instance}`,
+		);
+
+		this.subscribe(
+			"templateType",
+			(value) => (switchButton.textContent = value),
+		);
+
+		this.subscribe("templateType", (value) => {
+			const standardTemplateWrapper = document.querySelector(
+				`#standardTemplateWrapper${this.instance}`,
+			);
+
+			const pwrTemplateWrapper = document.querySelector(
+				`#pwrTemplateWrapper${this.instance}`,
+			);
+
+			if (value === "Standard") {
+				standardTemplateWrapper.classList.remove("hidden");
+				pwrTemplateWrapper.classList.add("hidden");
+			} else {
+				standardTemplateWrapper.classList.add("hidden");
+				pwrTemplateWrapper.classList.remove("hidden");
+			}
+		});
+
+		this.subscribe("templateType", (value) => {
+			const issueResolvedWrapper = document.querySelector(
+				`#issueResolvedWrapper${this.instance}`,
+			);
+			const userAgreedResolvedWrapper = document.querySelector(
+				`#userAgreedResolvedWrapper${this.instance}`,
+			);
+
+			const ticketFulfilledWrapper = document.querySelector(
+				`#ticketFulfilledWrapper${this.instance}`,
+			);
+
+			const userAgreedFulfilledWrapper = document.querySelector(
+				`#userAgreedFulfilledWrapper${this.instance}`,
+			);
+
+			if (value === "Standard") {
+				issueResolvedWrapper.classList.remove("hidden");
+				userAgreedResolvedWrapper.classList.remove("hidden");
+				ticketFulfilledWrapper.classList.add("hidden");
+				userAgreedFulfilledWrapper.classList.add("hidden");
+			} else {
+				issueResolvedWrapper.classList.add("hidden");
+				userAgreedResolvedWrapper.classList.add("hidden");
+				ticketFulfilledWrapper.classList.remove("hidden");
+				userAgreedFulfilledWrapper.classList.remove("hidden");
+			}
+		});
+
+		// this.subscribe("templateType", (value) => {
+		// 	const standardTemplateAutofillButtonsWrapper = document.querySelector(
+		// 		"#standardTemplateAutofillButtonsWrapper",
+		// 	);
+
+		// 	value === "Standard"
+		// 		? standardTemplateAutofillButtonsWrapper.classList.remove("hidden")
+		// 		: standardTemplateAutofillButtonsWrapper.classList.add("hidden");
+		// });
+
+		this.subscribe("templateType", (value) => {
+			const standardTemplateExclusiveOptGroup = document.querySelector(
+				`#standardTemplateExclusiveOptGroup${this.instance}`,
+			);
+			const pwrTemplateExclusiveOptGroup = document.querySelector(
+				`#pwrTemplateExclusiveOptGroup${this.instance}`,
+			);
+
+			if (value === "Standard") {
+				standardTemplateExclusiveOptGroup.classList.remove("hidden");
+				pwrTemplateExclusiveOptGroup.classList.add("hidden");
+			} else {
+				standardTemplateExclusiveOptGroup.classList.add("hidden");
+				pwrTemplateExclusiveOptGroup.classList.remove("hidden");
+			}
+		});
+
+		switchButton.addEventListener("click", () => {
+			this.getState("templateType") === "Standard"
+				? this.setState("templateType", "Password Reset")
+				: this.setState("templateType", "Standard");
+		});
+	}
+
+	emailProvidedSubscribe() {
+		this.subscribe("emailProvided", (value) => {
+			const button = document.querySelector(
+				`#emailProvidedButton${this.instance}`,
+			);
+			button.textContent = value === "Provided" ? "✓" : "x";
+		});
+
+		document
+			.querySelector(`#emailProvidedButton${this.instance}`)
+			.addEventListener("click", () => {
+				this.getState("emailProvided") === "Provided"
+					? this.setState("emailProvided", "Not Provided")
+					: this.setState("emailProvided", "Provided");
+			});
+	}
+
+	OBemailProvidedSubscribe() {
+		this.subscribe("OBemailProvided", (value) => {
+			const button = document.querySelector(
+				`#OBemailProvidedButton${this.instance}`,
+			);
+			button.textContent = value === "Provided" ? "✓" : "x";
+		});
+
+		document
+			.querySelector(`#OBemailProvidedButton${this.instance}`)
+			.addEventListener("click", () => {
+				this.getState("OBemailProvided") === "Provided"
+					? this.setState("OBemailProvided", "Not Provided")
+					: this.setState("OBemailProvided", "Provided");
+			});
+	}
+
+	employeeIdProvidedSubscribe() {
+		this.subscribe("employeeIdProvided", (value) => {
+			const button = document.querySelector(
+				`#employeeIdProvidedButton${this.instance}`,
+			);
+			button.textContent = value === "Provided" ? "✓" : "x";
+		});
+
+		document
+			.querySelector(`#employeeIdProvidedButton${this.instance}`)
+			.addEventListener("click", () => {
+				this.getState("employeeIdProvided") === "Provided"
+					? this.setState("employeeIdProvided", "Not Provided")
+					: this.setState("employeeIdProvided", "Provided");
+			});
+	}
+
+	OBemployeeIdProvidedSubscribe() {
+		this.subscribe("OBemployeeIdProvided", (value) => {
+			const button = document.querySelector(
+				`#OBemployeeIdProvidedButton${this.instance}`,
+			);
+			button.textContent = value === "Provided" ? "✓" : "x";
+		});
+
+		document
+			.querySelector(`#OBemployeeIdProvidedButton${this.instance}`)
+			.addEventListener("click", () => {
+				this.getState("OBemployeeIdProvided") === "Provided"
+					? this.setState("OBemployeeIdProvided", "Not Provided")
+					: this.setState("OBemployeeIdProvided", "Provided");
+			});
+	}
+
+	possibleMajorIncidentSubscribe() {
+		const switchButton = document.querySelector(
+			`#possibleMajorIncidentButton${this.instance}`,
+		);
+		this.subscribe(
+			"possibleMajorIncident",
+			(value) => (switchButton.textContent = value),
+		);
+
+		switchButton.addEventListener("click", () => {
+			this.getState("possibleMajorIncident") === "No"
+				? this.setState("possibleMajorIncident", "Yes")
+				: this.setState("possibleMajorIncident", "No");
+		});
+	}
+
+	contactTypeSubscribe() {
+		const switchButton = document.querySelector(
+			`#contactTypeButton${this.instance}`,
+		);
+		this.subscribe(
+			"contactType",
+			(value) => (switchButton.textContent = value),
+		);
+
+		switchButton.addEventListener("click", () => {
+			this.getState("contactType") === "Phone"
+				? this.setState("contactType", "Chat")
+				: this.setState("contactType", "Phone");
+		});
+	}
+
+	resetTypeSubscribe() {
+		const switchButton = document.querySelector(
+			`#resetTypeButton${this.instance}`,
+		);
+
+		this.subscribe("resetType", (value) => (switchButton.textContent = value));
+
+		this.subscribe("resetType", (value) => {
+			const ssprDetailsWrapper = document.querySelector(
+				`#ssprDetailsFieldset${this.instance}`,
+			);
+
+			value === "Non-AD"
+				? ssprDetailsWrapper.classList.add("hidden")
+				: ssprDetailsWrapper.classList.remove("hidden");
+		});
+
+		switchButton.addEventListener("click", () => {
+			this.getState("resetType") === "Non-AD"
+				? this.setState("resetType", "Active Directory")
+				: this.setState("resetType", "Non-AD");
+		});
+	}
+
+	newHireSubscribe() {
+		const switchButton = document.querySelector(
+			`#newHireButton${this.instance}`,
+		);
+		this.subscribe("newHire", (value) => (switchButton.textContent = value));
+
+		switchButton.addEventListener("click", () => {
+			this.getState("newHire") === "No"
+				? this.setState("newHire", "Yes")
+				: this.setState("newHire", "No");
+		});
+	}
+
+	mfaSubscribe() {
+		const switchButton = document.querySelector(
+			`#mfaRegisteredButton${this.instance}`,
+		);
+		this.subscribe(
+			"mfaRegistered",
+			(value) => (switchButton.textContent = value),
+		);
+
+		switchButton.addEventListener("click", () => {
+			this.getState("mfaRegistered") === "Yes"
+				? this.setState("mfaRegistered", "No")
+				: this.setState("mfaRegistered", "Yes");
+		});
+	}
+
+	ssprSubscribe() {
+		const switchButton = document.querySelector(
+			`#ssprOfferedButton${this.instance}`,
+		);
+
+		this.subscribe(
+			"ssprOffered",
+			(value) => (switchButton.textContent = value),
+		);
+
+		this.subscribe("ssprOffered", (value) => {
+			const noOptGroup = document.querySelector(`#noOptGroup${this.instance}`);
+			const yesOptGroup = document.querySelector(
+				`#yesOptGroup${this.instance}`,
+			);
+
+			if (value === "No") {
+				noOptGroup.classList.remove("hidden");
+				yesOptGroup.classList.add("hidden");
+			} else {
+				noOptGroup.classList.add("hidden");
+				yesOptGroup.classList.remove("hidden");
+			}
+		});
+
+		switchButton.addEventListener("click", () => {
+			this.getState("ssprOffered") === "No"
+				? this.setState("ssprOffered", "Yes")
+				: this.setState("ssprOffered", "No");
+		});
+	}
+
+	issueResolvedSubscribe() {
+		const switchButton = document.querySelector(
+			`#issueResolvedButton${this.instance}`,
+		);
+
+		this.subscribe(
+			"issueResolved",
+			(value) => (switchButton.textContent = value),
+		);
+
+		this.subscribe("issueResolved", (value) => {
+			const resolutionNotesWrapper = document.querySelector(
+				`#standardResolutionNotesWrapper${this.instance}`,
+			);
+
+			value === "No"
+				? resolutionNotesWrapper.classList.add("hidden")
+				: resolutionNotesWrapper.classList.remove("hidden");
+		});
+
+		switchButton.addEventListener("click", () => {
+			this.getState("issueResolved") === "No"
+				? this.setState("issueResolved", "Yes")
+				: this.setState("issueResolved", "No");
+		});
+	}
+
+	ticketFulfilledSubscribe() {
+		const switchButton = document.querySelector(
+			`#ticketFulfilledButton${this.instance}`,
+		);
+
+		this.subscribe(
+			"userAgreedFulfilled",
+			(value) => (switchButton.textContent = value),
+		);
+
+		this.subscribe("userAgreedFulfilled", (value) => {
+			const resolutionNotesWrapper = document.querySelector(
+				`#pwrResolutionNotesWrapper${this.instance}`,
+			);
+
+			value === "No"
+				? resolutionNotesWrapper.classList.add("hidden")
+				: resolutionNotesWrapper.classList.remove("hidden");
+		});
+
+		switchButton.addEventListener("click", () => {
+			this.getState("userAgreedFulfilled") === "No"
+				? this.setState("userAgreedFulfilled", "Yes")
+				: this.setState("userAgreedFulfilled", "No");
+		});
+	}
+
+	nextActionSubscribe() {
+		const nextActionSelect = document.querySelector(
+			`#nextActionSelect${this.instance}`,
+		);
+
+		this.subscribe("nextAction", (value) => {
+			const locationWrapper = document.querySelector(
+				`#locationWrapper${this.instance}`,
+			);
+			if (value === "Route the Ticket to the Next Resolver Team") {
+				locationWrapper.classList.remove("hidden");
+			} else {
+				locationWrapper.classList.add("hidden");
+			}
+		});
+
+		nextActionSelect.addEventListener("change", (e) => {
+			this.setState("nextAction", e.target.value);
+		});
+	}
+
+	userAgreedResolvedSubscribe() {
+		const switchButton = document.querySelector(
+			`#userAgreedResolvedButton${this.instance}`,
+		);
+		this.subscribe(
+			"userAgreedResolved",
+			(value) => (switchButton.textContent = value),
+		);
+
+		switchButton.addEventListener("click", () => {
+			this.getState("userAgreedResolved") === "No"
+				? this.setState("userAgreedResolved", "Yes")
+				: this.setState("userAgreedResolved", "No");
+		});
+	}
+
+	userAgreedFulfilledSubscribe() {
+		const switchButton = document.querySelector(
+			`#userAgreedFulfilledButton${this.instance}`,
+		);
+		this.subscribe(
+			"userAgreedResolved",
+			(value) => (switchButton.textContent = value),
+		);
+
+		switchButton.addEventListener("click", () => {
+			this.getState("userAgreedResolved") === "No"
+				? this.setState("userAgreedResolved", "Yes")
+				: this.setState("userAgreedResolved", "No");
+		});
+	}
+
+	stateSubscribe() {
+		// this.isEditModeSubscribe();
+		this.callerTypeSubscribe();
+		this.templateTypeSubscribe();
+		this.emailProvidedSubscribe();
+		this.OBemailProvidedSubscribe();
+		this.employeeIdProvidedSubscribe();
+		this.OBemployeeIdProvidedSubscribe();
+		this.possibleMajorIncidentSubscribe();
+		this.contactTypeSubscribe();
+		this.resetTypeSubscribe();
+		this.newHireSubscribe();
+		this.mfaSubscribe();
+		this.ssprSubscribe();
+		this.issueResolvedSubscribe();
+		this.ticketFulfilledSubscribe();
+		this.nextActionSubscribe();
+		this.userAgreedResolvedSubscribe();
+		this.userAgreedFulfilledSubscribe();
+	}
+
+	fieldInit() {
+		const field = document.querySelector("#documentationField");
+
+		field.addEventListener("input", () => {
+			setState("isModified", true);
+		});
+	}
+
+	saveButtonInit() {
+		const field = document.querySelector("#documentationField");
+
+		field.addEventListener("submit", (e) => {
+			e.preventDefault();
+
+			if (getState("isModified") === false) {
+				alert("No Changes Detected");
+				return;
+			}
+
+			if (getState("isSaved") === false) {
+				setState("isSaved", true);
+			}
+
+			const formData = new FormData(e.target);
+			const data = Object.fromEntries(formData.entries());
+			console.log(data);
+			setState("savedData", data);
+			copyToClipboard(data);
+			const tempSO = { ...appModule.getSessionObject() };
+			tempSO[appModule.getCurrentSessionName()] = [
+				...tempSO[appModule.getCurrentSessionName()],
+				data,
+			];
+			localStorage.setItem("tempSO", JSON.stringify(tempSO));
+			console.log(JSON.parse(localStorage.getItem("tempSO")));
+			alert("Saved and Copied to Clipboard");
+		});
+	}
+
+	newNoteButtonInit() {
+		document.querySelector("#newNoteButton").addEventListener("click", () => {
+			if (getState("isSaved") === false) {
+				alert("Please save current notes");
+				return;
+			}
+			appModule.updateSessionObject();
+			historyModule.renderHistory();
+			document.querySelector("#documentationField").reset();
+			resetAllState();
+			window.location.href = "#documentationField";
+		});
+	}
+
+	newNoteUserRetainedButtonInit() {
+		document
+			.querySelector("#newNoteUserRetainedButton")
+			.addEventListener("click", () => {
+				if (getState("isSaved") === false) {
+					alert("Please save current notes");
+					return;
+				}
+				const data = { ...getState("savedData") };
+
+				app.updateRecordAndSync(data);
+				document.querySelector("#documentationField").reset();
+
+				const fields = [
+					"employeeId",
+					"fullName",
+					"email",
+					"contactNumber",
+					"timezone",
+					"location",
+					"OBemployeeId",
+					"OBfullName",
+					"OBemail",
+					"OBcontactNumber",
+					"OBtimezone",
+					"OBlocation",
+				];
+
+				fields.forEach((key) => {
+					console.log(key);
+					document.querySelector(`[name="${key}"]`).value = data[key];
+				});
+				resetAllState();
+				window.location.href = "#documentationField";
+				appControls.renderHistoryList();
+			});
+	}
+
+	cancelButtonInit() {
+		document.querySelector("#cancelButton").addEventListener("click", () => {
+			if (
+				confirm(
+					"Are you sure you want to cancel? All unsaved changes will be lost.",
+				)
+			) {
+				document.querySelector("#documentationField").reset();
+				resetAllState();
+				window.location.href = "#documentationField";
+			}
+		});
+	}
+
+	saveChangesButtonInit() {
+		const saveChangesButton = document.querySelector("#saveChangesButton");
+
+		saveChangesButton.addEventListener("click", (e) => {
+			if (confirm("Are you sure you want to save changes?")) {
+				const form = document.querySelector("#documentationField");
+				const formData = new FormData(form);
+				const data = Object.fromEntries(formData.entries());
+				historyModule.saveChangesHandler(data);
+				copyToClipboard(data);
+				alert("Changes saved and copied to clipboard");
+				document.querySelector("#documentationField").reset();
+				resetAllState();
+				window.location.href = "#documentationField";
+			}
+		});
+	}
+
+	cancelEditButtonInit() {
+		const cancelEditButton = document.querySelector("#cancelEditButton");
+
+		cancelEditButton.addEventListener("click", (e) => {
+			if (confirm("Are you sure you want to cancel editing?")) {
+				document.querySelector("#documentationField").reset();
+				resetAllState();
+				window.location.href = "#documentationField";
+				historyModule.cancelEditHandler();
+			}
+		});
+	}
+
+	standardTroubleshootingStepsAutofillInit() {
+		const troubleShootingStepsField = document.querySelector(
+			"[name=troubleshootingSteps]",
+		);
+
+		const incidentResolvedAFButton = document.querySelector(
+			"#incidentResolvedAFButton",
+		);
+		const incidentRoutedAFButton = document.querySelector(
+			"#incidentRoutedAFButton",
+		);
+
+		incidentResolvedAFButton.addEventListener("click", () => {
+			troubleShootingStepsField.value += `
+- Issue Resolved
+- Provided ticket number to the user
+- Confirmed with user ticket can now be set to resolved
+- End Interaction`;
+		});
+
+		incidentRoutedAFButton.addEventListener("click", () => {
+			troubleShootingStepsField.value += `
+- Advised user ticket will be routed to the next resolver team
+- Provided ticket number to the user
+- User Acknowledged
+- End Interaction`;
+		});
+	}
+}
+
+function temp() {
+	const instance = crypto.randomUUID();
+
+	form.generate(instance);
+	const stateManager1 = new stateManager();
+	const uiStateLinker1 = new uiStateLinker(instance, stateManager1);
+}
+
 function appInit() {
 	// window.addEventListener("beforeunload", (e) => {
 	// 	e.preventDefault();
@@ -2079,7 +2847,7 @@ function appInit() {
 	preferenceModule.init();
 	resetAllState(); // prevent browser cache from desyncing from state
 	fieldUI.init();
-	temp.generateForm();
+	temp();
 }
 
 function fillTestData() {
@@ -2139,4 +2907,7 @@ function fillTestData() {
 
 document.querySelector("#fillTestData").addEventListener("click", fillTestData);
 
-appInit();
+// appInit();
+
+temp();
+temp();
