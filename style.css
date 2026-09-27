@@ -139,6 +139,18 @@ li {
 	gap: 5px;
 }
 
+#outerFormsWrapper {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.docForm {
+	border: 1px solid black;
+	padding: 1rem;
+}
+
 label {
 	font-size: 1rem;
 	text-align: end;
