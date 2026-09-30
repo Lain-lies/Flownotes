@@ -213,6 +213,14 @@ input[type="email"] {
 	gap: 5px;
 }
 
+[name="availability"] {
+	width: 11ch !important;
+}
+
+.insideWrapper {
+	display: flex;
+}
+
 .inputWithButtonWrapper {
 	display: flex;
 	align-items: center;
