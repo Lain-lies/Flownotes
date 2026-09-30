@@ -19,6 +19,9 @@
 body {
 	line-height: 1.5;
 	-webkit-font-smoothing: antialiased;
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
 }
 
 img,
@@ -139,16 +142,29 @@ li {
 	gap: 5px;
 }
 
+#hideControlPanelButton {
+	margin: 0.5rem;
+}
+
 #outerFormsWrapper {
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
+	flex: 1;
+}
+
+#addInstanceButton {
+	font-size: 1.5rem;
+	font-weight: bolder;
+	padding: 0.5rem 1rem;
+	margin: 1rem;
 }
 
 .docForm {
 	border: 1px solid black;
 	padding: 1rem;
+	margin: 1rem;
 }
 
 label {
@@ -247,12 +263,12 @@ button {
 	background-color: #bfe0f3;
 }
 
-#normalModeWrapper {
+.fieldControls {
 	display: flex;
 	justify-content: space-evenly;
 }
 
-#normalModeWrapper > button {
+.fieldControls > button {
 	padding: 0rem 0.3rem;
 	font-size: 0.9rem;
 }
@@ -279,16 +295,6 @@ optgroup {
 	justify-content: space-evenly;
 }
 
-#saveNoteButton,
-#newNoteButton,
-#newNoteUserRetainedButton {
-	background-color: #98fb98;
-}
-
-#cancelButton {
-	background-color: #bc544b;
-}
-
 #standardTemplateAutofillButtonsWrapper,
 #pwrTemplateAutofillButtonsWrapper {
 	display: flex;
@@ -306,4 +312,12 @@ footer {
 
 footer > p {
 	text-align: center;
+}
+
+#resetAppButton {
+	background-color: red !important;
+	position: fixed;
+	right: 10px;
+	bottom: 10px;
+	font-size: 0.5rem;
 }

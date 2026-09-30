@@ -4,23 +4,6 @@ function currentDate() {
 
 const preferenceModule = {
 	init() {
-		this.root = document.body;
-		this.h1 = document.querySelector("h1");
-		this.prevContainer = document.querySelector("#previewContainer");
-		this.appControlsWrapper = document.querySelector("#appControlsWrapper");
-
-		this.labels = document.querySelectorAll("label");
-		this.inputs = document.querySelectorAll("input");
-		this.textareas = document.querySelectorAll("textarea");
-		this.headers = document.querySelectorAll("h5");
-		this.buttons = document.querySelectorAll("button");
-		this.selects = document.querySelectorAll("select");
-		this.legends = document.querySelectorAll("legend");
-		this.fieldsets = document.querySelectorAll("fieldset");
-		this.footerEl = document.querySelectorAll("footer > *");
-		this.links = document.querySelectorAll("a");
-		this.li = document.querySelectorAll("li");
-
 		document
 			.querySelector("#preferencesForm")
 			.addEventListener("submit", (e) => {
@@ -29,6 +12,11 @@ const preferenceModule = {
 				const backgroundColor = formData.get("backgroundColor").trim();
 				const fontColor = formData.get("fontColor").trim();
 				const buttonColor = formData.get("buttonColor").trim();
+
+				localStorage.setItem(
+					"userPreferences",
+					JSON.stringify({ backgroundColor, fontColor, buttonColor }),
+				);
 
 				preferenceModule.apply(backgroundColor, fontColor, buttonColor);
 			});
@@ -45,11 +33,8 @@ const preferenceModule = {
 			const userPreferences = JSON.parse(
 				localStorage.getItem("userPreferences"),
 			);
-			preferenceModule.apply(
-				userPreferences.backgroundColor,
-				userPreferences.fontColor,
-				userPreferences.buttonColor,
-			);
+
+			preferenceModule.apply(...Object.values(userPreferences));
 		} else {
 			userPreferences = {
 				backgroundColor: "#f0f0f0",
@@ -66,72 +51,89 @@ const preferenceModule = {
 	},
 
 	apply(backgroundColor, fontColor, buttonColor) {
-		localStorage.setItem(
-			"userPreferences",
-			JSON.stringify({
-				backgroundColor,
-				fontColor,
-				buttonColor,
-			}),
-		);
+		const root = document.body;
+		const h1 = document.querySelector("h1");
+		const prevContainer = document.querySelector("#previewContainer");
+		const appControlsWrapper = document.querySelector("#appControlsWrapper");
 
-		this.root.style.backgroundColor = backgroundColor;
+		const labels = document.querySelectorAll("label");
+		const inputs = document.querySelectorAll("input");
+		const textareas = document.querySelectorAll("textarea");
+		const headers = document.querySelectorAll("h5");
+		const buttons = document.querySelectorAll("button");
+		const selects = document.querySelectorAll("select");
+		const legends = document.querySelectorAll("legend");
+		const fieldsets = document.querySelectorAll("fieldset");
+		const footerEl = document.querySelectorAll("footer > *");
+		const links = document.querySelectorAll("a");
+		const li = document.querySelectorAll("li");
+		const docForm = document.querySelectorAll(".docForm");
 
-		this.h1.style.color = fontColor;
-		this.prevContainer.style.color = fontColor;
-		this.appControlsWrapper.style.borderColor = fontColor;
+		root.style.backgroundColor = backgroundColor;
 
-		this.labels.forEach((label) => {
+		h1.style.color = fontColor;
+		prevContainer.style.color = fontColor;
+		appControlsWrapper.style.borderColor = fontColor;
+
+		labels.forEach((label) => {
 			label.style.color = fontColor;
 		});
 
-		this.inputs.forEach((input) => {
+		inputs.forEach((input) => {
 			input.style.border = `1px solid ${fontColor}`;
 			input.style.backgroundColor = backgroundColor;
 			input.style.color = fontColor;
 		});
 
-		this.textareas.forEach((textarea) => {
+		textareas.forEach((textarea) => {
 			textarea.style.border = `1px solid ${fontColor}`;
 			textarea.style.backgroundColor = backgroundColor;
 			textarea.style.color = fontColor;
 		});
 
-		this.headers.forEach((header) => {
+		headers.forEach((header) => {
 			header.style.color = fontColor;
 		});
 
-		this.buttons.forEach((button) => {
+		buttons.forEach((button) => {
 			button.style.border = `1px solid ${fontColor}`;
 			button.style.color = fontColor;
 			button.style.backgroundColor = buttonColor;
 		});
 
-		this.selects.forEach((select) => {
+		selects.forEach((select) => {
 			select.style.backgroundColor = backgroundColor;
 			select.style.color = fontColor;
 			select.style.border = `1px solid ${fontColor}`;
 		});
 
-		this.legends.forEach((legend) => {
+		legends.forEach((legend) => {
 			legend.style.color = fontColor;
 		});
 
-		this.fieldsets.forEach((fieldset) => {
+		fieldsets.forEach((fieldset) => {
 			fieldset.style.border = `1px solid ${fontColor}`;
 		});
 
-		this.footerEl.forEach((item) => {
+		footerEl.forEach((item) => {
 			item.style.color = fontColor;
 		});
 
-		this.links.forEach((link) => {
+		links.forEach((link) => {
 			link.style.color = fontColor;
 		});
 
-		this.li.forEach((item) => {
+		li.forEach((item) => {
 			item.style.color = fontColor;
 		});
+
+		docForm.forEach((item) => (item.style.border = `1px solid ${fontColor}`));
+	},
+
+	reapply() {
+		const userPreferences = JSON.parse(localStorage.getItem("userPreferences"));
+		console.log(userPreferences);
+		preferenceModule.apply(...Object.values(userPreferences));
 	},
 };
 
@@ -188,6 +190,10 @@ const sessionModule = {
 
 		sessionButton.textContent = session;
 		sessionButton.addEventListener("click", () => {
+			if (historyModule.getIsActivelyEditing()) {
+				alert("Editor is opened please close or save before switching session");
+				return;
+			}
 			appModule.setCurrentSession(session);
 			historyModule.renderHistory();
 		});
@@ -243,6 +249,20 @@ const sessionModule = {
 
 const historyModule = {
 	editIndex: null,
+	isActivelyEditing: false,
+
+	setIsActivelyEditing(value) {
+		this.isActivelyEditing = value;
+	},
+
+	getIsActivelyEditing(value) {
+		return this.isActivelyEditing;
+	},
+
+	reset() {
+		this.editIndex = null;
+		this.isActivelyEditing = false;
+	},
 
 	saveChangesHandler(data) {
 		if (this.editIndex === null) {
@@ -287,7 +307,9 @@ const historyModule = {
 		const ul = document.querySelector("#sessionHistory");
 		const exportAllButton = document.querySelector("#exportAll");
 		exportAllButton.addEventListener("click", () =>
-			exportSession(app.getCurrentSessionName()),
+			exportSession([
+				...appModule.getSessionObject()[appModule.getCurrentSessionName()],
+			]),
 		);
 		ul.replaceChildren();
 		appModule
@@ -296,25 +318,13 @@ const historyModule = {
 				previewHandler = () => previewRecord(data);
 
 				editHandler = () => {
-					if (getState("isModified")) {
-						alert("Unable to edit record: Please save or cancel notes");
+					if (this.getIsActivelyEditing()) {
+						alert("Editor is active please close or save current work");
 						return;
 					}
-
-					if (getState("isEditMode")) {
-						alert("Already in edit mode. Please save or cancel current edits.");
-						return;
-					}
-
 					this.editIndex = index;
-
-					Object.entries(data).forEach(([key, value]) => {
-						const el = document.querySelector(`[name="${key}"]`);
-						el.value = value;
-					});
-
-					setMultipleState(data);
-					setState("isEditMode", true);
+					this.isActivelyEditing = true;
+					createEditorInstance(data);
 				};
 
 				this.createHistoryListItem(ul, data, previewHandler, editHandler);
@@ -353,16 +363,17 @@ async function copyToClipboard(data) {
 		data.templateType === "Standard"
 			? standardTemplateFormatter(data)
 			: pwrTypeFormatter(data);
+
 	try {
 		await navigator.clipboard.writeText(text);
+		return true;
 	} catch (err) {
 		console.error("Failed to copy: ", err);
+		return false;
 	}
 }
 
-function exportSession(sessionName) {
-	const records = JSON.parse(localStorage.getItem(sessionName)) || [];
-
+function exportSession(records) {
 	let textContent = "";
 
 	records.forEach((record, index) => {
@@ -383,7 +394,7 @@ function exportSession(sessionName) {
 
 	const a = document.createElement("a");
 	a.href = url;
-	a.download = `${sessionName}.txt`;
+	a.download = `${appModule.getCurrentSessionName()}.txt`;
 
 	a.click();
 
@@ -409,7 +420,6 @@ Email Address: ${data.OBemailProvided} | ${data.OBemail}
 Employee ID: ${data.OBemployeeIdProvided} | ${data.OBemployeeId}
 Contact Number: ${data.OBcontactNumber}
 Availability Hours: ${data.OBavailability} ${data.OBtimezone}
-Location: ${data.OBlocation}
 `;
 	}
 
@@ -432,8 +442,8 @@ Existing Ticket? ${data.existingTicket}
 Possible Major Incident? ${data.possibleMajorIncident}
 Contact Type: ${data.contactType}
 
-Device Name: ${data.machineName}
-Nexthink Checklist: ${data.nexthinkChecklist}
+Device Name: ${data.deviceName}
+Nexthink Checklist: ${data.nexthinkCheckList}
 
 ISSUE DESCRIPTION:
 ${data.issueDescription}
@@ -443,7 +453,7 @@ ${data.troubleshootingSteps}
 ${resolutionNotes}
 KB Article: ${data.kbArticle}
 Issue Resolved? ${data.issueResolved}
-Next Action(s): ${data.nextActions}
+Next Action(s): ${data.nextAction}
 User agreed to set data to Resolved? ${data.userAgreedResolved}`;
 
 	return documentation;
@@ -459,7 +469,6 @@ Email Address: ${data.OBemailProvided} | ${data.OBemail}
 Employee ID: ${data.OBemployeeIdProvided} | ${data.OBemployeeId}
 Contact Number: ${data.OBcontactNumber}
 Availability Hours: ${data.OBavailability} ${data.OBtimezone}
-Location: ${data.OBlocation}
 `;
 	}
 
@@ -497,9 +506,9 @@ TROUBLESHOOTING STEPS:
 ${data.troubleshootingSteps}
 ${resolutionNotes}
 KB Article: ${data.kbArticle}
-Ticket Fulfilled: ${data.issueResolved}
+Ticket Fulfilled: ${data.ticketFulfilled}
 Next Action(s): ${data.nextActions}
-User agreed to fulfill ticket? ${data.userAgreedResolved}`;
+User agreed to fulfill ticket? ${data.userAgreedFulfilled}`;
 
 	return documentation;
 }
@@ -573,10 +582,16 @@ class stateManager {
 			this.setState(key, referenceObject[key]);
 		});
 	}
+
+	setMultipleSelectedState(referenceObject) {
+		Object.entries(referenceObject).forEach(([key, value]) => {
+			this.setState(key, value);
+		});
+	}
 }
 
 const form = {
-	generate(instance = 1) {
+	generate(instance = 1, editMode = false) {
 		const form = document.createElement("form");
 
 		form.id = `form${instance}`;
@@ -584,8 +599,16 @@ const form = {
 
 		// Instance ID
 		const instanceID = document.createElement("p");
-		instanceID.textContent = `instance id = ${instance}`;
+		instanceID.textContent = instance;
 		form.appendChild(instanceID);
+
+		//Form State
+
+		const formState = document.createElement("p");
+		editMode
+			? (formState.textContent = "FS=EDIT")
+			: (formState.textContent = "FS=NORMAL");
+		form.appendChild(formState);
 
 		//Caller and Template Type Fieldset
 		const callerFieldset = document.createElement("fieldset");
@@ -664,6 +687,8 @@ const form = {
 								type: "button",
 								textContent: "✓",
 								id: `emailProvidedButton${instance}`,
+								title:
+									"If Email is provided by caller button should be a check",
 							}),
 						],
 						["inputWithButtonWrapper"],
@@ -690,6 +715,8 @@ const form = {
 								type: "button",
 								textContent: "✓",
 								id: `employeeIdProvidedButton${instance}`,
+								title:
+									"If Employee ID is provided by caller button should be a check",
 							}),
 						],
 						["inputWithButtonWrapper"],
@@ -891,6 +918,8 @@ const form = {
 								type: "button",
 								textContent: "✓",
 								id: `OBemailProvidedButton${instance}`,
+								title:
+									"If Email is provided by caller button should be a check",
 							}),
 						],
 						["inputWithButtonWrapper"],
@@ -918,6 +947,8 @@ const form = {
 								type: "button",
 								textContent: "✓",
 								id: `OBemployeeIdProvidedButton${instance}`,
+								title:
+									"If Employee ID is provided by caller button should be a check",
 							}),
 						],
 						["inputWithButtonWrapper"],
@@ -1134,7 +1165,7 @@ const form = {
 							this.generateElement("label", {
 								textContent: "Nexthink Checklist:",
 							}),
-							this.generateSelectElement("nextChecklist", null, [
+							this.generateSelectElement("nexthinkCheckList", null, [
 								"Not Applicable",
 								"Not Available(See Attachment)",
 								"Diagnostics Attached",
@@ -1404,7 +1435,7 @@ const form = {
 							[
 								"Complete the interaction",
 								"Cancel the ticket",
-								"Escalated the ticket",
+								"Escalate the ticket",
 								"Set Ticket to 'On Hold' Status",
 								"Set Ticket to 'Resolved' Status",
 								"Route the Ticket to the Next Resolver Team",
@@ -1412,7 +1443,7 @@ const form = {
 							[
 								"Complete the interaction",
 								"Cancel the ticket",
-								"Escalated the ticket",
+								"Escalate the ticket",
 								"Set Ticket to 'Fulfilled' Status",
 								"Wait for Line Manager's Approval",
 							],
@@ -1497,57 +1528,55 @@ const form = {
 		fieldControlsLegend.textContent = "Field Controls";
 
 		fieldControlsFieldSet.appendChild(fieldControlsLegend);
+		fieldControlsFieldSet.classList.add("fieldControls");
+		if (!editMode) {
+			fieldControlsFieldSet.appendChild(
+				this.generateElement("button", {
+					type: "submit",
+					textContent: "Save Note & Copy",
+					id: `saveButton${instance}`,
+				}),
+			);
 
-		fieldControlsFieldSet.appendChild(
-			this.generateElement("button", {
-				type: "submit",
-				textContent: "Save Note & Copy",
-				id: `saveButton${instance}`,
-			}),
-		);
+			fieldControlsFieldSet.appendChild(
+				this.generateElement("button", {
+					type: "button",
+					textContent: "Close Instance",
+					id: `closeInstanceButton${instance}`,
+				}),
+			);
 
-		fieldControlsFieldSet.appendChild(
-			this.generateElement("button", {
-				type: "button",
-				textContent: "Close Instance",
-				id: `closeInstanceButton${instance}`,
-			}),
-		);
+			fieldControlsFieldSet.appendChild(
+				this.generateElement("button", {
+					type: "button",
+					textContent: "Multiple Issue",
+					id: `multipleIssueButton${instance}`,
+				}),
+			);
 
-		fieldControlsFieldSet.appendChild(
-			this.generateElement("button", {
-				type: "button",
-				textContent: "Multiple Issue",
-				id: `multipleIssueButton${instance}`,
-			}),
-		);
+			fieldControlsFieldSet.appendChild(
+				this.generateElement("button", {
+					type: "button",
+					textContent: "Cancel",
+					id: `cancelButton${instance}`,
+				}),
+			);
+		} else {
+			fieldControlsFieldSet.appendChild(
+				this.generateElement("button", {
+					type: "submit",
+					textContent: "Save Changes & Copy",
+				}),
+			);
 
-		fieldControlsFieldSet.appendChild(
-			this.generateElement("button", {
-				type: "button",
-				textContent: "Cancel",
-				id: `cancelButton${instance}`,
-			}),
-		);
-
-		fieldControlsFieldSet.appendChild(
-			this.generateWrapper(
-				[
-					this.generateElement("button", {
-						type: "button",
-						textContent: "Save Changes & Copy",
-						id: `saveChanges${instance}`,
-					}),
-					this.generateElement("button", {
-						type: "button",
-						textContent: "Cancel Edit",
-						id: `cancelEditButton${instance}`,
-					}),
-				],
-				[],
-				`editModeWrapper${instance}`,
-			),
-		);
+			fieldControlsFieldSet.appendChild(
+				this.generateElement("button", {
+					type: "button",
+					textContent: "Cancel Edit",
+					id: `cancelEditButton${instance}`,
+				}),
+			);
+		}
 
 		form.appendChild(callerFieldset);
 		form.appendChild(userEntitlementFieldSet);
@@ -1622,7 +1651,7 @@ const form = {
 };
 
 class uiStateLinker {
-	constructor(instance, stateManager) {
+	constructor(instance, stateManager, editMode) {
 		this.instance = instance;
 		this.setState = stateManager.setState.bind(stateManager);
 		this.getState = stateManager.getState.bind(stateManager);
@@ -1630,25 +1659,17 @@ class uiStateLinker {
 		this.getStateObject = stateManager.getStateObject.bind(stateManager);
 		this.stateSubscribe();
 		this.fieldInit();
-		this.saveButtonInit();
-		this.closeInstanceButtonInit();
-		this.multipleIssueButtonInit();
-		this.cancelButtonInit();
-	}
-	// isEditModeSubscribe() {
-	// 	subscribe("isEditMode", (value) => {
-	// 		const normalModeWrapper = document.querySelector("#normalModeWrapper");
-	// 		const editModeWrapper = document.querySelector("#editModeWrapper");
 
-	// 		if (value) {
-	// 			editModeWrapper.classList.remove("hidden");
-	// 			normalModeWrapper.classList.add("hidden");
-	// 		} else {
-	// 			editModeWrapper.classList.add("hidden");
-	// 			normalModeWrapper.classList.remove("hidden");
-	// 		}
-	// 	});
-	// },
+		if (!editMode) {
+			this.saveButtonInit();
+			this.closeInstanceButtonInit();
+			this.multipleIssueButtonInit();
+			this.cancelButtonInit();
+		} else {
+			this.saveChangesButtonInit();
+			this.cancelEditButtonInit();
+		}
+	}
 
 	callerTypeSubscribe() {
 		const switchButton = document.querySelector(
@@ -2089,7 +2110,7 @@ class uiStateLinker {
 	saveButtonInit() {
 		const form = document.querySelector(`#form${this.instance}`);
 
-		form.addEventListener("submit", (e) => {
+		form.addEventListener("submit", async (e) => {
 			e.preventDefault();
 
 			if (this.getState("isModified") === false) {
@@ -2103,11 +2124,18 @@ class uiStateLinker {
 
 			const formData = new FormData(e.target);
 			const data = Object.fromEntries(formData.entries());
-			copyToClipboard(data);
 
 			this.combined = { ...this.getStateObject(), ...data };
 
-			alert("Saved and Copied to Clipboard");
+			const copySuccess = await copyToClipboard(this.combined);
+
+			if (copySuccess) {
+				alert("Saved and Copied to Clipboard");
+			} else {
+				alert(
+					"Changes saved, but copying to clipboard failed. Click save again",
+				);
+			}
 		});
 	}
 
@@ -2147,7 +2175,7 @@ class uiStateLinker {
 				appModule.updateSessionObject({ ...tempSO });
 				historyModule.renderHistory();
 				document.querySelector(`#form${this.instance}`).remove();
-				temp(this.combined);
+				temp({ ...this.combined });
 			});
 	}
 
@@ -2166,34 +2194,54 @@ class uiStateLinker {
 	}
 
 	saveChangesButtonInit() {
-		const saveChangesButton = document.querySelector("#saveChangesButton");
+		const form = document.querySelector(`#form${this.instance}`);
 
-		saveChangesButton.addEventListener("click", (e) => {
-			if (confirm("Are you sure you want to save changes?")) {
-				const form = document.querySelector("#documentationField");
-				const formData = new FormData(form);
+		form.addEventListener("submit", async (e) => {
+			if (confirm("Would you like to save changes?")) {
+				e.preventDefault();
+
+				const formData = new FormData(e.target);
 				const data = Object.fromEntries(formData.entries());
-				historyModule.saveChangesHandler(data);
-				copyToClipboard(data);
-				alert("Changes saved and copied to clipboard");
-				document.querySelector("#documentationField").reset();
-				resetAllState();
-				window.location.href = "#documentationField";
+
+				this.combined = { ...this.getStateObject(), ...data };
+
+				const tempSO = appModule.getSessionObject();
+				tempSO[appModule.getCurrentSessionName()][historyModule.editIndex] =
+					this.combined;
+
+				appModule.updateSessionObject({ ...tempSO });
+				historyModule.reset();
+				historyModule.renderHistory();
+				document.querySelector(`#form${this.instance}`).remove();
+				const copySuccess = await copyToClipboard(this.combined);
+
+				if (copySuccess) {
+					alert("Changes saved and Copied to Clipboard");
+				} else {
+					alert(
+						"Changes saved, but copying to clipboard failed. Click save again",
+					);
+				}
+			} else {
+				return;
 			}
 		});
 	}
 
 	cancelEditButtonInit() {
-		const cancelEditButton = document.querySelector("#cancelEditButton");
-
-		cancelEditButton.addEventListener("click", (e) => {
-			if (confirm("Are you sure you want to cancel editing?")) {
-				document.querySelector("#documentationField").reset();
-				resetAllState();
-				window.location.href = "#documentationField";
-				historyModule.cancelEditHandler();
-			}
-		});
+		document
+			.querySelector(`#cancelEditButton${this.instance}`)
+			.addEventListener("click", () => {
+				if (
+					confirm(
+						"Are you sure you want to cancel? All unsaved changes will be lost.",
+					)
+				) {
+					historyModule.reset();
+					historyModule.renderHistory();
+					document.querySelector(`#form${this.instance}`).remove();
+				}
+			});
 	}
 
 	standardTroubleshootingStepsAutofillInit() {
@@ -2226,27 +2274,87 @@ class uiStateLinker {
 	}
 }
 
-function temp(data = null) {
+function createFormInstance(data = null) {
 	const instance = crypto.randomUUID();
 
 	form.generate(instance);
 	const stateManager1 = new stateManager();
-	new uiStateLinker(instance, stateManager1);
+	new uiStateLinker(instance, stateManager1, false);
 
-	if (data) retainUserInfo(instance, data);
+	if (data) {
+		const {
+			emailProvided,
+			OBemailProvided,
+			employeeIdProvided,
+			OBemployeeIdProvided,
+			templateType,
+		} = data;
+
+		const retainedState = {
+			emailProvided,
+			OBemailProvided,
+			employeeIdProvided,
+			OBemployeeIdProvided,
+		};
+
+		stateManager1.setMultipleSelectedState(retainedState);
+		retainUserInfo(instance, data);
+	}
+}
+
+function createEditorInstance(data = null) {
+	const instance = crypto.randomUUID();
+
+	form.generate(instance, true);
+	const stateManager1 = new stateManager();
+	new uiStateLinker(instance, stateManager1, true);
+
+	stateManager1.setMultipleState(data);
+	loadValuesToForm(instance, data);
+}
+
+function appMiscButtonsInit() {
+	document
+		.querySelector("#closePreviewButton")
+		.addEventListener("click", () => {
+			document.querySelector("#previewContainer").replaceChildren();
+		});
+
+	document.querySelector("#addInstanceButton").addEventListener("click", () => {
+		createFormInstance();
+		preferenceModule.reapply();
+	});
+
+	document
+		.querySelector("#hideControlPanelButton")
+		.addEventListener("click", () => {
+			document.querySelector("#appControlsWrapper").classList.toggle("hidden");
+		});
+
+	document.querySelector("#resetAppButton").addEventListener("click", () => {
+		if (
+			confirm(
+				"Only do a reset if the app is malfunctioning or advised by the developer for an update. Resetting the application will remove all the sessions and history. Would you like to proceed?",
+			)
+		) {
+			localStorage.clear();
+			window.location.reload();
+			return;
+		}
+
+		return;
+	});
 }
 
 function appInit() {
-	// window.addEventListener("beforeunload", (e) => {
-	// 	e.preventDefault();
-	// });
+	window.addEventListener("beforeunload", (e) => {
+		e.preventDefault();
+	});
 	appModule.init();
 	sessionModule.init();
 	historyModule.renderHistory();
 	preferenceModule.init();
-	document
-		.querySelector("#addInstanceButton")
-		.addEventListener("click", () => temp());
+	appMiscButtonsInit();
 }
 
 function fillTestData() {
@@ -2345,6 +2453,11 @@ function retainUserInfo(instance, data) {
 	).value = data["OBcontactPreference"];
 }
 
-document.querySelector("#fillTestData").addEventListener("click", fillTestData);
+function loadValuesToForm(instance, data) {
+	Object.entries(data).forEach(([key, value]) => {
+		const el = document.querySelector(`#form${instance} [name="${key}"]`);
+		if (el) el.value = value;
+	});
+}
 
 appInit();

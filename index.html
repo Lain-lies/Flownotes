@@ -4,7 +4,7 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<script src="script.js" defer></script>
-		<title>Flownotes</title>
+		<title>Flownotes 2.0.0</title>
 		<link rel="stylesheet" href="style.css" />
 	</head>
 
@@ -87,14 +87,17 @@
 			</div>
 		</div>
 
-		<button id="hideControlPanelButton">Show Control Panel</button>
+		<button id="hideControlPanelButton">Show/Hide Control Panel</button>
 
-		<button type="button" id="fillTestData">Fill Test Data</button>
 		<hr />
 		<div id="outerFormsWrapper">
 			<div id="innerFormsWrapper"></div>
-			<button id="addInstanceButton">+</button>
+			<button id="addInstanceButton" title="Clicking this will add a form">
+				+
+			</button>
 		</div>
+
+		<button id="resetAppButton">Reset</button>
 		<footer>
 			<p>
 				Flownotes &copy; 2026 | GitHub:
