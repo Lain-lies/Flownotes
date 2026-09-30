@@ -274,12 +274,13 @@ button {
 	background-color: #bfe0f3;
 }
 
-.fieldControls {
-	display: flex;
-	justify-content: space-evenly;
+.fieldControlsWrapper {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	place-items: center;
 }
 
-.fieldControls > button {
+.fieldControlsWrapper > button {
 	padding: 0rem 0.3rem;
 	font-size: 0.9rem;
 }
@@ -333,24 +334,30 @@ footer > p {
 	font-size: 0.5rem;
 }
 
-@media (max-width: 500px) {
+@media (max-width: 550px) {
 	button {
 		font-size: 0.85rem;
+	}
+
+	legend {
+		font-size: 0.8rem;
 	}
 	label,
 	input,
 	.fieldWrapper > button,
-	textarea,
-	legend {
+	textarea {
 		font-size: 0.9rem;
 	}
 	select {
 		font-size: 0.8rem;
 	}
 
-	.fieldWrapper > button,
-	.fieldControls > button {
-		font-size: 0.75rem;
+	.fieldWrapper > button {
+		font-size: 0.8rem;
+	}
+
+	.fieldControlsWrapper > button {
+		font-size: 0.6rem;
 	}
 
 	footer {

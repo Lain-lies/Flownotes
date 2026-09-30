@@ -1528,38 +1528,33 @@ const form = {
 		fieldControlsLegend.textContent = "Field Controls";
 
 		fieldControlsFieldSet.appendChild(fieldControlsLegend);
-		fieldControlsFieldSet.classList.add("fieldControls");
 		if (!editMode) {
 			fieldControlsFieldSet.appendChild(
-				this.generateElement("button", {
-					type: "submit",
-					textContent: "Save Note & Copy",
-					id: `saveButton${instance}`,
-				}),
-			);
-
-			fieldControlsFieldSet.appendChild(
-				this.generateElement("button", {
-					type: "button",
-					textContent: "Close Instance",
-					id: `closeInstanceButton${instance}`,
-				}),
-			);
-
-			fieldControlsFieldSet.appendChild(
-				this.generateElement("button", {
-					type: "button",
-					textContent: "Multiple Issue",
-					id: `multipleIssueButton${instance}`,
-				}),
-			);
-
-			fieldControlsFieldSet.appendChild(
-				this.generateElement("button", {
-					type: "button",
-					textContent: "Cancel",
-					id: `cancelButton${instance}`,
-				}),
+				this.generateWrapper(
+					[
+						this.generateElement("button", {
+							type: "submit",
+							textContent: "Save Note & Copy",
+							id: `saveButton${instance}`,
+						}),
+						this.generateElement("button", {
+							type: "button",
+							textContent: "Close Instance",
+							id: `closeInstanceButton${instance}`,
+						}),
+						this.generateElement("button", {
+							type: "button",
+							textContent: "Multiple Issue",
+							id: `multipleIssueButton${instance}`,
+						}),
+						this.generateElement("button", {
+							type: "button",
+							textContent: "Cancel",
+							id: `cancelButton${instance}`,
+						}),
+					],
+					["fieldControlsWrapper"],
+				),
 			);
 		} else {
 			fieldControlsFieldSet.appendChild(
