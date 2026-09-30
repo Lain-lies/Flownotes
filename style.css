@@ -216,6 +216,9 @@ input[type="email"] {
 [name="availability"] {
 	width: 11ch !important;
 }
+[name="deviceName"] {
+	width: 16ch !important;
+}
 
 .insideWrapper {
 	display: flex;
@@ -328,4 +331,29 @@ footer > p {
 	right: 10px;
 	bottom: 10px;
 	font-size: 0.5rem;
+}
+
+@media (max-width: 500px) {
+	button {
+		font-size: 0.85rem;
+	}
+	label,
+	input,
+	.fieldWrapper > button,
+	textarea,
+	legend {
+		font-size: 0.9rem;
+	}
+	select {
+		font-size: 0.8rem;
+	}
+
+	.fieldWrapper > button,
+	.fieldControls > button {
+		font-size: 0.75rem;
+	}
+
+	footer {
+		font-size: 0.8rem;
+	}
 }
