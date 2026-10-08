@@ -830,6 +830,12 @@ const form = {
 								value: "Field",
 							}),
 						);
+						select.appendChild(
+							this.generateElement("option", {
+								textContent: "Remote",
+								value: "Remote",
+							}),
+						);
 
 						select.name = "workSetup";
 						return select;
@@ -891,7 +897,6 @@ const form = {
 					this.generateElement("input", {
 						type: "text",
 						name: `OBfullName`,
-						required: true,
 						placeholder: "Enter Full Name",
 						value: "N/A",
 					}),
@@ -910,7 +915,6 @@ const form = {
 							this.generateElement("input", {
 								type: "email",
 								name: `OBemail`,
-								required: true,
 								placeholder: "Enter Email Address",
 								value: "N/A@email.com",
 							}),
@@ -939,7 +943,6 @@ const form = {
 							this.generateElement("input", {
 								type: "text",
 								name: `OBemployeeId`,
-								required: true,
 								placeholder: "Enter Employee ID",
 								value: "N/A",
 							}),
@@ -966,7 +969,6 @@ const form = {
 					this.generateElement("input", {
 						type: "text",
 						name: `OBcontactNumber`,
-						required: true,
 						placeholder: "Enter Contact Number",
 						value: "N/A",
 					}),
@@ -1061,6 +1063,12 @@ const form = {
 							this.generateElement("option", {
 								textContent: "Field",
 								value: "Field",
+							}),
+						);
+						select.appendChild(
+							this.generateElement("option", {
+								textContent: "Remote",
+								value: "Remote",
 							}),
 						);
 
@@ -1252,6 +1260,7 @@ const form = {
 								"N/A: User just had a password reset within 24 hours. Option is still locked.",
 							],
 							[
+								"Success: User was able to change the password via self-service tool.",
 								"Error: User is unable to access aka.ms/sspr.",
 								"Error: Account doesn't exist. Contact administrator.",
 								"Error: You haven't registered for a password reset",
