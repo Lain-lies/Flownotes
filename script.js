@@ -134,6 +134,7 @@ const preferenceModule = {
 		const userPreferences = JSON.parse(localStorage.getItem("userPreferences"));
 		console.log(userPreferences);
 		preferenceModule.apply(...Object.values(userPreferences));
+		historyModule.renderHistory();
 	},
 };
 
@@ -507,7 +508,7 @@ ${data.troubleshootingSteps}
 ${resolutionNotes}
 KB Article: ${data.kbArticle}
 Ticket Fulfilled: ${data.ticketFulfilled}
-Next Action(s): ${data.nextActions}
+Next Action(s): ${data.nextAction}
 User agreed to fulfill ticket? ${data.userAgreedFulfilled}`;
 
 	return documentation;
@@ -597,18 +598,17 @@ const form = {
 		form.id = `form${instance}`;
 		form.classList.add("docForm");
 
-		// Instance ID
-		const instanceID = document.createElement("p");
-		instanceID.textContent = instance;
-		form.appendChild(instanceID);
+		// // Instance ID
+		// const instanceID = document.createElement("p");
+		// instanceID.textContent = instance;
+		// form.appendChild(instanceID);
 
-		//Form State
-
-		const formState = document.createElement("p");
-		editMode
-			? (formState.textContent = "FS=EDIT")
-			: (formState.textContent = "FS=NORMAL");
-		form.appendChild(formState);
+		// //Form State
+		// const formState = document.createElement("p");
+		// editMode
+		// 	? (formState.textContent = "FS=EDIT")
+		// 	: (formState.textContent = "FS=NORMAL");
+		// form.appendChild(formState);
 
 		//Caller and Template Type Fieldset
 		const callerFieldset = document.createElement("fieldset");
@@ -1767,6 +1767,31 @@ class uiStateLinker {
 		// });
 
 		this.subscribe("templateType", (value) => {
+			const standardResolutionNotesWrapper = document.querySelector(
+				`#standardResolutionNotesWrapper${this.instance}`,
+			);
+			const pwrResolutionNotesWrapper = document.querySelector(
+				`#pwrResolutionNotesWrapper${this.instance}`,
+			);
+
+			if (value === "Standard") {
+				if (this.getState("issueResolved") === "Yes") {
+					console.log(this.getState("issueResolved"));
+					this.setState("issueResolved", "No");
+				}
+
+				pwrResolutionNotesWrapper.classList.add("hidden");
+			} else {
+				if (this.getState("ticketFulfilled") === "Yes") {
+					console.log(this.getState("ticketFulfilled"));
+					this.setState("ticketFulfilled", "No");
+				}
+
+				standardResolutionNotesWrapper.classList.add("hidden");
+			}
+		});
+
+		this.subscribe("templateType", (value) => {
 			const standardTemplateExclusiveOptGroup = document.querySelector(
 				`#standardTemplateExclusiveOptGroup${this.instance}`,
 			);
@@ -2008,11 +2033,11 @@ class uiStateLinker {
 		);
 
 		this.subscribe(
-			"userAgreedFulfilled",
+			"ticketFulfilled",
 			(value) => (switchButton.textContent = value),
 		);
 
-		this.subscribe("userAgreedFulfilled", (value) => {
+		this.subscribe("ticketFulfilled", (value) => {
 			const resolutionNotesWrapper = document.querySelector(
 				`#pwrResolutionNotesWrapper${this.instance}`,
 			);
@@ -2023,9 +2048,9 @@ class uiStateLinker {
 		});
 
 		switchButton.addEventListener("click", () => {
-			this.getState("userAgreedFulfilled") === "No"
-				? this.setState("userAgreedFulfilled", "Yes")
-				: this.setState("userAgreedFulfilled", "No");
+			this.getState("ticketFulfilled") === "No"
+				? this.setState("ticketFulfilled", "Yes")
+				: this.setState("ticketFulfilled", "No");
 		});
 	}
 
