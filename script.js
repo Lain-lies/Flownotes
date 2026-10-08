@@ -427,7 +427,7 @@ Availability Hours: ${data.OBavailability} ${data.OBtimezone}
 	let resolutionNotes = "";
 	if (data.issueResolved === "Yes") {
 		resolutionNotes = `
-RESOLUTION NOTES: ${data.resolutionNotes}`;
+RESOLUTION NOTES: ${data.standardResolutionNotes}`;
 	}
 
 	const documentation = `
@@ -483,10 +483,10 @@ SSPR Outcome: ${data.ssprOutcome}`;
 	}
 
 	let resolutionNotes = "";
-	if (data.issueResolved === "Yes") {
+	if (data.ticketFulfilled === "Yes") {
 		resolutionNotes = `
 RESOLUTION NOTES:
-${data.resolutionNotes}`;
+${data.pwrResolutionNotes}`;
 	}
 
 	const documentation = `
