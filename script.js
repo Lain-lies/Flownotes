@@ -1543,12 +1543,12 @@ const form = {
 					[
 						this.generateElement("button", {
 							type: "submit",
-							textContent: "Save Note & Copy",
+							textContent: "Copy & Update Notes",
 							id: `saveButton${instance}`,
 						}),
 						this.generateElement("button", {
 							type: "button",
-							textContent: "Close Instance",
+							textContent: "Save & Close",
 							id: `closeInstanceButton${instance}`,
 						}),
 						this.generateElement("button", {
