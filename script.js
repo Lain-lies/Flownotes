@@ -419,9 +419,8 @@ USER
 Name: ${data.OBfullName}
 Email Address: ${data.OBemailProvided} | ${data.OBemail}
 Employee ID: ${data.OBemployeeIdProvided} | ${data.OBemployeeId}
-Contact Number: ${data.OBcontactNumber}
-Availability Hours: ${data.OBavailability} ${data.OBtimezone}
-`;
+Contact Number: ${data.OBcontactNumber} | ${data.OBcontactPreference}
+Availability Hours: ${data.OBavailability} ${data.OBtimezone}`;
 	}
 
 	let resolutionNotes = "";
@@ -430,15 +429,23 @@ Availability Hours: ${data.OBavailability} ${data.OBtimezone}
 RESOLUTION NOTES: ${data.standardResolutionNotes}`;
 	}
 
+	let location = "";
+	if (data.callerType === "On Behalf") {
+		location = `
+Location: ${data.OBworkSetup} | ${data.location}`;
+	} else {
+		location = `Location: ${data.workSetup} | ${data.location}`;
+	}
+
 	const documentation = `
 CALLER
 Full Name: ${data.fullName}
 Email Address: ${data.emailProvided} | ${data.email}
 Employee ID: ${data.employeeIdProvided} | ${data.employeeId}
-Contact Number: ${data.contactNumber}
-Availability Hours: ${data.availability}${data.timezone}
-Location: ${data.location}
-${onBehalfDetails}
+Contact Number: ${data.contactNumber} | ${data.contactPreference}
+Availability Hours: ${data.availability} ${data.timezone}
+${onBehalfDetails}${location}
+
 Existing Ticket? ${data.existingTicket}
 Possible Major Incident? ${data.possibleMajorIncident}
 Contact Type: ${data.contactType}
@@ -468,9 +475,8 @@ USER
 Name: ${data.OBfullName}
 Email Address: ${data.OBemailProvided} | ${data.OBemail}
 Employee ID: ${data.OBemployeeIdProvided} | ${data.OBemployeeId}
-Contact Number: ${data.OBcontactNumber}
-Availability Hours: ${data.OBavailability} ${data.OBtimezone}
-`;
+Contact Number: ${data.OBcontactNumber} | ${data.OBcontactPreference}
+Availability Hours: ${data.OBavailability} ${data.OBtimezone}`;
 	}
 
 	let ssprDetails = "";
@@ -489,16 +495,24 @@ RESOLUTION NOTES:
 ${data.pwrResolutionNotes}`;
 	}
 
+	let location = "";
+	if (data.callerType === "On Behalf") {
+		location = `
+Location: ${data.OBworkSetup} | ${data.location}`;
+	} else {
+		location = `Location: ${data.workSetup} | ${data.location}`;
+	}
+
 	const documentation = `
 CALLER
 Name: ${data.fullName}
 Email Address: ${data.emailProvided} | ${data.email}
 Employee ID: ${data.employeeIdProvided} | ${data.employeeId}
-Contact Number: ${data.contactNumber}
+Contact Number: ${data.contactNumber} | ${data.contactPreference}
 Availability Hours: ${data.availability} ${data.timezone}
-Location: ${data.location}
 Existing Ticket? ${data.existingTicket}
-${onBehalfDetails}${ssprDetails}
+${onBehalfDetails}${location}S
+${ssprDetails}
 
 ISSUE DESCRIPTION:
 ${data.issueDescription}
