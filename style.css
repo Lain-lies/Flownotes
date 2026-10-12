@@ -1,4 +1,12 @@
 /* resets */
+#announcement {
+	display: block;
+	font-size: 0.75rem;
+	text-align: center;
+	margin: 0.5rem auto;
+	color: black !important;
+	background: white !important;
+}
 *,
 *::before,
 *::after {
