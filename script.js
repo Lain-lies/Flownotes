@@ -511,7 +511,7 @@ Employee ID: ${data.employeeIdProvided} | ${data.employeeId}
 Contact Number: ${data.contactNumber} | ${data.contactPreference}
 Availability Hours: ${data.availability} ${data.timezone}
 Existing Ticket? ${data.existingTicket}
-${onBehalfDetails}${location}S
+${onBehalfDetails}${location}
 ${ssprDetails}
 
 ISSUE DESCRIPTION:
