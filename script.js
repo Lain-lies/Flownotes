@@ -1487,7 +1487,6 @@ const form = {
 						name: "location",
 						placeholder: "Affected User Location",
 						value: "N/A",
-						required: true,
 					}),
 				],
 				["fieldWrapper", "hidden"],
