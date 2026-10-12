@@ -2396,9 +2396,9 @@ function appInit() {
 		e.preventDefault();
 	});
 	appModule.init();
+	preferenceModule.init();
 	sessionModule.init();
 	historyModule.renderHistory();
-	preferenceModule.init();
 	appMiscButtonsInit();
 }
 
