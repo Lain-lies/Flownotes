@@ -134,7 +134,6 @@ const preferenceModule = {
 		const userPreferences = JSON.parse(localStorage.getItem("userPreferences"));
 		console.log(userPreferences);
 		preferenceModule.apply(...Object.values(userPreferences));
-		historyModule.renderHistory();
 	},
 };
 
@@ -210,6 +209,8 @@ const sessionModule = {
 		this.sessionList.forEach((session) => {
 			this.createSessionListItem(ul, session);
 		});
+
+		preferenceModule.reapply();
 	},
 
 	createSessionFormInit() {
@@ -330,6 +331,7 @@ const historyModule = {
 
 				this.createHistoryListItem(ul, data, previewHandler, editHandler);
 			});
+		preferenceModule.reapply();
 	},
 };
 
@@ -2348,6 +2350,7 @@ function createEditorInstance(data = null) {
 	const instance = crypto.randomUUID();
 
 	form.generate(instance, true);
+	preferenceModule.reapply();
 	const stateManager1 = new stateManager();
 	new uiStateLinker(instance, stateManager1, true);
 
