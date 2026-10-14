@@ -2111,14 +2111,14 @@ class uiStateLinker {
 			`#userAgreedFulfilledButton${this.instance}`,
 		);
 		this.subscribe(
-			"userAgreedResolved",
+			"userAgreedFulfilled",
 			(value) => (switchButton.textContent = value),
 		);
 
 		switchButton.addEventListener("click", () => {
-			this.getState("userAgreedResolved") === "No"
-				? this.setState("userAgreedResolved", "Yes")
-				: this.setState("userAgreedResolved", "No");
+			this.getState("userAgreedFulfilled") === "No"
+				? this.setState("userAgreedFulfilled", "Yes")
+				: this.setState("userAgreedFulfilled", "No");
 		});
 	}
 
