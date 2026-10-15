@@ -2219,7 +2219,7 @@ class uiStateLinker {
 				appModule.updateSessionObject({ ...tempSO });
 				historyModule.renderHistory();
 				document.querySelector(`#form${this.instance}`).remove();
-				temp({ ...this.combined });
+				createFormInstance({ ...this.combined });
 			});
 	}
 
@@ -2332,6 +2332,7 @@ function createFormInstance(data = null) {
 			employeeIdProvided,
 			OBemployeeIdProvided,
 			templateType,
+			callerType,
 		} = data;
 
 		const retainedState = {
@@ -2339,9 +2340,11 @@ function createFormInstance(data = null) {
 			OBemailProvided,
 			employeeIdProvided,
 			OBemployeeIdProvided,
+			templateType,
+			callerType,
 		};
 
-		stateManager1.setMultipleSelectedState(retainedState);
+		stateManager1.setMultipleSelectedState({ ...retainedState });
 		retainUserInfo(instance, data);
 	}
 }
